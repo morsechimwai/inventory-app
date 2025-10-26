@@ -265,8 +265,8 @@ export default async function DashboardPage() {
 
           <div className="flex h-full flex-col gap-4">
             <h2 className="text-xl font-bold font-sans mb-4">Efficiency</h2>
-            <Card>
-              <CardContent>
+            <Card className="flex-1">
+              <CardContent className="flex flex-col gap-6 lg:flex-row">
                 <div className="relative flex flex-1 items-center justify-center">
                   <div className="w-full max-w-[280px]">
                     <EfficiencyRadialChart score={efficiencyScore} />
@@ -283,28 +283,35 @@ export default async function DashboardPage() {
                     </p>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                  {efficiencyMetrics.map((metric) => (
-                    <div
-                      key={metric.key}
-                      className="rounded-lg border bg-muted/40 p-3"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`h-2.5 w-4 rounded-full ${metric.indicator}`}
-                        />
-                        <p className="text-sm font-medium font-sans">
-                          {metric.label}
+                <div className="flex flex-1 flex-col gap-4">
+                  <p className="text-sm font-sans text-muted-foreground">
+                    Your inventory management efficiency is at {efficiencyScore}
+                    %. Keep maintaining optimal stock levels to minimize waste
+                    and avoid backorders.
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {efficiencyMetrics.map((metric) => (
+                      <div
+                        key={metric.key}
+                        className="rounded-lg border bg-muted/40 p-3"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`h-2.5 w-4 rounded-full ${metric.indicator}`}
+                          />
+                          <p className="text-sm font-medium font-sans">
+                            {metric.label}
+                          </p>
+                        </div>
+                        <p className="mt-2 text-2xl font-bold font-sans">
+                          {metric.value}%
+                        </p>
+                        <p className="text-xs text-muted-foreground font-sans">
+                          {metric.description}
                         </p>
                       </div>
-                      <p className="mt-2 text-2xl font-bold font-sans">
-                        {metric.value}%
-                      </p>
-                      <p className="text-xs text-muted-foreground font-sans">
-                        {metric.description}
-                      </p>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </CardContent>
             </Card>
