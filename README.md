@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Inventory App
 
-## Getting Started
+ระบบจัดการสต็อกและสินค้าสำหรับทีมธุรกิจที่ต้องการเห็นภาพรวมของสินค้า คำสั่งซื้อ และสถานะการเติมสินค้าแบบเรียลไทม์ สร้างด้วย Next.js 16 + App Router
 
-First, run the development server:
+> **สถานะโปรเจกต์:** กำลังพัฒนา – โครงสร้างพื้นฐาน (UI, Prisma, Stack authentication) ถูกเตรียมไว้และกำลังต่อยอดฟีเจอร์หลัก
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## คุณสมบัติ (ระยะสั้น)
+- แดชบอร์ดสรุปสินค้าคงคลัง รายการสินค้า และคำสั่งซื้อ
+- Workflow สำหรับรับเข้า/ตัดออกสต็อก พร้อมบันทึกเหตุผลการแก้ไข
+- สิทธิ์การใช้งานผ่าน Stack (multi-tenant ready)
+- ฐานข้อมูล PostgreSQL เชื่อมด้วย Prisma Client
+
+## Tech Stack
+- Next.js 16 (App Router, Server Components, Metadata API)
+- React 19 + TypeScript
+- Tailwind CSS 4 + tw-animate สำหรับ design system
+- Prisma ORM + PostgreSQL (`DATABASE_URL`)
+- Stack SDK (`@stackframe/stack`) สำหรับ auth/session management
+- Lucide icons, class-variance-authority, tailwind-merge
+
+## โครงสร้างโฟลเดอร์ย่อ
+```
+app/                 // หน้า App Router (dashboard, handlers, loading states)
+components/          // UI ที่ใช้ซ้ำได้ เช่น Sidebar, Cards
+lib/generated/       // Prisma Client (สร้างอัตโนมัติหลัง migrate)
+prisma/              // schema และ migrations
+stack/               // การตั้งค่าที่เกี่ยวข้องกับ Stack SDK
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## การเริ่มต้นใช้งาน
+1. ติดตั้ง dependencies
+   ```bash
+   pnpm install
+   ```
+2. สร้างไฟล์ environment (`.env.local` หรือ `.env`) และกำหนดค่าอย่างน้อย:
+   ```
+   DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB_NAME"
+   STACK_API_KEY="..."
+   STACK_PROJECT_ID="..."
+   ```
+3. สร้างฐานข้อมูลและ Prisma Client
+   ```bash
+   pnpm dlx prisma migrate dev
+   ```
+4. รันเซิร์ฟเวอร์พัฒนา
+   ```bash
+   pnpm dev
+   ```
+5. เปิด http://localhost:3000 เพื่อลองใช้งาน
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## สคริปต์ที่มีให้
+| สคริปต์            | คำอธิบาย                                   |
+|--------------------|---------------------------------------------|
+| `pnpm dev`         | รัน Next.js development server              |
+| `pnpm build`       | สร้าง production build                      |
+| `pnpm start`       | รัน production server จาก `.next`           |
+| `pnpm lint`        | ตรวจสอบโค้ดด้วย ESLint                     |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Roadmap ถัดไป
+- เชื่อมต่อ UI กับเลเยอร์ข้อมูลจริง (products, warehouses, suppliers)
+- เพิ่ม role-based access control และ activity log
+- อินทิเกรตการแจ้งเตือน (webhook / email) เมื่อสต็อกต่ำ
+- ปรับ UI ให้รองรับ mobile-first
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+โปรเจกต์นี้อยู่ภายใต้สัญญาอนุญาต MIT (ดูไฟล์ `LICENSE`)
