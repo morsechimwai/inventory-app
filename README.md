@@ -1,66 +1,66 @@
 # Inventory App
 
-ระบบจัดการสต็อกและสินค้าสำหรับทีมธุรกิจที่ต้องการเห็นภาพรวมของสินค้า คำสั่งซื้อ และสถานะการเติมสินค้าแบบเรียลไทม์ สร้างด้วย Next.js 16 + App Router
+An inventory management system for business teams that need a real-time overview of products, purchase orders, and restock status. Built on Next.js 16 with the App Router architecture.
 
-> **สถานะโปรเจกต์:** กำลังพัฒนา – โครงสร้างพื้นฐาน (UI, Prisma, Stack authentication) ถูกเตรียมไว้และกำลังต่อยอดฟีเจอร์หลัก
+> **Project status:** In development — core foundations (UI, Prisma, Stack authentication) are scaffolded and core features are in progress.
 
-## คุณสมบัติ (ระยะสั้น)
-- แดชบอร์ดสรุปสินค้าคงคลัง รายการสินค้า และคำสั่งซื้อ
-- Workflow สำหรับรับเข้า/ตัดออกสต็อก พร้อมบันทึกเหตุผลการแก้ไข
-- สิทธิ์การใช้งานผ่าน Stack (multi-tenant ready)
-- ฐานข้อมูล PostgreSQL เชื่อมด้วย Prisma Client
+## Near-term Features
+- Dashboard that summarizes current inventory, product lists, and orders
+- Workflows for receiving and issuing stock with audit-ready adjustment notes
+- Authentication and tenancy powered by Stack
+- PostgreSQL database access through Prisma Client
 
 ## Tech Stack
 - Next.js 16 (App Router, Server Components, Metadata API)
 - React 19 + TypeScript
-- Tailwind CSS 4 + tw-animate สำหรับ design system
+- Tailwind CSS 4 + tw-animate for the design system
 - Prisma ORM + PostgreSQL (`DATABASE_URL`)
-- Stack SDK (`@stackframe/stack`) สำหรับ auth/session management
+- Stack SDK (`@stackframe/stack`) for auth/session management
 - Lucide icons, class-variance-authority, tailwind-merge
 
-## โครงสร้างโฟลเดอร์ย่อ
+## Project Structure (short version)
 ```
-app/                 // หน้า App Router (dashboard, handlers, loading states)
-components/          // UI ที่ใช้ซ้ำได้ เช่น Sidebar, Cards
-lib/generated/       // Prisma Client (สร้างอัตโนมัติหลัง migrate)
-prisma/              // schema และ migrations
-stack/               // การตั้งค่าที่เกี่ยวข้องกับ Stack SDK
+app/                 // App Router pages (dashboard, handlers, loading states)
+components/          // Reusable UI pieces such as sidebar and cards
+lib/generated/       // Prisma Client (generated after running migrations)
+prisma/              // Schema definition and migrations
+stack/               // Stack SDK configuration
 ```
 
-## การเริ่มต้นใช้งาน
-1. ติดตั้ง dependencies
+## Getting Started
+1. Install dependencies
    ```bash
    pnpm install
    ```
-2. สร้างไฟล์ environment (`.env.local` หรือ `.env`) และกำหนดค่าอย่างน้อย:
+2. Create an environment file (`.env.local` or `.env`) and define at least:
    ```
    DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB_NAME"
    STACK_API_KEY="..."
    STACK_PROJECT_ID="..."
    ```
-3. สร้างฐานข้อมูลและ Prisma Client
+3. Prepare the database and generate Prisma Client
    ```bash
    pnpm dlx prisma migrate dev
    ```
-4. รันเซิร์ฟเวอร์พัฒนา
+4. Start the development server
    ```bash
    pnpm dev
    ```
-5. เปิด http://localhost:3000 เพื่อลองใช้งาน
+5. Open http://localhost:3000 to explore the UI
 
-## สคริปต์ที่มีให้
-| สคริปต์            | คำอธิบาย                                   |
-|--------------------|---------------------------------------------|
-| `pnpm dev`         | รัน Next.js development server              |
-| `pnpm build`       | สร้าง production build                      |
-| `pnpm start`       | รัน production server จาก `.next`           |
-| `pnpm lint`        | ตรวจสอบโค้ดด้วย ESLint                     |
+## Available Scripts
+| Script        | Description                              |
+|---------------|------------------------------------------|
+| `pnpm dev`    | Run the Next.js development server       |
+| `pnpm build`  | Produce a production build               |
+| `pnpm start`  | Serve the production build from `.next`  |
+| `pnpm lint`   | Lint the codebase with ESLint            |
 
-## Roadmap ถัดไป
-- เชื่อมต่อ UI กับเลเยอร์ข้อมูลจริง (products, warehouses, suppliers)
-- เพิ่ม role-based access control และ activity log
-- อินทิเกรตการแจ้งเตือน (webhook / email) เมื่อสต็อกต่ำ
-- ปรับ UI ให้รองรับ mobile-first
+## Roadmap
+- Bind the UI to real data models (products, warehouses, suppliers)
+- Add role-based access control and activity logging
+- Integrate webhooks/email alerts for low-stock events
+- Polish the UI for a mobile-first experience
 
 ## License
-โปรเจกต์นี้อยู่ภายใต้สัญญาอนุญาต MIT (ดูไฟล์ `LICENSE`)
+Released under the MIT License (see `LICENSE`).
