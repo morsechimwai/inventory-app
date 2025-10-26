@@ -39,8 +39,12 @@ export default function SideBar({ currentPath = "/dashboard" }: SideBarProps) {
         </div>
       </div>
 
+      <div className="text-sm text-background font-bold font-sans uppercase">
+        Inventory
+      </div>
+
       <nav className="space-y-2">
-        <div className="text-sm text-foreground font-semibold uppercase"></div>
+        <div className="text-sm text-foreground"></div>
         {navigation.map((item) => {
           const isActive = currentPath === item.href;
           const IconComponent = item.icon;
@@ -49,16 +53,18 @@ export default function SideBar({ currentPath = "/dashboard" }: SideBarProps) {
               href={item.href}
               key={item.name}
               className={`flex items-center gap-2 p-2 rounded-md ${
-                isActive ? "bg-white" : "hover:bg-white/80"
+                isActive
+                  ? "bg-primary-foreground"
+                  : "hover:bg-primary-foreground/20"
               }`}
             >
               <IconComponent
                 className={`size-4.5 ${
-                  isActive ? "text-primary" : "text-background"
+                  isActive ? "text-foreground" : "text-background"
                 }`}
               />
               <span
-                className={`text-sm font-bold uppercase font-sans ${
+                className={`text-sm font-bold font-sans ${
                   isActive ? "text-foreground" : "text-background"
                 }`}
               >
