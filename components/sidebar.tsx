@@ -2,6 +2,7 @@ import Link from "next/link";
 
 // Icons
 import { BarChart2, Container, LucideIcon, Settings2 } from "lucide-react";
+import { UserButton } from "@stackframe/stack";
 
 interface SideBarProps {
   currentPath: string;
@@ -33,16 +34,19 @@ export default function SideBar({ currentPath = "/dashboard" }: SideBarProps) {
   ];
   return (
     <div className="fixed left-0 top-0 bg-primary text-white w-64 min-h-screen p-6 z-10">
+      {/* Logo Section */}
       <div className="mb-8">
         <div className="flex gap-2">
           <h2 className="text-2xl font-black font-sans">Inventory App</h2>
         </div>
       </div>
 
+      {/* Inventory Section */}
       <div className="text-sm text-background font-bold font-sans uppercase">
         Inventory
       </div>
 
+      {/* Navigation Links */}
       <nav className="space-y-2">
         <div className="text-sm text-foreground"></div>
         {navigation.map((item) => {
@@ -74,6 +78,14 @@ export default function SideBar({ currentPath = "/dashboard" }: SideBarProps) {
           );
         })}
       </nav>
+
+      {/* Footer Section */}
+
+      <div className="absolute bottom-6 left-6 right-6">
+        <div className="text-sm text-background font-bold font-sans uppercase">
+          <UserButton />
+        </div>
+      </div>
     </div>
   );
 }
