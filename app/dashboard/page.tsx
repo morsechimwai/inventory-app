@@ -131,7 +131,7 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div>
+    <>
       <SideBar currentPath="/dashboard" />
       {/* Header */}
       <main className="ml-64 p-8">
@@ -318,6 +318,6 @@ export default async function DashboardPage() {
           </div>
         </section>
       </main>
-    </div>
+    </>
   );
 }
