@@ -17,7 +17,7 @@ interface EfficiencyRadialChartProps {
 const chartConfig = {
   score: {
     label: "Efficiency",
-    color: "oklch(68% 0.21 286)",
+    color: "oklch(70.2% 0.183 293.541)",
   },
 } satisfies ChartConfig;
 
@@ -49,8 +49,8 @@ export default function EfficiencyRadialChart({
         data={chartData}
         startAngle={90}
         endAngle={-270}
-        innerRadius={40}
-        outerRadius={110}
+        innerRadius={82}
+        outerRadius={100}
       >
         <PolarAngleAxis
           type="number"
@@ -58,22 +58,13 @@ export default function EfficiencyRadialChart({
           tick={false}
           dataKey="value"
         />
-        <RadialBar
-          dataKey="value"
-          background
-          clockWise
-          cornerRadius={6}
-          barSize={18}
-        />
+        <RadialBar dataKey="value" background cornerRadius={6} />
         <ChartTooltip
           cursor={false}
           content={
             <ChartTooltipContent
               hideLabel
-              formatter={(value, name) => [
-                `${value}%`,
-                chartConfig[name as keyof typeof chartConfig]?.label ?? name,
-              ]}
+              formatter={(value) => [`Score ${value}%`]}
             />
           }
         />

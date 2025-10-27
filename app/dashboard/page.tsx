@@ -96,14 +96,14 @@ export default async function DashboardPage() {
       key: "inStock",
       label: "In Stock",
       value: inStockPercentage,
-      indicator: "bg-violet-400",
+      indicator: "bg-emerald-400",
       description: "Healthy stock coverage",
     },
     {
       key: "lowStock",
       label: "Low Stock",
       value: lowStockPercentage,
-      indicator: "bg-yellow-400",
+      indicator: "bg-amber-400",
       description: "Needs attention soon",
     },
     {
@@ -143,10 +143,10 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        <section className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2 items-stretch">
+        <section className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2 items-stretch">
           {/* Key Metrics Cards */}
           <div className="flex h-full flex-col gap-4">
-            <h2 className="text-xl font-bold font-sans mb-4">Key Metrics</h2>
+            <h2 className="text-xl font-bold font-sans">Key Metrics</h2>
             <Card className="flex-1">
               <CardContent className="grid grid-cols-3 gap-4 text-center h-full items-center">
                 <div>
@@ -195,7 +195,7 @@ export default async function DashboardPage() {
 
           {/* Inventory Overtime */}
           <div className="flex h-full flex-col gap-4">
-            <h2 className="text-xl font-bold font-sans mb-4">
+            <h2 className="text-xl font-bold font-sans">
               New product per week
             </h2>
             <Card className="flex-1">
@@ -207,9 +207,9 @@ export default async function DashboardPage() {
         </section>
 
         {/* Stock Levels Cards */}
-        <section className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2 items-stretch">
+        <section className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2 items-stretch">
           <div className="flex h-full flex-col gap-4">
-            <h2 className="text-xl font-bold font-sans mb-4">Stock Levels</h2>
+            <h2 className="text-xl font-bold font-sans">Stock Levels</h2>
             <Card className="flex-1">
               <CardContent>
                 <div className="space-y-2">
@@ -223,13 +223,13 @@ export default async function DashboardPage() {
 
                     const bgColors = [
                       "bg-red-400",
-                      "bg-yellow-400",
-                      "bg-green-400",
+                      "bg-amber-400",
+                      "bg-emerald-400",
                     ];
                     const textColors = [
                       "text-red-400",
-                      "text-yellow-400",
-                      "text-green-400",
+                      "text-amber-400",
+                      "text-emerald-400",
                     ];
 
                     return (
@@ -264,9 +264,9 @@ export default async function DashboardPage() {
           </div>
 
           <div className="flex h-full flex-col gap-4">
-            <h2 className="text-xl font-bold font-sans mb-4">Efficiency</h2>
+            <h2 className="text-xl font-bold font-sans">Efficiency</h2>
             <Card className="flex-1">
-              <CardContent className="flex flex-col gap-6 lg:flex-row">
+              <CardContent className="flex flex-col">
                 <div className="relative flex flex-1 items-center justify-center">
                   <div className="w-full max-w-[280px]">
                     <EfficiencyRadialChart score={efficiencyScore} />
@@ -283,13 +283,13 @@ export default async function DashboardPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-1 flex-col gap-4">
-                  <p className="text-sm font-sans text-muted-foreground">
+                <div className="flex flex-1 flex-col">
+                  <p className="text-sm font-sans text-muted-foreground mb-6">
                     Your inventory management efficiency is at {efficiencyScore}
                     %. Keep maintaining optimal stock levels to minimize waste
                     and avoid backorders.
                   </p>
-                  <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="grid gap-3 grid-cols-1 lg:grid-cols-3">
                     {efficiencyMetrics.map((metric) => (
                       <div
                         key={metric.key}
