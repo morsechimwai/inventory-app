@@ -3,13 +3,13 @@ import EfficiencyRadialChart from "@/components/efficiency-radial-chart";
 import ProductChart from "@/components/product-chart";
 import SideBar from "@/components/sidebar";
 import { Card, CardContent } from "@/components/ui/card";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth/auth";
 
 // Prisma Client
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db/prisma";
 import { TrendingUp } from "lucide-react";
 
-export default async function DashboardPage() {
+export default async function Dashboard() {
   const user = await getCurrentUser();
   const userId = user.id;
 
