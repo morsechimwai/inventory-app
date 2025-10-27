@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Edit3, MoreHorizontal, Trash2 } from "lucide-react";
+import { MoreHorizontal, SquarePen, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -63,7 +63,7 @@ export const columns: ColumnDef<ProductDTO>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onSelect={() => meta?.onEdit?.(product)}>
-              <Edit3 className="size-4" />
+              <SquarePen className="size-4" />
               <span>Edit</span>
             </DropdownMenuItem>
             <DropdownMenuItem
