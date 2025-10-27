@@ -1,6 +1,6 @@
 // Components
-import EfficiencyRadialChart from "@/components/efficiency-radial-chart";
-import ProductChart from "@/components/product-chart";
+import EfficiencyRadialChart from "@/components/charts/efficiency-radial-chart";
+import ProductChart from "@/components/charts/product-chart";
 import SideBar from "@/components/sidebar";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/auth/auth";

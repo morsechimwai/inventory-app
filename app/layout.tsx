@@ -1,7 +1,17 @@
+// SEO Metadata
 import type { Metadata } from "next";
+
+// Toasters
+import { Toaster } from "@/components/ui/sonner";
+
+// Stackframe
 import { StackProvider, StackTheme } from "@stackframe/stack";
 import { stackClientApp } from "../stack/client";
+
+// Fonts
 import { Geist_Mono, Nunito } from "next/font/google";
+
+// global CSS
 import "./globals.css";
 
 const nunito = Nunito({
@@ -26,9 +36,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${nunito.variable} ${geistMono.variable} antialiased`}><StackProvider app={stackClientApp}><StackTheme>
-        {children}
-      </StackTheme></StackProvider></body>
+      <body className={`${nunito.variable} ${geistMono.variable} antialiased`}>
+        <StackProvider app={stackClientApp}>
+          <StackTheme>
+            {children}
+            <Toaster closeButton />
+          </StackTheme>
+        </StackProvider>
+      </body>
     </html>
   );
 }

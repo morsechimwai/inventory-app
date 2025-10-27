@@ -40,6 +40,7 @@ export const columns: ColumnDef<ProductDTO>[] = [
   {
     accessorKey: "lowStockAt",
     header: "Low Stock At",
+    cell: ({ getValue }) => `< ${getValue<number>()}`,
   },
   {
     id: "actions",
