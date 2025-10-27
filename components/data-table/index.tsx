@@ -18,25 +18,27 @@ import {
 } from "@/components/ui/table";
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  columns: ColumnDef<TData, TValue>[];
   meta?: TableMeta<TData>;
+  emptyComponent?: React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
-  columns,
   data,
+  columns,
   meta,
+  emptyComponent,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
     meta,
+    getCoreRowModel: getCoreRowModel(),
   });
 
   return (
-    <div className="overflow-hidden rounded-md border">
+    <div className="overflow-hidden rounded-md border font-sans">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -73,7 +75,7 @@ export function DataTable<TData, TValue>({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+                {emptyComponent || "No results."}
               </TableCell>
             </TableRow>
           )}
