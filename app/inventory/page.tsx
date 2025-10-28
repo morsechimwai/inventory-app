@@ -2,7 +2,7 @@
 
 // React
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
 // Components
 import {
@@ -22,14 +22,13 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  Field,
+  FieldContent,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import {
   Empty,
   EmptyContent,
@@ -65,16 +64,13 @@ import {
 } from "@/lib/actions/products";
 
 // Validation
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  defaultFormValues,
-  productFormSchema,
-  ProductFormValues,
-} from "./schemas";
+import { defaultFormValues, productFormSchema } from "./schemas";
 
 export default function InventoryPage() {
   // Custom Hook Form
-  const form = useForm<ProductFormValues>({
+  const form = useForm<z.infer<typeof productFormSchema>>({
     resolver: zodResolver(productFormSchema),
     defaultValues: defaultFormValues,
     mode: "onBlur",
@@ -114,7 +110,7 @@ export default function InventoryPage() {
   }, []);
 
   // Handle form submission
-  const onSubmit = form.handleSubmit(async (values) => {
+  const onSubmit = async (values: z.infer<typeof productFormSchema>) => {
     const toastId = toast.loading(
       editingProduct ? "Updating product..." : "Creating product..."
     );
@@ -163,7 +159,7 @@ export default function InventoryPage() {
     } finally {
       setSaving(false);
     }
-  });
+  };
 
   // Confirm delete product
   const confirmDelete = async () => {
@@ -298,7 +294,10 @@ export default function InventoryPage() {
       <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
         <SheetContent side="right">
           <Form {...form}>
-            <form className="flex h-full flex-col" onSubmit={onSubmit}>
+            <form
+              className="flex h-full flex-col"
+              onSubmit={form.handleSubmit(onSubmit)}
+            >
               <SheetHeader>
                 <SheetTitle className="flex items-center">
                   {isEditing ? (
@@ -318,60 +317,68 @@ export default function InventoryPage() {
               </SheetHeader>
 
               <div className="flex-1 space-y-4 overflow-y-auto p-4">
-                <FormField
+                <Controller
                   control={form.control}
                   name="name"
                   render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
-                      <FormControl>
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+                      <FieldContent>
                         <Input
+                          id={field.name}
                           type="text"
                           autoComplete="off"
                           disabled={saving}
+                          aria-invalid={fieldState.invalid}
                           {...field}
                         />
-                      </FormControl>
-                      <FormMessage>{fieldState.error?.message}</FormMessage>
-                    </FormItem>
+                        <FieldError errors={[fieldState.error]} />
+                      </FieldContent>
+                    </Field>
                   )}
                 />
 
-                <FormField
+                <Controller
                   control={form.control}
                   name="sku"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <span>SKU</span>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Info className="size-3.5 text-sm font-normal" />
-                          </TooltipTrigger>
-                          <TooltipContent side="right">
-                            <p>Stock Keeping Unit (SKU)</p>
-                          </TooltipContent>
-                        </Tooltip>
+                  render={({ field, fieldState }) => {
+                    const { value, ...fieldProps } = field;
 
-                        <span className="text-sm font-normal text-muted-foreground">
-                          (optional)
-                        </span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          autoComplete="off"
-                          disabled={saving}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage>{fieldState.error?.message}</FormMessage>
-                    </FormItem>
-                  )}
+                    return (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>
+                          <span>SKU</span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="size-3.5 text-sm font-normal" />
+                            </TooltipTrigger>
+                            <TooltipContent side="right">
+                              <p>Stock Keeping Unit (SKU)</p>
+                            </TooltipContent>
+                          </Tooltip>
+                          <span className="text-sm font-normal text-muted-foreground">
+                            (optional)
+                          </span>
+                        </FieldLabel>
+                        <FieldContent>
+                          <Input
+                            id={field.name}
+                            type="text"
+                            autoComplete="off"
+                            disabled={saving}
+                            value={value ?? ""}
+                            aria-invalid={fieldState.invalid}
+                            {...fieldProps}
+                          />
+                          <FieldError errors={[fieldState.error]} />
+                        </FieldContent>
+                      </Field>
+                    );
+                  }}
                 />
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <FormField
+                  <Controller
                     control={form.control}
                     name="price"
                     render={({ field, fieldState }) => {
@@ -380,24 +387,28 @@ export default function InventoryPage() {
                         !isEditing && !fieldState.isDirty ? "" : value ?? "";
 
                       return (
-                        <FormItem>
-                          <FormLabel>Price (THB)</FormLabel>
-                          <FormControl>
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>
+                            Price (THB)
+                          </FieldLabel>
+                          <FieldContent>
                             <Input
+                              id={field.name}
                               type="number"
                               autoComplete="off"
                               disabled={saving}
                               value={inputValue}
+                              aria-invalid={fieldState.invalid}
                               {...fieldProps}
                             />
-                          </FormControl>
-                          <FormMessage>{fieldState.error?.message}</FormMessage>
-                        </FormItem>
+                            <FieldError errors={[fieldState.error]} />
+                          </FieldContent>
+                        </Field>
                       );
                     }}
                   />
 
-                  <FormField
+                  <Controller
                     control={form.control}
                     name="quantity"
                     render={({ field, fieldState }) => {
@@ -406,54 +417,70 @@ export default function InventoryPage() {
                         !isEditing && !fieldState.isDirty ? "" : value ?? "";
 
                       return (
-                        <FormItem>
-                          <FormLabel>Quantity</FormLabel>
-                          <FormControl>
+                        <Field data-invalid={fieldState.invalid}>
+                          <FieldLabel htmlFor={field.name}>Quantity</FieldLabel>
+                          <FieldContent>
                             <Input
+                              id={field.name}
                               type="number"
                               autoComplete="off"
                               disabled={saving}
                               value={inputValue}
+                              aria-invalid={fieldState.invalid}
                               {...fieldProps}
                             />
-                          </FormControl>
-                          <FormMessage>{fieldState.error?.message}</FormMessage>
-                        </FormItem>
+                            <FieldError errors={[fieldState.error]} />
+                          </FieldContent>
+                        </Field>
                       );
                     }}
                   />
                 </div>
 
-                <FormField
+                <Controller
                   control={form.control}
                   name="lowStockAt"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormLabel>
-                        <span>Low Stock At</span>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Info className="size-3.5 text-sm font-normal" />
-                          </TooltipTrigger>
-                          <TooltipContent side="right">
-                            <p>Low stock threshold</p>
-                          </TooltipContent>
-                        </Tooltip>
-                        <span className="text-sm font-normal text-muted-foreground">
-                          (optional)
-                        </span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          autoComplete="off"
-                          disabled={saving}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage>{fieldState.error?.message}</FormMessage>
-                    </FormItem>
-                  )}
+                  render={({ field, fieldState }) => {
+                    const { value, onChange, ...fieldProps } = field;
+                    const inputValue = value ?? "";
+
+                    return (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor={field.name}>
+                          <span>Low Stock At</span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="size-3.5 text-sm font-normal" />
+                            </TooltipTrigger>
+                            <TooltipContent side="right">
+                              <p>Low stock threshold</p>
+                            </TooltipContent>
+                          </Tooltip>
+                          <span className="text-sm font-normal text-muted-foreground">
+                            (optional)
+                          </span>
+                        </FieldLabel>
+                        <FieldContent>
+                          <Input
+                            id={field.name}
+                            type="number"
+                            autoComplete="off"
+                            disabled={saving}
+                            value={inputValue}
+                            onChange={(event) => {
+                              const nextValue = event.target.value;
+                              onChange(
+                                nextValue === "" ? undefined : nextValue
+                              );
+                            }}
+                            aria-invalid={fieldState.invalid}
+                            {...fieldProps}
+                          />
+                          <FieldError errors={[fieldState.error]} />
+                        </FieldContent>
+                      </Field>
+                    );
+                  }}
                 />
               </div>
 

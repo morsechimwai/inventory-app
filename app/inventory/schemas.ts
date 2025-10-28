@@ -5,7 +5,8 @@ export const productFormSchema = z.object({
   sku: z.string().trim().optional(),
 
   price: z.coerce
-    .number()
+    .number<number>()
+    .int("Price must be an integer")
     .min(0, "Price must be at least 0")
     .max(9999999999.99, "Price must be less than 10,000,000,000.00")
     .catch(() => {
@@ -13,7 +14,7 @@ export const productFormSchema = z.object({
     }),
 
   quantity: z.coerce
-    .number()
+    .number<number>()
     .int("Quantity must be an integer")
     .min(0, "Quantity must be at least 0")
     .max(9999999999, "Quantity must be less than 10,000,000,000")
@@ -22,7 +23,7 @@ export const productFormSchema = z.object({
     }),
 
   lowStockAt: z.coerce
-    .number()
+    .number<number>()
     .int("Low stock must be an integer")
     .min(0, "Low stock must be at least 0")
     .max(9999999999, "Low stock must be less than 10,000,000,000")
