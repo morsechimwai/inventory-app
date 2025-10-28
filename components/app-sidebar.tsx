@@ -66,9 +66,9 @@ export default function SideBar2() {
   return (
     <Sidebar collapsible="offcanvas">
       <SidebarHeader className="h-(--header-height) border-b">
-        <SidebarMenuButton asChild>
+        <SidebarMenuButton variant="default" asChild>
           <Link
-            className="flex items-center text-sky-400 hover:text-sky-300"
+            className="flex items-center text-sky-400 hover:text-sky-300 active:text-sky-200"
             href="#"
           >
             <div className="rounded-lg bg-sky-400 p-1.5">

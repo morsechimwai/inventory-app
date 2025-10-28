@@ -170,10 +170,12 @@ export default function InventoryPage() {
       const result = await deleteProductAction(productToDelete.id);
 
       if (result.success) {
-        toast.success(`Deleted ${productToDelete.name}`);
+        toast.success(`Deleted ${productToDelete.name}`, { id: toastId });
         await loadProducts();
       } else {
-        toast.error(`Failed to delete ${productToDelete.name}`);
+        toast.error(`Failed to delete ${productToDelete.name}`, {
+          id: toastId,
+        });
         console.error(result.errorMessage, result.code);
       }
     } catch (error) {

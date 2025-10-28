@@ -8,19 +8,13 @@ export const productFormSchema = z.object({
     .number<number>()
     .int("Price must be an integer")
     .min(0, "Price must be at least 0")
-    .max(9999999999.99, "Price must be less than 10,000,000,000.00")
-    .catch(() => {
-      throw new Error("Price is required");
-    }),
+    .max(9999999999.99, "Price must be less than 10,000,000,000.00"),
 
   quantity: z.coerce
     .number<number>()
     .int("Quantity must be an integer")
     .min(0, "Quantity must be at least 0")
-    .max(9999999999, "Quantity must be less than 10,000,000,000")
-    .catch(() => {
-      throw new Error("Quantity is required");
-    }),
+    .max(9999999999, "Quantity must be less than 10,000,000,000"),
 
   lowStockAt: z.coerce
     .number<number>()

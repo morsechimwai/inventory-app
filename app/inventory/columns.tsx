@@ -42,7 +42,8 @@ export const columns = (
   {
     accessorKey: "lowStockAt",
     header: "Low Stock At",
-    cell: ({ getValue }) => `< ${getValue<number>()}`,
+    cell: ({ getValue }) =>
+      getValue<number>() ? `< ${getValue<number>()}` : `-`,
   },
   {
     id: "actions",
