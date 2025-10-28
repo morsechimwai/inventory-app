@@ -1,40 +1,32 @@
-import z from "zod";
+import { z } from "zod";
 
 export const productFormSchema = z.object({
-  name: z.string().trim().min(1, { message: "Product Name is required" }),
-  sku: z
-    .string()
-    .trim()
-    .transform((value) => (value.length ? value : undefined))
+  name: z.string().trim().min(1, "Product Name is required"),
+  sku: z.string().trim().optional(),
+
+  price: z.coerce
+    .number()
+    .min(0, "Price must be at least 0")
+    .max(9999999999.99, "Price must be less than 10,000,000,000.00")
+    .catch(() => {
+      throw new Error("Price is required");
+    }),
+
+  quantity: z.coerce
+    .number()
+    .int("Quantity must be an integer")
+    .min(0, "Quantity must be at least 0")
+    .max(9999999999, "Quantity must be less than 10,000,000,000")
+    .catch(() => {
+      throw new Error("Quantity is required");
+    }),
+
+  lowStockAt: z.coerce
+    .number()
+    .int("Low stock must be an integer")
+    .min(0, "Low stock must be at least 0")
+    .max(9999999999, "Low stock must be less than 10,000,000,000")
     .optional(),
-  price: z.preprocess(
-    (v) => (v === "" ? undefined : Number(v)),
-    z
-      .number({ message: "Price is required" })
-      .min(0, { message: "Price must be at least 0" })
-      .max(9999999999.99, {
-        message: "Price must be less than 10,000,000,000.00",
-      })
-  ),
-  quantity: z.preprocess(
-    (v) => (v === "" ? undefined : Number(v)),
-    z
-      .number({ message: "Quantity is required" })
-      .int({ message: "Quantity must be an integer" })
-      .min(0, { message: "Quantity must be at least 0" })
-      .max(9999999999, { message: "Quantity must be less than 10,000,000,000" })
-  ),
-  lowStockAt: z.preprocess(
-    (v) => (v === "" ? undefined : Number(v)),
-    z
-      .number({ message: "Low stock must be a number" })
-      .int({ message: "Low stock must be an integer" })
-      .min(0, { message: "Low stock must be at least 0" })
-      .max(9999999999, {
-        message: "Low stock must be less than 10,000,000,000",
-      })
-      .optional()
-  ),
 });
 
 export type ProductFormValues = z.infer<typeof productFormSchema>;

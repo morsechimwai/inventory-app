@@ -1,9 +1,6 @@
 // Types
 import type { ActionResult } from "@/lib/types/error";
 
-// Custom Zod error messages
-import { ZodError } from "zod";
-
 // Prisma Client
 import { Prisma } from "@prisma/client";
 
@@ -26,16 +23,6 @@ export async function withErrorHandling<T>(
     return { success: true, data };
   } catch (error: unknown) {
     console.error("[withErrorHandling] Caught error:", error);
-
-    // Zod validation errors
-    if (error instanceof ZodError) {
-      return {
-        success: false,
-        code: "VALIDATION_ERROR",
-        meta: { issues: error.issues },
-        errorMessage: error.issues[0]?.message || "Validation failed.",
-      };
-    }
 
     // Prisma known request error
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
