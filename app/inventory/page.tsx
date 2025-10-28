@@ -22,7 +22,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
-import { Form } from "@/components/ui/form";
 import {
   Field,
   FieldContent,
@@ -293,80 +292,110 @@ export default function InventoryPage() {
 
       <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
         <SheetContent side="right">
-          <Form {...form}>
-            <form
-              className="flex h-full flex-col"
-              onSubmit={form.handleSubmit(onSubmit)}
-            >
-              <SheetHeader>
-                <SheetTitle className="flex items-center">
-                  {isEditing ? (
-                    <SquarePen className="mr-1 size-4.5" />
-                  ) : (
-                    <ListPlus className="mr-1 size-4.5" />
-                  )}
-                  <span className="text-bold">
-                    {isEditing ? "Edit Product" : "Add Product"}
-                  </span>
-                </SheetTitle>
-                <SheetDescription>
-                  {isEditing
-                    ? "Update the product details below."
-                    : "Add a new product to your inventory."}
-                </SheetDescription>
-              </SheetHeader>
+          <form
+            className="flex h-full flex-col"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
+            <SheetHeader>
+              <SheetTitle className="flex items-center">
+                {isEditing ? (
+                  <SquarePen className="mr-1 size-4.5" />
+                ) : (
+                  <ListPlus className="mr-1 size-4.5" />
+                )}
+                <span className="text-bold">
+                  {isEditing ? "Edit Product" : "Add Product"}
+                </span>
+              </SheetTitle>
+              <SheetDescription>
+                {isEditing
+                  ? "Update the product details below."
+                  : "Add a new product to your inventory."}
+              </SheetDescription>
+            </SheetHeader>
 
-              <div className="flex-1 space-y-4 overflow-y-auto p-4">
-                <Controller
-                  control={form.control}
-                  name="name"
-                  render={({ field, fieldState }) => (
+            <div className="flex-1 space-y-4 overflow-y-auto p-4">
+              <Controller
+                control={form.control}
+                name="name"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id={field.name}
+                        type="text"
+                        autoComplete="off"
+                        disabled={saving}
+                        aria-invalid={fieldState.invalid}
+                        {...field}
+                      />
+                      <FieldError errors={[fieldState.error]} />
+                    </FieldContent>
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="sku"
+                render={({ field, fieldState }) => {
+                  const { value, ...fieldProps } = field;
+
+                  return (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>
+                        <span>SKU</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="size-3.5 text-sm font-normal" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right">
+                            <p>Stock Keeping Unit (SKU)</p>
+                          </TooltipContent>
+                        </Tooltip>
+                        <span className="text-sm font-normal text-muted-foreground">
+                          (optional)
+                        </span>
+                      </FieldLabel>
                       <FieldContent>
                         <Input
                           id={field.name}
                           type="text"
                           autoComplete="off"
                           disabled={saving}
+                          value={value ?? ""}
                           aria-invalid={fieldState.invalid}
-                          {...field}
+                          {...fieldProps}
                         />
                         <FieldError errors={[fieldState.error]} />
                       </FieldContent>
                     </Field>
-                  )}
-                />
+                  );
+                }}
+              />
 
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Controller
                   control={form.control}
-                  name="sku"
+                  name="price"
                   render={({ field, fieldState }) => {
                     const { value, ...fieldProps } = field;
+                    const inputValue =
+                      !isEditing && !fieldState.isDirty ? "" : value ?? "";
 
                     return (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor={field.name}>
-                          <span>SKU</span>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Info className="size-3.5 text-sm font-normal" />
-                            </TooltipTrigger>
-                            <TooltipContent side="right">
-                              <p>Stock Keeping Unit (SKU)</p>
-                            </TooltipContent>
-                          </Tooltip>
-                          <span className="text-sm font-normal text-muted-foreground">
-                            (optional)
-                          </span>
+                          Price (THB)
                         </FieldLabel>
                         <FieldContent>
                           <Input
                             id={field.name}
-                            type="text"
+                            type="number"
                             autoComplete="off"
                             disabled={saving}
-                            value={value ?? ""}
+                            value={inputValue}
                             aria-invalid={fieldState.invalid}
                             {...fieldProps}
                           />
@@ -377,89 +406,17 @@ export default function InventoryPage() {
                   }}
                 />
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <Controller
-                    control={form.control}
-                    name="price"
-                    render={({ field, fieldState }) => {
-                      const { value, ...fieldProps } = field;
-                      const inputValue =
-                        !isEditing && !fieldState.isDirty ? "" : value ?? "";
-
-                      return (
-                        <Field data-invalid={fieldState.invalid}>
-                          <FieldLabel htmlFor={field.name}>
-                            Price (THB)
-                          </FieldLabel>
-                          <FieldContent>
-                            <Input
-                              id={field.name}
-                              type="number"
-                              autoComplete="off"
-                              disabled={saving}
-                              value={inputValue}
-                              aria-invalid={fieldState.invalid}
-                              {...fieldProps}
-                            />
-                            <FieldError errors={[fieldState.error]} />
-                          </FieldContent>
-                        </Field>
-                      );
-                    }}
-                  />
-
-                  <Controller
-                    control={form.control}
-                    name="quantity"
-                    render={({ field, fieldState }) => {
-                      const { value, ...fieldProps } = field;
-                      const inputValue =
-                        !isEditing && !fieldState.isDirty ? "" : value ?? "";
-
-                      return (
-                        <Field data-invalid={fieldState.invalid}>
-                          <FieldLabel htmlFor={field.name}>Quantity</FieldLabel>
-                          <FieldContent>
-                            <Input
-                              id={field.name}
-                              type="number"
-                              autoComplete="off"
-                              disabled={saving}
-                              value={inputValue}
-                              aria-invalid={fieldState.invalid}
-                              {...fieldProps}
-                            />
-                            <FieldError errors={[fieldState.error]} />
-                          </FieldContent>
-                        </Field>
-                      );
-                    }}
-                  />
-                </div>
-
                 <Controller
                   control={form.control}
-                  name="lowStockAt"
+                  name="quantity"
                   render={({ field, fieldState }) => {
-                    const { value, onChange, ...fieldProps } = field;
-                    const inputValue = value ?? "";
+                    const { value, ...fieldProps } = field;
+                    const inputValue =
+                      !isEditing && !fieldState.isDirty ? "" : value ?? "";
 
                     return (
                       <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={field.name}>
-                          <span>Low Stock At</span>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Info className="size-3.5 text-sm font-normal" />
-                            </TooltipTrigger>
-                            <TooltipContent side="right">
-                              <p>Low stock threshold</p>
-                            </TooltipContent>
-                          </Tooltip>
-                          <span className="text-sm font-normal text-muted-foreground">
-                            (optional)
-                          </span>
-                        </FieldLabel>
+                        <FieldLabel htmlFor={field.name}>Quantity</FieldLabel>
                         <FieldContent>
                           <Input
                             id={field.name}
@@ -467,12 +424,6 @@ export default function InventoryPage() {
                             autoComplete="off"
                             disabled={saving}
                             value={inputValue}
-                            onChange={(event) => {
-                              const nextValue = event.target.value;
-                              onChange(
-                                nextValue === "" ? undefined : nextValue
-                              );
-                            }}
                             aria-invalid={fieldState.invalid}
                             {...fieldProps}
                           />
@@ -484,21 +435,65 @@ export default function InventoryPage() {
                 />
               </div>
 
-              <SheetFooter className="sm:flex-row sm:justify-end">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => handleSheetOpenChange(false)}
-                  disabled={saving}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={saving}>
-                  {isEditing ? "Save changes" : "Add product"}
-                </Button>
-              </SheetFooter>
-            </form>
-          </Form>
+              <Controller
+                control={form.control}
+                name="lowStockAt"
+                render={({ field, fieldState }) => {
+                  const { value, onChange, ...fieldProps } = field;
+                  const inputValue = value ?? "";
+
+                  return (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={field.name}>
+                        <span>Low Stock At</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="size-3.5 text-sm font-normal" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right">
+                            <p>Low stock threshold</p>
+                          </TooltipContent>
+                        </Tooltip>
+                        <span className="text-sm font-normal text-muted-foreground">
+                          (optional)
+                        </span>
+                      </FieldLabel>
+                      <FieldContent>
+                        <Input
+                          id={field.name}
+                          type="number"
+                          autoComplete="off"
+                          disabled={saving}
+                          value={inputValue}
+                          onChange={(event) => {
+                            const nextValue = event.target.value;
+                            onChange(nextValue === "" ? undefined : nextValue);
+                          }}
+                          aria-invalid={fieldState.invalid}
+                          {...fieldProps}
+                        />
+                        <FieldError errors={[fieldState.error]} />
+                      </FieldContent>
+                    </Field>
+                  );
+                }}
+              />
+            </div>
+
+            <SheetFooter className="sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleSheetOpenChange(false)}
+                disabled={saving}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={saving}>
+                {isEditing ? "Save changes" : "Add product"}
+              </Button>
+            </SheetFooter>
+          </form>
         </SheetContent>
       </Sheet>
 
