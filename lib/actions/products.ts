@@ -15,7 +15,7 @@ import {
 } from "@/lib/services/products";
 
 // Types
-import type { ActionResult } from "@/lib/types";
+import type { ActionResult } from "@/lib/types/error";
 import type { CreateProductInput, ProductDTO } from "@/lib/types/product";
 
 // Error Handling
