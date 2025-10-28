@@ -243,7 +243,7 @@ export default function InventoryPage() {
   const isEditing = Boolean(editingProduct);
 
   return (
-    <div className="p-4 md:p-6 lg:p-8">
+    <section className="p-4 md:p-6 lg:p-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <p className="text-muted-foreground font-sans">
           Manage your inventory and track your products here.
@@ -534,6 +534,6 @@ export default function InventoryPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </section>
   );
 }

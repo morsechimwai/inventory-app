@@ -1,9 +1,12 @@
+// Next.js
+import Link from "next/link";
+
 // Icons
-import Auth from "@/components/auth";
+import { PackageCheck, ShieldCheck, Truck } from "lucide-react";
+
+// Components
 import { Button } from "@/components/ui/button";
 import { SignIn } from "@stackframe/stack";
-import { PackageCheck, ShieldCheck, Truck } from "lucide-react";
-import Link from "next/link";
 
 export default function Home() {
   return (

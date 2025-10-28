@@ -18,13 +18,7 @@ import {
 } from "@/components/ui/sidebar";
 
 // Icons
-import {
-  BarChart2,
-  Container,
-  LucideIcon,
-  Origami,
-  Settings2,
-} from "lucide-react";
+import { BarChart2, Container, LucideIcon, Origami } from "lucide-react";
 
 // Stack Auth
 import { UserButton } from "@stackframe/stack";
@@ -45,11 +39,6 @@ const navigation: Navigation[] = [
     title: "Inventory",
     url: "/inventory",
     icon: Container,
-  },
-  {
-    title: "Settings",
-    url: "/settings",
-    icon: Settings2,
   },
 ];
 

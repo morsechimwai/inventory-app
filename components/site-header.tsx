@@ -10,12 +10,9 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   Breadcrumb,
-  BreadcrumbEllipsis,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
 // Icons
@@ -38,7 +35,7 @@ export function SiteHeader() {
       : normalizePath(pathname).split("/").pop() === "settings"
       ? "settings"
       : normalizePath(pathname).split("/").pop() === "account-settings"
-      ? "account settings"
+      ? "settings"
       : null;
 
   return (
@@ -52,12 +49,6 @@ export function SiteHeader() {
         <h1 className="text-base font-medium capitalize font-sans">
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="#">Home</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage>{currentPath}</BreadcrumbPage>
               </BreadcrumbItem>

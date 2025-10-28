@@ -5,4 +5,10 @@ import { stackClientApp } from "./client";
 
 export const stackServerApp = new StackServerApp({
   inheritsFrom: stackClientApp,
+  urls: {
+    signIn: "/",
+    signOut: "/",
+    afterSignIn: "/dashboard",
+    afterSignOut: "/",
+  },
 });
