@@ -77,7 +77,7 @@ export default function InventoryPage() {
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
     defaultValues: defaultFormValues,
-    mode: "onSubmit",
+    mode: "onBlur",
     reValidateMode: "onChange",
   });
 
