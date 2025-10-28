@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 // Stackframe
 import { StackProvider, StackTheme } from "@stackframe/stack";
 import { stackClientApp } from "@/stack/client";
+import { ThemeProvider } from "@/components/theme-provider";
 
 // Fonts
 import { Geist_Mono, Nunito } from "next/font/google";
@@ -32,13 +33,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${nunito.variable} ${geistMono.variable} antialiased`}>
-        <StackProvider app={stackClientApp}>
-          <StackTheme>
-            <main className="w-full">{children}</main>
-          </StackTheme>
-        </StackProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <StackProvider app={stackClientApp}>
+            <StackTheme>
+              <main className="w-full">{children}</main>
+            </StackTheme>
+          </StackProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

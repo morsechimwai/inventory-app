@@ -1,8 +1,10 @@
 "use client";
 
+import { useCallback } from "react";
 // Next.js
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
 
 // Components
 import {
@@ -44,6 +46,7 @@ const navigation: Navigation[] = [
 
 export default function SideBar2() {
   const pathname = usePathname();
+  const { resolvedTheme, setTheme } = useTheme();
   const normalizePath = (path: string) =>
     path.endsWith("/") && path !== "/" ? path.slice(0, -1) : path;
   const currentPath = normalizePath(pathname);
@@ -51,6 +54,11 @@ export default function SideBar2() {
   const isActive = (path: string) => {
     return currentPath === normalizePath(path);
   };
+
+  const handleToggleTheme = useCallback(() => {
+    const nextTheme = (resolvedTheme ?? "light") === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+  }, [resolvedTheme, setTheme]);
 
   return (
     <Sidebar collapsible="offcanvas">
@@ -60,7 +68,7 @@ export default function SideBar2() {
             className="flex items-center text-sky-400 hover:text-sky-300 active:text-sky-200"
             href="#"
           >
-            <div className="rounded-lg bg-sky-400 p-1.5">
+            <div className="rounded-md bg-sky-400 p-1.5">
               <Origami className="text-sky-50 size-3.5" />
             </div>
             <span className="text-lg font-black font-sans">StocKit</span>
@@ -96,12 +104,7 @@ export default function SideBar2() {
       </SidebarContent>
       <SidebarFooter className="mt-auto border-t">
         <div className="px-2">
-          <UserButton
-            showUserInfo
-            colorModeToggle={() => {
-              console.log("color mode toggle clicked");
-            }}
-          />
+          <UserButton showUserInfo colorModeToggle={handleToggleTheme} />
         </div>
       </SidebarFooter>
     </Sidebar>

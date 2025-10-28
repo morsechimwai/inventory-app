@@ -2,7 +2,7 @@
 import Link from "next/link";
 
 // Icons
-import { PackageCheck, ShieldCheck, Truck } from "lucide-react";
+import { Origami, PackageCheck, ShieldCheck, Truck } from "lucide-react";
 
 // Components
 import { Button } from "@/components/ui/button";
@@ -18,9 +18,14 @@ export default function Home() {
             Enterprise-grade security
           </p>
           <div className="space-y-4">
-            <h1 className="font-sans text-5xl font-black tracking-wide text-sky-400 sm:text-5xl">
-              stocKit
-            </h1>
+            <div className="flex items-center gap-5">
+              <div className="rounded-3xl inline-block bg-sky-400 p-4">
+                <Origami className="text-sky-50 size-12" />
+              </div>
+              <h1 className="font-sans text-5xl font-black tracking-wide text-sky-400 sm:text-5xl">
+                stocKit
+              </h1>
+            </div>
             <h1 className="font-sans text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
               Inventory Management System
             </h1>
