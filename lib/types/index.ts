@@ -1,17 +1,12 @@
 export type ActionResult<T = undefined> = {
   success: boolean;
   data?: T;
-  message?: string;
+  code?: string;
+  meta?: Record<string, unknown>;
+  errorMessage?: string;
 };
 
-export type PaginatedResult<T> = {
-  data: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-};
-
-export type ApiError = {
-  code: string;
-  message: string;
-};
+export interface PrismaErrorMeta {
+  target?: string[];
+  [key: string]: unknown;
+}

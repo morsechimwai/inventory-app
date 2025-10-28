@@ -107,7 +107,12 @@ export default function SideBar2() {
       </SidebarContent>
       <SidebarFooter className="mt-auto border-t">
         <div className="px-2">
-          <UserButton showUserInfo />
+          <UserButton
+            showUserInfo
+            colorModeToggle={() => {
+              console.log("color mode toggle clicked");
+            }}
+          />
         </div>
       </SidebarFooter>
     </Sidebar>

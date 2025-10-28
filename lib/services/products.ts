@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/prisma";
 import type { ProductDTO, ProductEntity } from "@/lib/types/product";
+import { AppError } from "../errors/app-error";
 
 type CreateProductInput = Omit<ProductDTO, "id">;
 
@@ -36,9 +37,15 @@ export async function deleteProductById(
     select: { id: true },
   });
 
-  if (!existing) throw new Error("Product not found or unauthorized");
+  if (!existing) throw new AppError("NOT_FOUND", "Product not found.");
 
-  return await prisma.product.delete({ where: { id } });
+  try {
+    return await prisma.product.delete({ where: { id } });
+  } catch {
+    throw new AppError("DB_DELETE_FAILED", "Failed to delete product.", {
+      id,
+    });
+  }
 }
 
 // Create a new product
@@ -46,9 +53,15 @@ export async function createProduct(
   userId: string,
   data: CreateProductInput
 ): Promise<ProductEntity> {
-  return prisma.product.create({
-    data: { ...data, userId },
-  });
+  try {
+    return prisma.product.create({
+      data: { ...data, userId },
+    });
+  } catch {
+    throw new AppError("DB_CREATE_FAILED", "Failed to create product.", {
+      data,
+    });
+  }
 }
 
 // Update an existing product
@@ -62,10 +75,17 @@ export async function updateProduct(
     select: { id: true },
   });
 
-  if (!existing) throw new Error("Product not found or unauthorized");
+  if (!existing) throw new AppError("NOT_FOUND", "Product not found.");
 
-  return prisma.product.update({
-    where: { id },
-    data,
-  });
+  try {
+    return prisma.product.update({
+      where: { id },
+      data,
+    });
+  } catch {
+    throw new AppError("DB_UPDATE_FAILED", "Failed to update product.", {
+      id,
+      data,
+    });
+  }
 }

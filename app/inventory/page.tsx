@@ -78,6 +78,7 @@ export default function InventoryPage() {
     resolver: zodResolver(productFormSchema),
     defaultValues: defaultFormValues,
     mode: "onSubmit",
+    reValidateMode: "onChange",
   });
 
   // Products state
@@ -97,22 +98,103 @@ export default function InventoryPage() {
   const loadProducts = useCallback(async () => {
     try {
       const result = await getAllProducts();
-      if (result.success && result.data) {
-        setProducts(result.data);
+
+      if (result.success) {
+        setProducts(result.data?.data ?? []);
       } else {
-        toast.error("Failed to load products");
+        toast.error(result.errorMessage ?? "Failed to load products");
+        console.error(result.errorMessage, result.code);
       }
     } catch (error) {
-      console.error("Error fetching products:", error);
-      toast.error("Error fetching products");
+      console.error(error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to load products."
+      );
     }
   }, []);
 
-  useEffect(() => {
-    setLoading(true);
-    loadProducts().finally(() => setLoading(false));
-  }, [loadProducts]);
+  // Handle form submission
+  const onSubmit = form.handleSubmit(async (values) => {
+    const toastId = toast.loading(
+      editingProduct ? "Updating product..." : "Creating product..."
+    );
+    setSaving(true);
 
+    // Prepare payload
+    const payload = {
+      name: values.name,
+      sku: values.sku ?? null,
+      price: values.price,
+      quantity: values.quantity,
+      lowStockAt: values.lowStockAt ?? null,
+    };
+
+    try {
+      if (editingProduct) {
+        // Edit existing product
+        const result = await updateProductAction(editingProduct.id, payload);
+        if (result.success) {
+          toast.success(`${result.data?.message}`, { id: toastId });
+          handleSheetOpenChange(false);
+          await loadProducts();
+        } else {
+          toast.error(`${result.errorMessage}`, { id: toastId });
+          console.error(result.errorMessage, result.code);
+        }
+      } else {
+        // Create new product
+        const result = await createProductAction(payload);
+        if (result.success) {
+          toast.success(`${result.data?.message}`, { id: toastId });
+          handleSheetOpenChange(false);
+          await loadProducts();
+        } else {
+          toast.error(`${result.errorMessage}`, { id: toastId });
+          console.error(result.errorMessage, result.code);
+        }
+      }
+    } catch (error) {
+      // Standardize error message
+      const errorMessage = error instanceof Error ? error.message : error;
+
+      // Log and show error
+      toast.error(`${errorMessage}`, { id: toastId });
+      console.error(errorMessage);
+    } finally {
+      setSaving(false);
+    }
+  });
+
+  // Confirm delete product
+  const confirmDelete = async () => {
+    if (!productToDelete) return;
+
+    setDeleting(true);
+    const toastId = toast.loading(`Deleting ${productToDelete.name}...`);
+    try {
+      const result = await deleteProductAction(productToDelete.id);
+
+      if (result.success) {
+        toast.success(`Deleted ${productToDelete.name}`);
+        await loadProducts();
+      } else {
+        toast.error(`Failed to delete ${productToDelete.name}`);
+        console.error(result.errorMessage, result.code);
+      }
+    } catch (error) {
+      // Standardize error message
+      const errorMessage = error instanceof Error ? error.message : error;
+
+      // Log and show error
+      toast.error(`${errorMessage}`, { id: toastId });
+      console.error(errorMessage);
+    } finally {
+      setDeleting(false);
+      setProductToDelete(null);
+    }
+  };
+
+  // Handle sheet open/close
   const handleSheetOpenChange = (open: boolean) => {
     setIsSheetOpen(open);
     if (!open) {
@@ -121,12 +203,14 @@ export default function InventoryPage() {
     }
   };
 
+  // Open create product sheet
   const handleOpenCreate = () => {
     setEditingProduct(null);
     form.reset(defaultFormValues);
     setIsSheetOpen(true);
   };
 
+  // Open edit product sheet
   const handleOpenEdit = useCallback(
     (product: ProductDTO) => {
       setEditingProduct(product);
@@ -142,6 +226,7 @@ export default function InventoryPage() {
     [form]
   );
 
+  // Handle delete product
   const handleDelete = useCallback((product: ProductDTO) => {
     setProductToDelete(product);
   }, []);
@@ -152,72 +237,11 @@ export default function InventoryPage() {
     [handleOpenEdit, handleDelete]
   );
 
-  const confirmDelete = async () => {
-    if (!productToDelete) return;
-
-    setDeleting(true);
-    const toastId = toast.loading(`Deleting ${productToDelete.name}...`);
-    try {
-      const result = await deleteProductAction(productToDelete.id);
-
-      if (result.success) {
-        setProducts((prev) =>
-          prev.filter((product) => product.id !== productToDelete.id)
-        );
-        toast.success(`Deleted ${productToDelete.name}`);
-      } else {
-        toast.error(`Failed to delete ${productToDelete.name}`);
-      }
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      toast.error(`Error deleting ${productToDelete.name}`);
-    } finally {
-      toast.dismiss(toastId);
-      setDeleting(false);
-      setProductToDelete(null);
-    }
-  };
-
-  const onSubmit = form.handleSubmit(async (values) => {
-    setSaving(true);
-
-    const trimmedSku = values.sku?.trim();
-    const payload = {
-      name: values.name,
-      sku: trimmedSku && trimmedSku.length ? trimmedSku : null,
-      price: values.price,
-      quantity: values.quantity,
-      lowStockAt: values.lowStockAt ?? null,
-    };
-
-    try {
-      if (editingProduct) {
-        const result = await updateProductAction(editingProduct.id, payload);
-        if (result.success) {
-          toast.success(`Updated ${values.name}`);
-          await loadProducts();
-          handleSheetOpenChange(false);
-        } else {
-          toast.error(`Failed to update ${values.name}`);
-        }
-      } else {
-        const result = await createProductAction(payload);
-        if (result.success) {
-          toast.success(`Created ${values.name}`);
-          await loadProducts();
-          handleSheetOpenChange(false);
-        } else {
-          toast.error(`Failed to create ${values.name}`);
-        }
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : error;
-      console.error("Error saving product:", errorMessage);
-      toast.error(`Error saving product: ${errorMessage}`);
-    } finally {
-      setSaving(false);
-    }
-  });
+  // Load on mount
+  useEffect(() => {
+    setLoading(true);
+    loadProducts().finally(() => setLoading(false));
+  }, [loadProducts]);
 
   const isEditing = Boolean(editingProduct);
 
@@ -251,7 +275,7 @@ export default function InventoryPage() {
                 <EmptyMedia variant="icon">
                   <Container className="size-8 p-1" />
                 </EmptyMedia>
-                <EmptyTitle>No Data</EmptyTitle>
+                <EmptyTitle>No product found.</EmptyTitle>
                 <EmptyDescription>
                   Get started by adding your first product to the inventory.
                 </EmptyDescription>
@@ -301,7 +325,12 @@ export default function InventoryPage() {
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input type="text" disabled={saving} {...field} />
+                        <Input
+                          type="text"
+                          autoComplete="off"
+                          disabled={saving}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage>{fieldState.error?.message}</FormMessage>
                     </FormItem>
@@ -329,7 +358,12 @@ export default function InventoryPage() {
                         </span>
                       </FormLabel>
                       <FormControl>
-                        <Input type="text" disabled={saving} {...field} />
+                        <Input
+                          type="text"
+                          autoComplete="off"
+                          disabled={saving}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage>{fieldState.error?.message}</FormMessage>
                     </FormItem>
@@ -343,16 +377,15 @@ export default function InventoryPage() {
                     render={({ field, fieldState }) => {
                       const { value, ...fieldProps } = field;
                       const inputValue =
-                        !isEditing && !fieldState.isDirty
-                          ? ""
-                          : value ?? "";
+                        !isEditing && !fieldState.isDirty ? "" : value ?? "";
 
                       return (
                         <FormItem>
                           <FormLabel>Price (THB)</FormLabel>
                           <FormControl>
                             <Input
-                              type="text"
+                              type="number"
+                              autoComplete="off"
                               disabled={saving}
                               value={inputValue}
                               {...fieldProps}
@@ -370,16 +403,15 @@ export default function InventoryPage() {
                     render={({ field, fieldState }) => {
                       const { value, ...fieldProps } = field;
                       const inputValue =
-                        !isEditing && !fieldState.isDirty
-                          ? ""
-                          : value ?? "";
+                        !isEditing && !fieldState.isDirty ? "" : value ?? "";
 
                       return (
                         <FormItem>
                           <FormLabel>Quantity</FormLabel>
                           <FormControl>
                             <Input
-                              type="text"
+                              type="number"
+                              autoComplete="off"
                               disabled={saving}
                               value={inputValue}
                               {...fieldProps}
@@ -412,7 +444,12 @@ export default function InventoryPage() {
                         </span>
                       </FormLabel>
                       <FormControl>
-                        <Input type="text" disabled={saving} {...field} />
+                        <Input
+                          type="number"
+                          autoComplete="off"
+                          disabled={saving}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage>{fieldState.error?.message}</FormMessage>
                     </FormItem>
