@@ -78,7 +78,7 @@ export default function SideBar2() {
           </Link>
         </SidebarMenuButton>
       </SidebarHeader>
-      <SidebarContent className="px-2 mt-8">
+      <SidebarContent className="px-2 mt-6">
         <SidebarGroupLabel className="uppercase">Inventory</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>

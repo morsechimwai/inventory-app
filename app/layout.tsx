@@ -18,6 +18,8 @@ import { Geist_Mono, Nunito } from "next/font/google";
 // global CSS
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -45,9 +47,13 @@ export default function RootLayout({
         <StackProvider app={stackClientApp}>
           <StackTheme>
             <SidebarProvider>
-              <AppSidebar />
+              <Suspense fallback={<Skeleton className="h-screen w-60" />}>
+                <AppSidebar />
+              </Suspense>
               <main className="w-full">
-                <SiteHeader />
+                <Suspense fallback={<Skeleton className="h-16 w-full" />}>
+                  <SiteHeader />
+                </Suspense>
                 {children}
               </main>
               <Toaster closeButton />
