@@ -1,12 +1,8 @@
 "use client";
 
 // React
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
-
-// Validation
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 // Components
 import {
@@ -34,25 +30,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import SideBar from "@/components/sidebar";
-import { DataTable } from "@/components/data-table";
-import TableLoading from "@/components/skeleton/table-loading";
-
-// Data Table Columns
-import { columns } from "./columns";
-
-// Types
-import { ProductDTO } from "@/lib/types/product";
-
-// Actions
-import { getAllProducts } from "@/lib/actions/products";
-import {
-  createProductAction,
-  updateProductAction,
-  deleteProductAction,
-} from "@/lib/actions/products";
-import { toast } from "sonner";
-import { Container, ListPlus, PlusCircle, SquarePen } from "lucide-react";
 import {
   Empty,
   EmptyContent,
@@ -61,35 +38,49 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { DataTable } from "@/components/data-table";
+import TableLoading from "@/components/skeleton/table-loading";
+import { toast } from "sonner";
 
-const productFormSchema = z.object({
-  name: z.string().trim().min(1, "Name is required"),
-  sku: z.string().optional(),
-  price: z
-    .number({ message: "Price is required" })
-    .min(0, "Price must be at least 0"),
-  quantity: z
-    .number({ message: "Quantity is required" })
-    .int("Quantity must be an integer")
-    .min(0, "Quantity must be at least 0"),
-  lowStockAt: z
-    .number({ message: "Low stock must be a number" })
-    .int("Low stock must be an integer")
-    .min(0, "Low stock must be at least 0")
-    .optional(),
-});
+// Icons
+import { Container, Info, ListPlus, SquarePen } from "lucide-react";
 
-type ProductFormValues = z.infer<typeof productFormSchema>;
+// Types
+import { ProductDTO } from "@/lib/types/product";
 
-const defaultFormValues: ProductFormValues = {
-  name: "",
-  sku: undefined,
-  price: 0,
-  quantity: 0,
-  lowStockAt: undefined,
-};
+// Data Table Columns
+import { columns } from "./columns";
+
+// Actions
+import { getAllProducts } from "@/lib/actions/products";
+import {
+  createProductAction,
+  updateProductAction,
+  deleteProductAction,
+} from "@/lib/actions/products";
+
+// Validation
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  defaultFormValues,
+  productFormSchema,
+  ProductFormValues,
+} from "./schemas";
 
 export default function InventoryPage() {
+  // Custom Hook Form
+  const form = useForm<ProductFormValues>({
+    resolver: zodResolver(productFormSchema),
+    defaultValues: defaultFormValues,
+    mode: "onSubmit",
+  });
+
+  // Products state
   const [products, setProducts] = useState<ProductDTO[]>([]);
   const [editingProduct, setEditingProduct] = useState<ProductDTO | null>(null);
   const [productToDelete, setProductToDelete] = useState<ProductDTO | null>(
@@ -102,11 +93,7 @@ export default function InventoryPage() {
   const [deleting, setDeleting] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
 
-  const form = useForm<ProductFormValues>({
-    resolver: zodResolver(productFormSchema),
-    defaultValues: defaultFormValues,
-  });
-
+  // Load products
   const loadProducts = useCallback(async () => {
     try {
       const result = await getAllProducts();
@@ -126,22 +113,19 @@ export default function InventoryPage() {
     loadProducts().finally(() => setLoading(false));
   }, [loadProducts]);
 
-  const handleSheetOpenChange = useCallback(
-    (open: boolean) => {
-      setIsSheetOpen(open);
-      if (!open) {
-        setEditingProduct(null);
-        form.reset(defaultFormValues);
-      }
-    },
-    [form]
-  );
+  const handleSheetOpenChange = (open: boolean) => {
+    setIsSheetOpen(open);
+    if (!open) {
+      setEditingProduct(null);
+      form.reset(defaultFormValues);
+    }
+  };
 
-  const handleOpenCreate = useCallback(() => {
+  const handleOpenCreate = () => {
     setEditingProduct(null);
     form.reset(defaultFormValues);
     setIsSheetOpen(true);
-  }, [form]);
+  };
 
   const handleOpenEdit = useCallback(
     (product: ProductDTO) => {
@@ -162,7 +146,13 @@ export default function InventoryPage() {
     setProductToDelete(product);
   }, []);
 
-  const confirmDelete = useCallback(async () => {
+  // Memoized columns for DataTable
+  const memoizedColumns = useMemo(
+    () => columns(handleOpenEdit, handleDelete),
+    [handleOpenEdit, handleDelete]
+  );
+
+  const confirmDelete = async () => {
     if (!productToDelete) return;
 
     setDeleting(true);
@@ -186,7 +176,7 @@ export default function InventoryPage() {
       setDeleting(false);
       setProductToDelete(null);
     }
-  }, [productToDelete]);
+  };
 
   const onSubmit = form.handleSubmit(async (values) => {
     setSaving(true);
@@ -232,293 +222,257 @@ export default function InventoryPage() {
   const isEditing = Boolean(editingProduct);
 
   return (
-    <>
-      <SideBar currentPath="/inventory" />
-      <main className="ml-64 p-8">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold font-sans">Inventory</h1>
-            <p className="text-muted-foreground font-sans">
-              Manage your inventory and track your products here.
-            </p>
-          </div>
-          {products.length > 0 && (
-            <Button
-              className="font-sans font-bold text-sm"
-              onClick={handleOpenCreate}
-              disabled={saving}
-            >
-              <ListPlus className="mr-1 size-4" />
-              <span>Add Product</span>
-            </Button>
-          )}
-        </div>
-
-        {loading ? (
-          <TableLoading />
-        ) : (
-          <DataTable
-            columns={columns}
-            data={products}
-            meta={{
-              onEdit: handleOpenEdit,
-              onDelete: handleDelete,
-            }}
-            emptyComponent={
-              <Empty>
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <Container className="size-8 p-1" />
-                  </EmptyMedia>
-                  <EmptyTitle>No Product Data</EmptyTitle>
-                  <EmptyDescription>
-                    Get started by adding your first product to the inventory.
-                  </EmptyDescription>
-                </EmptyHeader>
-                <EmptyContent className="flex items-center">
-                  <Button
-                    className="font-sans font-bold text-sm"
-                    onClick={handleOpenCreate}
-                    disabled={saving}
-                  >
-                    <ListPlus className="mr-1 size-4" />
-                    <span>Add Product</span>
-                  </Button>
-                </EmptyContent>
-              </Empty>
-            }
-          />
+    <div className="p-4 md:p-6 lg:p-8">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <p className="text-muted-foreground font-sans">
+          Manage your inventory and track your products here.
+        </p>
+        {products.length > 0 && (
+          <Button
+            className="font-sans font-bold text-sm"
+            onClick={handleOpenCreate}
+            disabled={saving}
+          >
+            <ListPlus className="mr-1 size-4" />
+            <span>Add Product</span>
+          </Button>
         )}
+      </div>
 
-        <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
-          <SheetContent side="right">
-            <Form {...form}>
-              <form className="flex h-full flex-col" onSubmit={onSubmit}>
-                <SheetHeader>
-                  <SheetTitle className="flex items-center">
-                    {isEditing ? (
-                      <SquarePen className="mr-1 size-4.5" />
-                    ) : (
-                      <ListPlus className="mr-1 size-4.5" />
-                    )}
-                    <span className="text-bold">
-                      {isEditing ? "Edit Product" : "Add Product"}
-                    </span>
-                  </SheetTitle>
-                  <SheetDescription>
-                    {isEditing
-                      ? "Update the product details below."
-                      : "Add a new product to your inventory."}
-                  </SheetDescription>
-                </SheetHeader>
+      {loading ? (
+        <TableLoading />
+      ) : (
+        <DataTable
+          columns={memoizedColumns}
+          data={products}
+          emptyComponent={
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Container className="size-8 p-1" />
+                </EmptyMedia>
+                <EmptyTitle>No Data</EmptyTitle>
+                <EmptyDescription>
+                  Get started by adding your first product to the inventory.
+                </EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent className="flex items-center">
+                <Button
+                  className="font-sans font-bold text-sm"
+                  onClick={handleOpenCreate}
+                  disabled={saving}
+                >
+                  <ListPlus className="mr-1 size-4" />
+                  <span>Add Product</span>
+                </Button>
+              </EmptyContent>
+            </Empty>
+          }
+        />
+      )}
 
-                <div className="flex-1 space-y-4 overflow-y-auto p-4">
+      <Sheet open={isSheetOpen} onOpenChange={handleSheetOpenChange}>
+        <SheetContent side="right">
+          <Form {...form}>
+            <form className="flex h-full flex-col" onSubmit={onSubmit}>
+              <SheetHeader>
+                <SheetTitle className="flex items-center">
+                  {isEditing ? (
+                    <SquarePen className="mr-1 size-4.5" />
+                  ) : (
+                    <ListPlus className="mr-1 size-4.5" />
+                  )}
+                  <span className="text-bold">
+                    {isEditing ? "Edit Product" : "Add Product"}
+                  </span>
+                </SheetTitle>
+                <SheetDescription>
+                  {isEditing
+                    ? "Update the product details below."
+                    : "Add a new product to your inventory."}
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="flex-1 space-y-4 overflow-y-auto p-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field, fieldState }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input type="text" disabled={saving} {...field} />
+                      </FormControl>
+                      <FormMessage>{fieldState.error?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="sku"
+                  render={({ field, fieldState }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <span>SKU</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="size-3.5 text-sm font-normal" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right">
+                            <p>Stock Keeping Unit (SKU)</p>
+                          </TooltipContent>
+                        </Tooltip>
+
+                        <span className="text-sm font-normal text-muted-foreground">
+                          (optional)
+                        </span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="text" disabled={saving} {...field} />
+                      </FormControl>
+                      <FormMessage>{fieldState.error?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField
                     control={form.control}
-                    name="name"
-                    render={({ field, fieldState }) => (
-                      <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                          <Input disabled={saving} {...field} />
-                        </FormControl>
-                        <FormMessage>{fieldState.error?.message}</FormMessage>
-                      </FormItem>
-                    )}
-                  />
+                    name="price"
+                    render={({ field, fieldState }) => {
+                      const { value, ...fieldProps } = field;
+                      const inputValue =
+                        !isEditing && !fieldState.isDirty
+                          ? ""
+                          : value ?? "";
 
-                  <FormField
-                    control={form.control}
-                    name="sku"
-                    render={({ field, fieldState }) => (
-                      <FormItem>
-                        <FormLabel>
-                          SKU
-                          <span className="ml-1 text-sm font-normal text-muted-foreground">
-                            (optional)
-                          </span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            disabled={saving}
-                            value={field.value ?? ""}
-                            onChange={(event) =>
-                              field.onChange(event.target.value)
-                            }
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            ref={field.ref}
-                          />
-                        </FormControl>
-                        <FormMessage>{fieldState.error?.message}</FormMessage>
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <FormField
-                      control={form.control}
-                      name="price"
-                      render={({ field, fieldState }) => (
+                      return (
                         <FormItem>
                           <FormLabel>Price (THB)</FormLabel>
                           <FormControl>
                             <Input
-                              type="number"
-                              min={0}
-                              step="0.01"
+                              type="text"
                               disabled={saving}
-                              value={field.value ?? ""}
-                              onChange={(event) => {
-                                const nextValue = event.target.value;
-                                if (nextValue === "") {
-                                  field.onChange(undefined);
-                                  return;
-                                }
-                                const parsed = Number(nextValue);
-                                field.onChange(
-                                  Number.isNaN(parsed) ? undefined : parsed
-                                );
-                              }}
-                              onBlur={field.onBlur}
-                              name={field.name}
-                              ref={field.ref}
+                              value={inputValue}
+                              {...fieldProps}
                             />
                           </FormControl>
                           <FormMessage>{fieldState.error?.message}</FormMessage>
                         </FormItem>
-                      )}
-                    />
+                      );
+                    }}
+                  />
 
-                    <FormField
-                      control={form.control}
-                      name="quantity"
-                      render={({ field, fieldState }) => (
+                  <FormField
+                    control={form.control}
+                    name="quantity"
+                    render={({ field, fieldState }) => {
+                      const { value, ...fieldProps } = field;
+                      const inputValue =
+                        !isEditing && !fieldState.isDirty
+                          ? ""
+                          : value ?? "";
+
+                      return (
                         <FormItem>
                           <FormLabel>Quantity</FormLabel>
                           <FormControl>
                             <Input
-                              type="number"
-                              min={0}
-                              step={1}
+                              type="text"
                               disabled={saving}
-                              value={field.value ?? ""}
-                              onChange={(event) => {
-                                const nextValue = event.target.value;
-                                if (nextValue === "") {
-                                  field.onChange(undefined);
-                                  return;
-                                }
-                                const parsed = Number(nextValue);
-                                field.onChange(
-                                  Number.isNaN(parsed) ? undefined : parsed
-                                );
-                              }}
-                              onBlur={field.onBlur}
-                              name={field.name}
-                              ref={field.ref}
+                              value={inputValue}
+                              {...fieldProps}
                             />
                           </FormControl>
                           <FormMessage>{fieldState.error?.message}</FormMessage>
                         </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="lowStockAt"
-                    render={({ field, fieldState }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Low Stock At
-                          <span className="ml-1 text-sm font-normal text-muted-foreground">
-                            (optional)
-                          </span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min={0}
-                            step={1}
-                            disabled={saving}
-                            value={field.value ?? ""}
-                            onChange={(event) => {
-                              const nextValue = event.target.value;
-                              if (nextValue === "") {
-                                field.onChange(undefined);
-                                return;
-                              }
-                              const parsed = Number(nextValue);
-                              field.onChange(
-                                Number.isNaN(parsed) ? undefined : parsed
-                              );
-                            }}
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            ref={field.ref}
-                          />
-                        </FormControl>
-                        <FormMessage>{fieldState.error?.message}</FormMessage>
-                      </FormItem>
-                    )}
+                      );
+                    }}
                   />
                 </div>
 
-                <SheetFooter className="sm:flex-row sm:justify-end">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => handleSheetOpenChange(false)}
-                    disabled={saving}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={saving}>
-                    {isEditing ? "Save changes" : "Create product"}
-                  </Button>
-                </SheetFooter>
-              </form>
-            </Form>
-          </SheetContent>
-        </Sheet>
+                <FormField
+                  control={form.control}
+                  name="lowStockAt"
+                  render={({ field, fieldState }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <span>Low Stock At</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="size-3.5 text-sm font-normal" />
+                          </TooltipTrigger>
+                          <TooltipContent side="right">
+                            <p>Low stock threshold</p>
+                          </TooltipContent>
+                        </Tooltip>
+                        <span className="text-sm font-normal text-muted-foreground">
+                          (optional)
+                        </span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input type="text" disabled={saving} {...field} />
+                      </FormControl>
+                      <FormMessage>{fieldState.error?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-        <Dialog
-          open={!!productToDelete}
-          onOpenChange={(open) => {
-            if (!open && !deleting) {
-              setProductToDelete(null);
-            }
-          }}
-        >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Delete Product</DialogTitle>
-              <p>
-                Are you sure you want to delete{" "}
-                <strong>{productToDelete?.name}</strong>?
-              </p>
-            </DialogHeader>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setProductToDelete(null)}
-                disabled={deleting}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="text-red-100"
-                variant="destructive"
-                onClick={confirmDelete}
-                disabled={deleting}
-              >
-                Delete
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </main>
-    </>
+              <SheetFooter className="sm:flex-row sm:justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleSheetOpenChange(false)}
+                  disabled={saving}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={saving}>
+                  {isEditing ? "Save changes" : "Add product"}
+                </Button>
+              </SheetFooter>
+            </form>
+          </Form>
+        </SheetContent>
+      </Sheet>
+
+      <Dialog
+        open={!!productToDelete}
+        onOpenChange={(open) => {
+          if (!open && !deleting) {
+            setProductToDelete(null);
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Product</DialogTitle>
+            <p>
+              Are you sure you want to delete{" "}
+              <strong>{productToDelete?.name}</strong>?
+            </p>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setProductToDelete(null)}
+              disabled={deleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="text-red-100"
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={deleting}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

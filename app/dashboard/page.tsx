@@ -1,7 +1,6 @@
 // Components
 import EfficiencyRadialChart from "@/components/charts/efficiency-radial-chart";
 import ProductChart from "@/components/charts/product-chart";
-import SideBar from "@/components/sidebar";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/auth/auth";
 
@@ -131,193 +130,180 @@ export default async function Dashboard() {
   });
 
   return (
-    <>
-      <SideBar currentPath="/dashboard" />
-      {/* Header */}
-      <main className="ml-64 p-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold font-sans">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome to the Dashboard! Here you can find an overview of your
-            inventory and recent activity.
-          </p>
+    <div className="p-4 md:p-6 lg:p-8">
+      <div className="mb-6">
+        <p className="text-muted-foreground font-sans">
+          Welcome to the Dashboard! Here you can find an overview of your
+          inventory and recent activity.
+        </p>
+      </div>
+
+      <section className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2 items-stretch">
+        {/* Key Metrics Cards */}
+        <div className="flex h-full flex-col gap-4">
+          <h2 className="text-xl font-bold font-sans">Key Metrics</h2>
+          <Card className="flex-1">
+            <CardContent className="grid grid-cols-3 gap-4 text-center h-full items-center">
+              <div>
+                <p className="text-3xl font-bold font-sans">{totalProducts}</p>
+                <h3 className="text-base font-semibold font-sans">
+                  Total Products
+                </h3>
+                <div className="flex items-center justify-center">
+                  <p className="text-sm text-emerald-400 font-medium font-sans">
+                    +{totalProducts}
+                  </p>
+                  <TrendingUp className="size-3.5 text-emerald-400 inline-block ml-1" />
+                </div>
+              </div>
+              <div>
+                <p className="text-3xl font-bold font-sans">
+                  {totalValue.toFixed(0)}
+                </p>
+                <h3 className="text-base font-semibold font-sans">
+                  Total Value
+                </h3>
+                <div className="flex items-center justify-center">
+                  <p className="text-sm text-emerald-400 font-medium font-sans">
+                    +{totalValue.toFixed(0)}
+                  </p>
+                  <TrendingUp className="size-3.5 text-emerald-400 inline-block ml-1" />
+                </div>
+              </div>
+              <div>
+                <p className="text-3xl font-bold font-sans">{lowStock}</p>
+                <h3 className="text-base font-semibold font-sans">Low Stock</h3>
+                <div className="flex items-center justify-center">
+                  <p className="text-sm text-emerald-400 font-medium font-sans">
+                    +{lowStock}
+                  </p>
+                  <TrendingUp className="size-3.5 text-emerald-400 inline-block ml-1" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        <section className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2 items-stretch">
-          {/* Key Metrics Cards */}
-          <div className="flex h-full flex-col gap-4">
-            <h2 className="text-xl font-bold font-sans">Key Metrics</h2>
-            <Card className="flex-1">
-              <CardContent className="grid grid-cols-3 gap-4 text-center h-full items-center">
-                <div>
-                  <p className="text-3xl font-bold font-sans">
-                    {totalProducts}
-                  </p>
-                  <h3 className="text-base font-semibold font-sans">
-                    Total Products
-                  </h3>
-                  <div className="flex items-center justify-center">
-                    <p className="text-sm text-emerald-400 font-medium font-sans">
-                      +{totalProducts}
-                    </p>
-                    <TrendingUp className="size-3.5 text-emerald-400 inline-block ml-1" />
-                  </div>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold font-sans">
-                    {totalValue.toFixed(0)}
-                  </p>
-                  <h3 className="text-base font-semibold font-sans">
-                    Total Value
-                  </h3>
-                  <div className="flex items-center justify-center">
-                    <p className="text-sm text-emerald-400 font-medium font-sans">
-                      +{totalValue.toFixed(0)}
-                    </p>
-                    <TrendingUp className="size-3.5 text-emerald-400 inline-block ml-1" />
-                  </div>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold font-sans">{lowStock}</p>
-                  <h3 className="text-base font-semibold font-sans">
-                    Low Stock
-                  </h3>
-                  <div className="flex items-center justify-center">
-                    <p className="text-sm text-emerald-400 font-medium font-sans">
-                      +{lowStock}
-                    </p>
-                    <TrendingUp className="size-3.5 text-emerald-400 inline-block ml-1" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        {/* Inventory Overtime */}
+        <div className="flex h-full flex-col gap-4">
+          <h2 className="text-xl font-bold font-sans">New product per week</h2>
+          <Card className="flex-1">
+            <CardContent>
+              <ProductChart data={weekProductsData} />
+            </CardContent>
+          </Card>
+        </div>
+      </section>
 
-          {/* Inventory Overtime */}
-          <div className="flex h-full flex-col gap-4">
-            <h2 className="text-xl font-bold font-sans">
-              New product per week
-            </h2>
-            <Card className="flex-1">
-              <CardContent>
-                <ProductChart data={weekProductsData} />
-              </CardContent>
-            </Card>
-          </div>
-        </section>
+      {/* Stock Levels Cards */}
+      <section className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2 items-stretch">
+        <div className="flex h-full flex-col gap-4">
+          <h2 className="text-xl font-bold font-sans">Stock Levels</h2>
+          <Card className="flex-1">
+            <CardContent>
+              <div className="space-y-2">
+                {recent.map((product, key) => {
+                  const stockLevel =
+                    product.quantity === 0
+                      ? 0
+                      : product.quantity <= (product.lowStockAt || 5)
+                      ? 1
+                      : 2;
 
-        {/* Stock Levels Cards */}
-        <section className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2 items-stretch">
-          <div className="flex h-full flex-col gap-4">
-            <h2 className="text-xl font-bold font-sans">Stock Levels</h2>
-            <Card className="flex-1">
-              <CardContent>
-                <div className="space-y-2">
-                  {recent.map((product, key) => {
-                    const stockLevel =
-                      product.quantity === 0
-                        ? 0
-                        : product.quantity <= (product.lowStockAt || 5)
-                        ? 1
-                        : 2;
+                  const bgColors = [
+                    "bg-red-400",
+                    "bg-amber-400",
+                    "bg-emerald-400",
+                  ];
+                  const textColors = [
+                    "text-red-400",
+                    "text-amber-400",
+                    "text-emerald-400",
+                  ];
 
-                    const bgColors = [
-                      "bg-red-400",
-                      "bg-amber-400",
-                      "bg-emerald-400",
-                    ];
-                    const textColors = [
-                      "text-red-400",
-                      "text-amber-400",
-                      "text-emerald-400",
-                    ];
-
-                    return (
-                      <div
-                        key={key}
-                        className="flex items-center justify-between rounded-lg p-2 bg-muted/50"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`w-4 h-2.5 rounded-full ${bgColors[stockLevel]}`}
-                          />
-                          <p className="text-sm font-medium font-sans">
-                            {product.name}
-                          </p>
-                        </div>
-                        <p
-                          className={`text-sm font-medium ${textColors[stockLevel]} font-sans`}
-                        >
-                          <span>
-                            {product.quantity
-                              ? product.quantity
-                              : "out of stock"}{" "}
-                          </span>
-                          <span> {product.quantity ? "units" : ""}</span>
+                  return (
+                    <div
+                      key={key}
+                      className="flex items-center justify-between rounded-lg p-2 bg-muted/50"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`w-4 h-2.5 rounded-full ${bgColors[stockLevel]}`}
+                        />
+                        <p className="text-sm font-medium font-sans">
+                          {product.name}
                         </p>
                       </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="flex h-full flex-col gap-4">
-            <h2 className="text-xl font-bold font-sans">Efficiency</h2>
-            <Card className="flex-1">
-              <CardContent className="flex flex-col">
-                <div className="relative flex flex-1 items-center justify-center">
-                  <div className="w-full max-w-[280px]">
-                    <EfficiencyRadialChart score={efficiencyScore} />
-                  </div>
-                  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Efficiency
-                    </p>
-                    <p className="text-4xl font-bold font-sans">
-                      {efficiencyScore}%
-                    </p>
-                    <p className="text-xs text-muted-foreground font-sans">
-                      optimized stock
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-1 flex-col">
-                  <p className="text-sm font-sans text-muted-foreground mb-6">
-                    Your inventory management efficiency is at {efficiencyScore}
-                    %. Keep maintaining optimal stock levels to minimize waste
-                    and avoid backorders.
-                  </p>
-                  <div className="grid gap-3 grid-cols-1 lg:grid-cols-3">
-                    {efficiencyMetrics.map((metric) => (
-                      <div
-                        key={metric.key}
-                        className="rounded-lg border bg-muted/40 p-3"
+                      <p
+                        className={`text-sm font-medium ${textColors[stockLevel]} font-sans`}
                       >
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`h-2.5 w-4 rounded-full ${metric.indicator}`}
-                          />
-                          <p className="text-sm font-medium font-sans">
-                            {metric.label}
-                          </p>
-                        </div>
-                        <p className="mt-2 text-2xl font-bold font-sans">
-                          {metric.value}%
-                        </p>
-                        <p className="text-xs text-muted-foreground font-sans">
-                          {metric.description}
+                        <span>
+                          {product.quantity ? product.quantity : "out of stock"}{" "}
+                        </span>
+                        <span> {product.quantity ? "units" : ""}</span>
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="flex h-full flex-col gap-4">
+          <h2 className="text-xl font-bold font-sans">Efficiency</h2>
+          <Card className="flex-1">
+            <CardContent className="flex flex-col">
+              <div className="relative flex flex-1 items-center justify-center">
+                <div className="w-full max-w-[280px]">
+                  <EfficiencyRadialChart score={efficiencyScore} />
+                </div>
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Efficiency
+                  </p>
+                  <p className="text-4xl font-bold font-sans">
+                    {efficiencyScore}%
+                  </p>
+                  <p className="text-xs text-muted-foreground font-sans">
+                    optimized stock
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-1 flex-col">
+                <p className="text-sm font-sans text-muted-foreground mb-6">
+                  Your inventory management efficiency is at {efficiencyScore}
+                  %. Keep maintaining optimal stock levels to minimize waste and
+                  avoid backorders.
+                </p>
+                <div className="grid gap-3 grid-cols-1 lg:grid-cols-3">
+                  {efficiencyMetrics.map((metric) => (
+                    <div
+                      key={metric.key}
+                      className="rounded-lg border bg-muted/40 p-3"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`h-2.5 w-4 rounded-full ${metric.indicator}`}
+                        />
+                        <p className="text-sm font-medium font-sans">
+                          {metric.label}
                         </p>
                       </div>
-                    ))}
-                  </div>
+                      <p className="mt-2 text-2xl font-bold font-sans">
+                        {metric.value}%
+                      </p>
+                      <p className="text-xs text-muted-foreground font-sans">
+                        {metric.description}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-      </main>
-    </>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+    </div>
   );
 }

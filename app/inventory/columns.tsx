@@ -1,23 +1,25 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, SquarePen, Trash2 } from "lucide-react";
+// Icons
+import { SquarePen, Trash2, MoreHorizontal } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+// Components
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+
+// Types
+import { ColumnDef } from "@tanstack/react-table";
 import { ProductDTO } from "@/lib/types/product";
 
-type ProductTableMeta = {
-  onEdit?: (product: ProductDTO) => void;
-  onDelete?: (product: ProductDTO) => void;
-};
-
-export const columns: ColumnDef<ProductDTO>[] = [
+export const columns = (
+  onEdit: (product: ProductDTO) => void,
+  onDelete: (product: ProductDTO) => void
+): ColumnDef<ProductDTO>[] => [
   {
     accessorKey: "name",
     header: "Name",
@@ -30,12 +32,12 @@ export const columns: ColumnDef<ProductDTO>[] = [
   },
   {
     accessorKey: "price",
-    header: "Price",
-    cell: ({ getValue }) => `${getValue<number>().toFixed(2)} THB`,
+    header: "Price (THB)",
+    cell: ({ getValue }) => getValue<number>().toFixed(2),
   },
   {
     accessorKey: "quantity",
-    header: "Quantity",
+    header: "Qty",
   },
   {
     accessorKey: "lowStockAt",
@@ -45,10 +47,8 @@ export const columns: ColumnDef<ProductDTO>[] = [
   {
     id: "actions",
     header: "",
-    cell: ({ row, table }) => {
+    cell: ({ row }) => {
       const product = row.original;
-      const meta = table.options.meta as ProductTableMeta | undefined;
-
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -62,13 +62,13 @@ export const columns: ColumnDef<ProductDTO>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={() => meta?.onEdit?.(product)}>
+            <DropdownMenuItem onSelect={() => onEdit(product)}>
               <SquarePen className="size-4" />
               <span>Edit</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               variant="destructive"
-              onSelect={() => meta?.onDelete?.(product)}
+              onSelect={() => onDelete(product)}
             >
               <Trash2 className="size-4" />
               <span>Delete</span>

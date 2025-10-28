@@ -1,13 +1,12 @@
 "use client";
 
+import React from "react";
 import {
   ColumnDef,
-  TableMeta,
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -17,25 +16,26 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface DataTableProps<TData, TValue> {
+// ---------- Type Definition ----------
+interface DataTableProps<TData> {
+  columns: ColumnDef<TData>[];
   data: TData[];
-  columns: ColumnDef<TData, TValue>[];
-  meta?: TableMeta<TData>;
   emptyComponent?: React.ReactNode;
 }
 
-export function DataTable<TData, TValue>({
-  data,
+// ---------- Component ----------
+export function DataTable<TData>({
   columns,
-  meta,
+  data,
   emptyComponent,
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps<TData>) {
   const table = useReactTable({
     data,
     columns,
-    meta,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  const rows = table.getRowModel().rows;
 
   return (
     <div className="overflow-hidden rounded-md border font-sans">
@@ -43,28 +43,23 @@ export function DataTable<TData, TValue>({
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                );
-              })}
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                </TableHead>
+              ))}
             </TableRow>
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
+          {rows.length ? (
+            rows.map((row) => (
+              <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -74,8 +69,11 @@ export function DataTable<TData, TValue>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                {emptyComponent || "No results."}
+              <TableCell
+                colSpan={columns.length}
+                className="h-24 text-center text-muted-foreground"
+              >
+                {emptyComponent || "No data found."}
               </TableCell>
             </TableRow>
           )}

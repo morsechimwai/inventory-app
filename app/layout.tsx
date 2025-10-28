@@ -1,6 +1,10 @@
 // SEO Metadata
 import type { Metadata } from "next";
 
+// Sidebar
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import AppSidebar from "@/components/app-sidebar";
+
 // Toasters
 import { Toaster } from "@/components/ui/sonner";
 
@@ -13,6 +17,7 @@ import { Geist_Mono, Nunito } from "next/font/google";
 
 // global CSS
 import "./globals.css";
+import { SiteHeader } from "@/components/site-header";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -39,8 +44,14 @@ export default function RootLayout({
       <body className={`${nunito.variable} ${geistMono.variable} antialiased`}>
         <StackProvider app={stackClientApp}>
           <StackTheme>
-            {children}
-            <Toaster closeButton />
+            <SidebarProvider>
+              <AppSidebar />
+              <main className="w-full">
+                <SiteHeader />
+                {children}
+              </main>
+              <Toaster closeButton />
+            </SidebarProvider>
           </StackTheme>
         </StackProvider>
       </body>
