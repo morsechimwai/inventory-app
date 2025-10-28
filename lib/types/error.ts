@@ -5,8 +5,3 @@ export type ActionResult<T = undefined> = {
   meta?: Record<string, unknown>;
   errorMessage?: string;
 };
-
-export interface PrismaErrorMeta {
-  target?: string[];
-  [key: string]: unknown;
-}

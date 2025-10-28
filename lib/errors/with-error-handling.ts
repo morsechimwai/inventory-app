@@ -1,8 +1,16 @@
+// Types
+import type { ActionResult } from "@/lib/types/error";
+
+// Custom Zod error messages
+import { ZodError } from "zod";
+
+// Prisma Client
 import { Prisma } from "@prisma/client";
-import type { ActionResult } from "@/lib/types";
+
+// Application-specific errors
 import { AppError } from "./app-error";
 
-// central known error messages
+// Friendly Prisma error messages
 const PRISMA_ERROR_MESSAGES: Record<string, string> = {
   P2002: "This value already exists. Please choose another one.",
   P2003: "Cannot delete this item because it’s linked to other data.",
@@ -18,6 +26,16 @@ export async function withErrorHandling<T>(
     return { success: true, data };
   } catch (error: unknown) {
     console.error("[withErrorHandling] Caught error:", error);
+
+    // Zod validation errors
+    if (error instanceof ZodError) {
+      return {
+        success: false,
+        code: "VALIDATION_ERROR",
+        meta: { issues: error.issues },
+        errorMessage: error.issues[0]?.message || "Validation failed.",
+      };
+    }
 
     // Prisma known request error
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
