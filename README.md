@@ -1,52 +1,69 @@
-# Inventory App
+# 🦜 stocKit
 
-An inventory management system for business teams that need a real-time overview of products, purchase orders, and restock status. Built on Next.js 16 with the App Router architecture.
+A Stack-authenticated inventory management workspace built with Next.js 16. It lets small teams monitor stock, surface low inventory, and manage product records from a single dashboard.
 
-> **Project status:** In development — core foundations (UI, Prisma, Stack authentication) are scaffolded and core features are in progress.
+> **Project status:** In development — dashboard analytics and inventory CRUD flows are live; integrations such as alerts and role management are still in progress.
 
-## Near-term Features
-- Dashboard that summarizes current inventory, product lists, and orders
-- Workflows for receiving and issuing stock with audit-ready adjustment notes
-- Authentication and tenancy powered by Stack
-- PostgreSQL database access through Prisma Client
+## Feature Highlights
+- Secure workspace powered by Stack authentication with protected routes and user-scoped Prisma queries.
+- Inventory manager with server actions for create/update/delete, `react-hook-form` + `zod` validation, toast feedback, sheets and dialogs, and empty/loading states.
+- Analytics dashboard that calculates stock KPIs, renders recent product activity with Recharts, and visualizes efficiency using a radial chart.
+- Responsive layout with an off-canvas sidebar, breadcrumb header, skeleton placeholders, and reusable UI primitives.
+- Prisma-backed PostgreSQL data model for per-user products, with `revalidatePath` ensuring UI freshness after mutations.
 
 ## Tech Stack
-- Next.js 16 (App Router, Server Components, Metadata API)
+- Next.js 16 (App Router, Server Components, Route Handlers)
 - React 19 + TypeScript
-- Tailwind CSS 4 + tw-animate for the design system
+- Tailwind CSS 4 + tw-animate
 - Prisma ORM + PostgreSQL (`DATABASE_URL`)
 - Stack SDK (`@stackframe/stack`) for auth/session management
-- Lucide icons, class-variance-authority, tailwind-merge
+- Recharts, react-hook-form, zod, sonner, class-variance-authority, tailwind-merge, Lucide icons
 
-## Project Structure (short version)
+## Directory Overview
 ```
-app/                 // App Router pages (dashboard, handlers, loading states)
-components/          // Reusable UI pieces such as sidebar and cards
-lib/generated/       // Prisma Client (generated after running migrations)
-prisma/              // Schema definition and migrations
-stack/               // Stack SDK configuration
+app/                      // Landing page, dashboard, inventory, settings, Stack handler
+components/               // Shared UI (sidebar, header, tables, charts, skeletons)
+lib/actions/              // Server actions wrapping service-layer operations
+lib/services/             // Prisma-backed domain services
+lib/types/                // Shared DTOs and helpers
+stack/                    // Stack client/server configuration
+prisma/                   // Schema, migrations, seed script
+public/                   // Static assets
 ```
+
+## Prerequisites
+- Node.js 20+
+- pnpm
+- PostgreSQL database
+- Stack account with project keys (https://stackauth.com)
+
+## Environment Variables
+Create `.env.local` (or `.env`) with the following values using your own credentials:
+
+```
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB_NAME"
+NEXT_PUBLIC_STACK_PROJECT_ID="<your-stack-project-id>"
+NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY="<your-stack-publishable-client-key>"
+STACK_SECRET_SERVER_KEY="<your-stack-server-key>"
+```
+
+The optional `prisma/seed.ts` script references a demo user ID—adjust it if you seed sample data.
 
 ## Getting Started
 1. Install dependencies
    ```bash
    pnpm install
    ```
-2. Create an environment file (`.env.local` or `.env`) and define at least:
-   ```
-   DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB_NAME"
-   STACK_API_KEY="..."
-   STACK_PROJECT_ID="..."
-   ```
-3. Prepare the database and generate Prisma Client
+2. Apply database migrations and generate Prisma Client
    ```bash
    pnpm dlx prisma migrate dev
    ```
+3. (Optional) Seed demo data after configuring Prisma's seed command to run `prisma/seed.ts`.
 4. Start the development server
    ```bash
    pnpm dev
    ```
-5. Open http://localhost:3000 to explore the UI
+5. Open http://localhost:3000 and sign in with Stack to access the dashboard and inventory screens.
 
 ## Available Scripts
 | Script        | Description                              |
@@ -57,10 +74,11 @@ stack/               // Stack SDK configuration
 | `pnpm lint`   | Lint the codebase with ESLint            |
 
 ## Roadmap
-- Bind the UI to real data models (products, warehouses, suppliers)
-- Add role-based access control and activity logging
-- Integrate webhooks/email alerts for low-stock events
-- Polish the UI for a mobile-first experience
+- Sync dashboard metrics with live inbound/outbound stock transactions
+- Introduce role-based access control and audit logging
+- Enable supplier management, purchase orders, and transfer workflows
+- Add alerting (webhooks/email) for low stock and stockouts
+- Polish responsive UX and accessibility coverage
 
 ## License
 Released under the MIT License (see `LICENSE`).
