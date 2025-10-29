@@ -22,7 +22,6 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function ProductChart({ data }: { data: ProductChart[] }) {
-  console.log(data);
   return (
     <div className="h-fit w-full">
       <ChartContainer config={chartConfig}>
