@@ -75,3 +75,59 @@ export function calculateEfficiencyMetrics(
     outOfStockPercentage,
   };
 }
+
+export function calculateWeeklyTrends(allProducts: ProductWithDate[]) {
+  const now = new Date();
+
+  const startOfThisWeek = new Date();
+  startOfThisWeek.setDate(now.getDate() - now.getDay());
+  startOfThisWeek.setHours(0, 0, 0, 0);
+
+  const startOfLastWeek = new Date(startOfThisWeek);
+  startOfLastWeek.setDate(startOfThisWeek.getDate() - 7);
+
+  const endOfLastWeek = new Date(startOfThisWeek);
+  endOfLastWeek.setMilliseconds(-1);
+
+  const thisWeekProducts = allProducts.filter(
+    (p) => new Date(p.createdAt) >= startOfThisWeek
+  );
+  const lastWeekProducts = allProducts.filter(
+    (p) =>
+      new Date(p.createdAt) >= startOfLastWeek &&
+      new Date(p.createdAt) < startOfThisWeek
+  );
+
+  const safePercent = (curr: number, prev: number) => {
+    return prev > 0 ? ((curr - prev) / prev) * 100 : 0;
+  };
+
+  const productTrend = safePercent(
+    thisWeekProducts.length,
+    lastWeekProducts.length
+  );
+
+  const totalValueThisWeek = thisWeekProducts.reduce(
+    (sum, p) => sum + Number(p.price) * Number(p.quantity),
+    0
+  );
+  const totalValueLastWeek = lastWeekProducts.reduce(
+    (sum, p) => sum + Number(p.price) * Number(p.quantity),
+    0
+  );
+  const totalValueTrend = safePercent(totalValueThisWeek, totalValueLastWeek);
+
+  const lowStockThisWeek = thisWeekProducts.filter(
+    (p) => p.quantity <= 5
+  ).length;
+  const lowStockLastWeek = lastWeekProducts.filter(
+    (p) => p.quantity <= 5
+  ).length;
+  const lowStockTrend = safePercent(lowStockThisWeek, lowStockLastWeek);
+
+  return {
+    productTrend,
+    totalValueTrend,
+    lowStockTrend,
+  };
+}
