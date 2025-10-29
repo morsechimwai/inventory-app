@@ -88,7 +88,7 @@ export default async function Dashboard() {
 
   // Mock recent products — ถ้าต้องการข้อมูลจริงให้ fetch ใน getDashboardMetrics()
   const recent = allProducts.slice(0, 5).map((p, i) => ({
-    name: `Product ${i + 1}`,
+    name: p.name,
     quantity: p.quantity,
     lowStockAt: 5,
   }));
