@@ -1,3 +1,4 @@
+// lib/actions/products.ts
 "use server";
 
 // Next.js
@@ -44,7 +45,7 @@ export interface ProductDeleteResult {
   meta?: { id: string; userId: string };
 }
 
-// Create a new product
+// Create a new product (CRUD - Create)
 export async function createProductAction(
   data: CreateProductInput
 ): Promise<ActionResult<ProductCreateResult>> {
@@ -62,7 +63,7 @@ export async function createProductAction(
   });
 }
 
-// Read all products for the current user
+// Read all products for the current user (CRUD - Read)
 export async function getAllProducts(): Promise<
   ActionResult<ProductListResult>
 > {
@@ -80,7 +81,7 @@ export async function getAllProducts(): Promise<
   });
 }
 
-// Update an existing product
+// Update an existing product by ID (CRUD - Update)
 export async function updateProductAction(
   id: string,
   data: Partial<ProductDTO>
@@ -98,7 +99,7 @@ export async function updateProductAction(
   });
 }
 
-// Delete a product by ID
+// Delete a product by ID (CRUD - Delete)
 export async function deleteProductAction(
   id: string
 ): Promise<ActionResult<ProductDeleteResult>> {
