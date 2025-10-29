@@ -270,7 +270,7 @@ export default function InventoryPage() {
             <Empty>
               <EmptyHeader>
                 <EmptyMedia variant="icon">
-                  <Container className="size-8 p-1" />
+                  <Container className="size-8 text-muted-foreground" />
                 </EmptyMedia>
                 <EmptyTitle>No product found.</EmptyTitle>
                 <EmptyDescription>

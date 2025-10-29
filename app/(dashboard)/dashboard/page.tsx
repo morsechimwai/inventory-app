@@ -1,12 +1,29 @@
 // Components
 import EfficiencyRadialChart from "@/components/charts/efficiency-radial-chart";
 import ProductChart from "@/components/charts/product-chart";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { getCurrentUser } from "@/lib/auth/auth";
 
 // Prisma Client
 import { prisma } from "@/lib/db/prisma";
-import { TrendingUp } from "lucide-react";
+import {
+  BarChart2,
+  ChartBar,
+  ChartPie,
+  Icon,
+  PackageOpen,
+  TrendingUp,
+} from "lucide-react";
+import Link from "next/link";
 
 export default async function Dashboard() {
   const user = await getCurrentUser();
@@ -150,43 +167,46 @@ export default async function Dashboard() {
         <div className="flex h-full flex-col gap-4">
           <h2 className="text-xl font-bold font-sans">Key Metrics</h2>
           <Card className="flex-1">
-            <CardContent className="grid grid-cols-1 gap-4 text-center h-full sm:grid-cols-3 sm:items-center">
-              <div>
-                <p className="text-3xl font-bold font-sans">{totalProducts}</p>
-                <h3 className="text-base font-semibold font-sans">
-                  Total Products
-                </h3>
-                <div className="flex items-center justify-center">
-                  <p className="text-sm text-emerald-400 font-medium font-sans">
-                    +{totalProducts}
-                  </p>
-                  <TrendingUp className="size-3.5 text-emerald-400 inline-block ml-1" />
+            <CardContent className="flex h-full w-full">
+              {totalProducts > 0 ? (
+                <div className="grid h-full flex-1 grid-cols-1 place-items-center gap-4 text-center sm:grid-cols-3 sm:items-center">
+                  <div className="flex h-full flex-col items-center justify-center">
+                    <p className="text-3xl font-bold font-sans">
+                      {totalProducts}
+                    </p>
+                    <h3 className="text-base font-semibold font-sans">
+                      Total Products
+                    </h3>
+                  </div>
+                  <div className="flex h-full flex-col items-center justify-center">
+                    <p className="text-3xl font-bold font-sans">
+                      {totalValue.toFixed(0)}
+                    </p>
+                    <h3 className="text-base font-semibold font-sans">
+                      Total Value
+                    </h3>
+                  </div>
+                  <div className="flex h-full flex-col items-center justify-center">
+                    <p className="text-3xl font-bold font-sans">{lowStock}</p>
+                    <h3 className="text-base font-semibold font-sans">
+                      Low Stock
+                    </h3>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <p className="text-3xl font-bold font-sans">
-                  {totalValue.toFixed(0)}
-                </p>
-                <h3 className="text-base font-semibold font-sans">
-                  Total Value
-                </h3>
-                <div className="flex items-center justify-center">
-                  <p className="text-sm text-emerald-400 font-medium font-sans">
-                    +{totalValue.toFixed(0)}
-                  </p>
-                  <TrendingUp className="size-3.5 text-emerald-400 inline-block ml-1" />
-                </div>
-              </div>
-              <div>
-                <p className="text-3xl font-bold font-sans">{lowStock}</p>
-                <h3 className="text-base font-semibold font-sans">Low Stock</h3>
-                <div className="flex items-center justify-center">
-                  <p className="text-sm text-emerald-400 font-medium font-sans">
-                    +{lowStock}
-                  </p>
-                  <TrendingUp className="size-3.5 text-emerald-400 inline-block ml-1" />
-                </div>
-              </div>
+              ) : (
+                <Empty className="w-full">
+                  <EmptyHeader className="w-full max-w-none">
+                    <EmptyMedia variant="icon">
+                      <BarChart2 className="size-8 text-muted-foreground" />
+                    </EmptyMedia>
+                    <EmptyTitle>No data available</EmptyTitle>
+                    <EmptyDescription>
+                      Add products to view your key metrics.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                  <EmptyContent className="w-full max-w-none"></EmptyContent>
+                </Empty>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -207,52 +227,73 @@ export default async function Dashboard() {
         <div className="flex h-full flex-col gap-4">
           <h2 className="text-xl font-bold font-sans">Stock Levels</h2>
           <Card className="flex-1">
-            <CardContent>
-              <div className="space-y-2">
-                {recent.map((product, key) => {
-                  const stockLevel =
-                    product.quantity === 0
-                      ? 0
-                      : product.quantity <= (product.lowStockAt || 5)
-                      ? 1
-                      : 2;
+            <CardContent className="flex h-full w-full">
+              {recent.length > 0 ? (
+                <div className="flex-1 space-y-2">
+                  {recent.map((product, key) => {
+                    const stockLevel =
+                      product.quantity === 0
+                        ? 0
+                        : product.quantity <= (product.lowStockAt || 5)
+                        ? 1
+                        : 2;
 
-                  const bgColors = [
-                    "bg-red-400",
-                    "bg-amber-400",
-                    "bg-emerald-400",
-                  ];
-                  const textColors = [
-                    "text-red-400",
-                    "text-amber-400",
-                    "text-emerald-400",
-                  ];
+                    const bgColors = [
+                      "bg-red-400",
+                      "bg-amber-400",
+                      "bg-emerald-400",
+                    ];
+                    const textColors = [
+                      "text-red-400",
+                      "text-amber-400",
+                      "text-emerald-400",
+                    ];
 
-                  return (
-                    <div
-                      key={key}
-                      className="flex flex-col gap-2 rounded-lg bg-muted/50 p-2 sm:flex-row sm:items-center sm:justify-between"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`w-4 h-2.5 rounded-full ${bgColors[stockLevel]}`}
-                        />
-                        <p className="text-sm font-medium font-sans">
-                          {product.name}
+                    return (
+                      <div
+                        key={key}
+                        className="flex flex-col gap-2 rounded-lg bg-muted/50 p-2 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`w-4 h-2.5 rounded-full ${bgColors[stockLevel]}`}
+                          />
+                          <p className="text-sm font-medium font-sans">
+                            {product.name}
+                          </p>
+                        </div>
+                        <p
+                          className={`text-sm font-medium ${textColors[stockLevel]} font-sans`}
+                        >
+                          <span>
+                            {product.quantity
+                              ? product.quantity
+                              : "out of stock"}{" "}
+                          </span>
+                          <span> {product.quantity ? "units" : ""}</span>
                         </p>
                       </div>
-                      <p
-                        className={`text-sm font-medium ${textColors[stockLevel]} font-sans`}
-                      >
-                        <span>
-                          {product.quantity ? product.quantity : "out of stock"}{" "}
-                        </span>
-                        <span> {product.quantity ? "units" : ""}</span>
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <Empty className="w-full">
+                  <EmptyHeader className="w-full max-w-none">
+                    <EmptyMedia variant="icon">
+                      <PackageOpen className="size-8 text-muted-foreground" />
+                    </EmptyMedia>
+                    <EmptyTitle>No Products</EmptyTitle>
+                    <EmptyDescription>
+                      Go to your inventory to add products.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                  <EmptyContent className="w-full max-w-none">
+                    <Button asChild className="w-full">
+                      <Link href="/inventory">View Inventory</Link>
+                    </Button>
+                  </EmptyContent>
+                </Empty>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -260,71 +301,78 @@ export default async function Dashboard() {
         <div className="flex h-full flex-col gap-4">
           <h2 className="text-xl font-bold font-sans">Efficiency</h2>
           <Card className="flex-1">
-            <CardContent className="flex flex-col">
-              <div className="relative flex flex-1 items-center justify-center">
-                <div className="w-full max-w-[280px]">
-                  {efficiencyScore === null ? (
-                    <div className="aspect-square w-full rounded-full border border-dashed border-muted-foreground/40" />
-                  ) : (
-                    <EfficiencyRadialChart score={efficiencyScore} />
-                  )}
-                </div>
-                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Efficiency
-                  </p>
-                  {efficiencyScore === null ? (
-                    <p className="text-sm font-medium text-muted-foreground">
-                      No data
-                    </p>
-                  ) : (
-                    <>
+            <CardContent className="flex flex-col h-full w-full">
+              {efficiencyScore === null ? (
+                <Empty className="w-full h-full">
+                  <EmptyHeader className="w-full max-w-none">
+                    <EmptyMedia variant="icon">
+                      <ChartPie className="size-8 text-muted-foreground" />
+                    </EmptyMedia>
+                    <EmptyTitle>No Efficiency Data</EmptyTitle>
+                    <EmptyDescription>
+                      Start tracking your efficiency by adding products to your
+                      inventory.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                  <EmptyContent className="w-full max-w-none"></EmptyContent>
+                </Empty>
+              ) : (
+                <>
+                  <div className="relative flex flex-1 items-center justify-center">
+                    <div className="w-full max-w-[280px]">
+                      <EfficiencyRadialChart score={efficiencyScore} />
+                    </div>
+                    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Efficiency
+                      </p>
                       <p className="text-4xl font-bold font-sans">
                         {efficiencyScore}%
                       </p>
                       <p className="text-xs text-muted-foreground font-sans">
                         optimized stock
                       </p>
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="flex flex-1 flex-col">
-                {efficiencyScore === null ? (
-                  <p className="mb-6 text-sm font-sans text-muted-foreground">
-                    Add products to start tracking efficiency.
-                  </p>
-                ) : (
-                  <p className="mb-6 text-sm font-sans text-muted-foreground">
-                    Your inventory management efficiency is at {efficiencyScore}
-                    %. Keep maintaining optimal stock levels to minimize waste
-                    and avoid backorders.
-                  </p>
-                )}
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {efficiencyMetrics.map((metric) => (
-                    <div
-                      key={metric.key}
-                      className="rounded-lg border bg-muted/40 p-3"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`h-2.5 w-4 rounded-full ${metric.indicator}`}
-                        />
-                        <p className="text-sm font-medium font-sans">
-                          {metric.label}
-                        </p>
-                      </div>
-                      <p className="mt-2 text-2xl font-bold font-sans">
-                        {metric.value}%
-                      </p>
-                      <p className="text-xs text-muted-foreground font-sans">
-                        {metric.description}
-                      </p>
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+
+                  {efficiencyScore !== null && (
+                    <div className="flex flex-1 flex-col mt-4">
+                      <p className="mb-6 text-sm font-sans text-muted-foreground">
+                        Your inventory management efficiency is at{" "}
+                        <span className="font-semibold">
+                          {efficiencyScore}%
+                        </span>
+                        . Keep maintaining optimal stock levels to minimize
+                        waste and avoid backorders.
+                      </p>
+
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {efficiencyMetrics.map((metric) => (
+                          <div
+                            key={metric.key}
+                            className="rounded-lg border bg-muted/40 p-3"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`h-2.5 w-4 rounded-full ${metric.indicator}`}
+                              />
+                              <p className="text-sm font-medium font-sans">
+                                {metric.label}
+                              </p>
+                            </div>
+                            <p className="mt-2 text-2xl font-bold font-sans">
+                              {metric.value}%
+                            </p>
+                            <p className="text-xs text-muted-foreground font-sans">
+                              {metric.description}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
