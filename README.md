@@ -1,7 +1,7 @@
 # 🦜 stocKit
 
 <!-- PROJECT LOGO -->
-<div align="center" class="margin-top: 20px; margin-bottom: 20px; ">
+<div align="center" class="padding-top: 20px; padding-bottom: 20px;">
   <img src="public/icon.png" alt="Logo" width="100" />
 </div>
 
