@@ -114,13 +114,20 @@ export default async function Dashboard() {
     },
   ];
 
-  const efficiencyScore = Math.max(
-    0,
-    Math.min(
-      100,
-      Math.round(inStockPercentage * 0.8 + (100 - outOfStockPercentage) * 0.2)
-    )
-  );
+  const efficiencyScore =
+    totalProducts > 0
+      ? Math.max(
+          0,
+          Math.min(
+            100,
+            Math.round(
+              inStockPercentage * 0.7 +
+                (100 - lowStockPercentage) * 0.2 +
+                (100 - outOfStockPercentage) * 0.1
+            )
+          )
+        )
+      : null;
 
   // Fetch recent products
   const recent = await prisma.product.findMany({
@@ -256,26 +263,44 @@ export default async function Dashboard() {
             <CardContent className="flex flex-col">
               <div className="relative flex flex-1 items-center justify-center">
                 <div className="w-full max-w-[280px]">
-                  <EfficiencyRadialChart score={efficiencyScore} />
+                  {efficiencyScore === null ? (
+                    <div className="aspect-square w-full rounded-full border border-dashed border-muted-foreground/40" />
+                  ) : (
+                    <EfficiencyRadialChart score={efficiencyScore} />
+                  )}
                 </div>
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Efficiency
                   </p>
-                  <p className="text-4xl font-bold font-sans">
-                    {efficiencyScore}%
-                  </p>
-                  <p className="text-xs text-muted-foreground font-sans">
-                    optimized stock
-                  </p>
+                  {efficiencyScore === null ? (
+                    <p className="text-sm font-medium text-muted-foreground">
+                      No data
+                    </p>
+                  ) : (
+                    <>
+                      <p className="text-4xl font-bold font-sans">
+                        {efficiencyScore}%
+                      </p>
+                      <p className="text-xs text-muted-foreground font-sans">
+                        optimized stock
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
               <div className="flex flex-1 flex-col">
-                <p className="mb-6 text-sm font-sans text-muted-foreground">
-                  Your inventory management efficiency is at {efficiencyScore}
-                  %. Keep maintaining optimal stock levels to minimize waste and
-                  avoid backorders.
-                </p>
+                {efficiencyScore === null ? (
+                  <p className="mb-6 text-sm font-sans text-muted-foreground">
+                    Add products to start tracking efficiency.
+                  </p>
+                ) : (
+                  <p className="mb-6 text-sm font-sans text-muted-foreground">
+                    Your inventory management efficiency is at {efficiencyScore}
+                    %. Keep maintaining optimal stock levels to minimize waste
+                    and avoid backorders.
+                  </p>
+                )}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {efficiencyMetrics.map((metric) => (
                     <div

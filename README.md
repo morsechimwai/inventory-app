@@ -87,5 +87,7 @@ The optional `prisma/seed.ts` script references a demo user ID—adjust it if yo
 - Add alerting (webhooks/email) for low stock and stockouts
 - Polish responsive UX and accessibility coverage
 
-## License
-Released under the MIT License (see `LICENSE`).
+## Contributing & license
+Pull requests, issues, and feature ideas are welcome. microFeed ships under the [MIT License](./LICENSE), so you can adapt it for commercial products, internal tools, or SaaS offerings without friction.
+
+Own your feed. Let your team share updates on your terms.
