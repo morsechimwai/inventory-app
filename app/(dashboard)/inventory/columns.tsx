@@ -16,6 +16,9 @@ import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { ProductDTO } from "@/lib/types/product";
 
+// Utils
+import { formatCurrencyTHB } from "@/lib/utils";
+
 export const columns = (
   onEdit: (product: ProductDTO) => void,
   onDelete: (product: ProductDTO) => void
@@ -32,8 +35,8 @@ export const columns = (
   },
   {
     accessorKey: "price",
-    header: "Price (THB)",
-    cell: ({ getValue }) => getValue<number>().toFixed(2),
+    header: "Price",
+    cell: ({ getValue }) => formatCurrencyTHB(getValue<number>()),
   },
   {
     accessorKey: "quantity",
