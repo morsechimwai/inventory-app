@@ -71,7 +71,9 @@ export default function Home() {
             </Button>
           </p>
         </section>
-        <SignIn />
+        <div className="flex justify-center lg:justify-end">
+          <SignIn />
+        </div>
       </div>
     </main>
   );

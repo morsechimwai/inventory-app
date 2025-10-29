@@ -143,7 +143,7 @@ export default async function Dashboard() {
         <div className="flex h-full flex-col gap-4">
           <h2 className="text-xl font-bold font-sans">Key Metrics</h2>
           <Card className="flex-1">
-            <CardContent className="grid grid-cols-3 gap-4 text-center h-full items-center">
+            <CardContent className="grid grid-cols-1 gap-4 text-center h-full sm:grid-cols-3 sm:items-center">
               <div>
                 <p className="text-3xl font-bold font-sans">{totalProducts}</p>
                 <h3 className="text-base font-semibold font-sans">
@@ -224,7 +224,7 @@ export default async function Dashboard() {
                   return (
                     <div
                       key={key}
-                      className="flex items-center justify-between rounded-lg p-2 bg-muted/50"
+                      className="flex flex-col gap-2 rounded-lg bg-muted/50 p-2 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="flex items-center gap-2">
                         <span
@@ -271,12 +271,12 @@ export default async function Dashboard() {
                 </div>
               </div>
               <div className="flex flex-1 flex-col">
-                <p className="text-sm font-sans text-muted-foreground mb-6">
+                <p className="mb-6 text-sm font-sans text-muted-foreground">
                   Your inventory management efficiency is at {efficiencyScore}
                   %. Keep maintaining optimal stock levels to minimize waste and
                   avoid backorders.
                 </p>
-                <div className="grid gap-3 grid-cols-1 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {efficiencyMetrics.map((metric) => (
                     <div
                       key={metric.key}

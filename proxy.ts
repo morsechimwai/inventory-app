@@ -51,6 +51,6 @@ export const config = {
     "/", // public entry
     "/dashboard/:path*",
     "/inventory/:path*",
-    "/handler/:path*", // ให้ proxy เห็น เพื่อรีไดเร็กต์ authed → /dashboard (แต่ปล่อย sign-out)
+    // "/handler/:path*", // ให้ proxy เห็น เพื่อรีไดเร็กต์ authed → /dashboard (แต่ปล่อย sign-out)
   ],
 };

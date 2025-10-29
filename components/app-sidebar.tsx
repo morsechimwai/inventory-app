@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState, useEffect, useMemo } from "react";
 // Next.js
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -17,13 +17,18 @@ import {
   SidebarMenuItem,
   SidebarFooter,
   SidebarHeader,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 // Icons
 import { BarChart2, Container, LucideIcon, Origami } from "lucide-react";
 
-// Stack Auth
-import { UserButton } from "@stackframe/stack";
+// Stack Auth (โหลดเฉพาะฝั่ง client)
+import dynamic from "next/dynamic";
+const UserButton = dynamic(
+  () => import("@stackframe/stack").then((mod) => mod.UserButton),
+  { ssr: false }
+);
 
 interface Navigation {
   title: string;
@@ -44,21 +49,52 @@ const navigation: Navigation[] = [
   },
 ];
 
-export default function SideBar2() {
+export default function AppSidebar() {
   const pathname = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
-  const normalizePath = (path: string) =>
-    path.endsWith("/") && path !== "/" ? path.slice(0, -1) : path;
-  const currentPath = normalizePath(pathname);
+  const [mounted, setMounted] = useState(false);
+  const { isMobile, setOpenMobile } = useSidebar();
 
-  const isActive = (path: string) => {
-    return currentPath === normalizePath(path);
-  };
+  // Ensure mounted for theme detection
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
+  // Close sidebar on navigation (mobile)
+  useEffect(() => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  }, [pathname, isMobile, setOpenMobile]);
+
+  // Handlers
+  const handleNavigate = useCallback(() => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  }, [isMobile, setOpenMobile]);
+
+  // Toggle theme
   const handleToggleTheme = useCallback(() => {
     const nextTheme = (resolvedTheme ?? "light") === "dark" ? "light" : "dark";
     setTheme(nextTheme);
   }, [resolvedTheme, setTheme]);
+
+  // Memoized UserButton
+  const MemoizedUserButton = useMemo(
+    () => <UserButton showUserInfo colorModeToggle={handleToggleTheme} />,
+    [handleToggleTheme]
+  );
+
+  // Render after mount
+  if (!mounted) return null;
+
+  const normalizePath = (path: string) =>
+    path.endsWith("/") && path !== "/" ? path.slice(0, -1) : path;
+
+  const currentPath = normalizePath(pathname);
+  const isActive = (path: string) => currentPath === normalizePath(path);
 
   return (
     <Sidebar collapsible="offcanvas">
@@ -67,6 +103,7 @@ export default function SideBar2() {
           <Link
             className="flex items-center text-sky-400 hover:text-sky-300 active:text-sky-200"
             href="#"
+            onClick={handleNavigate}
           >
             <div className="rounded-md bg-sky-400 p-1.5">
               <Origami className="text-sky-50 size-3.5" />
@@ -75,6 +112,7 @@ export default function SideBar2() {
           </Link>
         </SidebarMenuButton>
       </SidebarHeader>
+
       <SidebarContent className="px-2 mt-6">
         <SidebarGroupLabel className="uppercase">Inventory</SidebarGroupLabel>
         <SidebarGroupContent>
@@ -90,10 +128,10 @@ export default function SideBar2() {
                       isActive={active}
                       aria-current={active ? "page" : undefined}
                     >
-                      <a href={item.url}>
+                      <Link href={item.url} onClick={handleNavigate}>
                         <item.icon />
                         <span>{item.title}</span>
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -102,10 +140,9 @@ export default function SideBar2() {
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarContent>
+
       <SidebarFooter className="mt-auto border-t">
-        <div className="px-2">
-          <UserButton showUserInfo colorModeToggle={handleToggleTheme} />
-        </div>
+        <div className="px-2">{MemoizedUserButton}</div>
       </SidebarFooter>
     </Sidebar>
   );

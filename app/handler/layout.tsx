@@ -11,18 +11,25 @@ import { Toaster } from "@/components/ui/sonner";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 
+// Stackframe
+import { stackServerApp } from "@/stack/server";
+
 export const metadata: Metadata = {
   title: "Dashboard | stocKit",
   description: "Manage your inventory with stocKit",
 };
 
-interface DashboardLayoutProps {
+interface HandlerLayoutProps {
   children: ReactNode;
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<DashboardLayoutProps>) {
+export default async function HandlerLayout({ children }: HandlerLayoutProps) {
+  const user = await stackServerApp.getUser();
+
+  if (!user) {
+    return <>{children}</>;
+  }
+
   return (
     <SidebarProvider>
       <Suspense fallback={<Skeleton className="h-screen w-60" />}>

@@ -1,5 +1,10 @@
 # 🦜 stocKit
 
+<!-- PROJECT LOGO -->
+<div align="center">
+  <img src="public/icon.png" alt="Logo" width="100" />
+</div>
+
 A Stack-authenticated inventory management workspace built with Next.js 16. It lets small teams monitor stock, surface low inventory, and manage product records from a single dashboard.
 
 > **Project status:** In development — dashboard analytics and inventory CRUD flows are live; integrations such as alerts and role management are still in progress.
