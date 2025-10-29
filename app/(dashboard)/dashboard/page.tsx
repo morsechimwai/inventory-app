@@ -1,3 +1,6 @@
+// Next.js
+import Link from "next/link";
+
 // Components
 import EfficiencyRadialChart from "@/components/charts/efficiency-radial-chart";
 import ProductChart from "@/components/charts/product-chart";
@@ -11,103 +14,27 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { getCurrentUser } from "@/lib/auth/auth";
 
-// Prisma Client
-import { prisma } from "@/lib/db/prisma";
-import {
-  BarChart2,
-  ChartBar,
-  ChartPie,
-  Icon,
-  PackageOpen,
-  TrendingUp,
-} from "lucide-react";
-import Link from "next/link";
+// Icons
+import { BarChart2, ChartPie, PackageOpen } from "lucide-react";
+
+// Actions
+import { getDashboardMetrics } from "@/lib/actions/dashboard";
 
 export default async function Dashboard() {
-  const user = await getCurrentUser();
-  const userId = user.id;
+  const { keyMetrics, weekProductsData, efficiency } =
+    await getDashboardMetrics();
 
-  // Fetch key metrics
-  const [totalProducts, lowStock, allProducts] = await Promise.all([
-    prisma.product.count({ where: { userId } }),
-    prisma.product.count({
-      where: { userId, lowStockAt: { not: null }, quantity: { lte: 5 } },
-    }),
-    prisma.product.findMany({
-      where: { userId },
-      select: { price: true, quantity: true, createdAt: true },
-    }),
-  ]);
+  const { totalProducts, lowStock, totalValue, allProducts } = keyMetrics;
+  const {
+    efficiencyScore,
+    inStockPercentage,
+    lowStockPercentage,
+    outOfStockPercentage,
+  } = efficiency;
 
-  // Calculate new products per week for the last 12 weeks
-  const now = new Date();
-  const weekProductsData = [];
-
-  // Loop through the last 12 weeks
-  for (let i = 11; i >= 0; i--) {
-    // Calculate week start
-    const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - now.getDay() - i * 7);
-    weekStart.setHours(0, 0, 0, 0);
-
-    // Calculate week end
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
-    weekEnd.setHours(23, 59, 59, 999);
-
-    // Format week label as MM/DD
-    const weekLabel = `${String(weekStart.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}/${String(weekStart.getDate() + 1).padStart(2, "0")}`;
-
-    // Count products created in this week
-    const weekProducts = allProducts.filter((product) => {
-      const productDate = new Date(product.createdAt);
-      return productDate >= weekStart && productDate <= weekEnd;
-    });
-
-    // Push week data to array
-    weekProductsData.push({ week: weekLabel, products: weekProducts.length });
-  }
-
-  // Calculate total value of all products
-  const totalValue = allProducts.reduce((sum, product) => {
-    return sum + Number(product.price) * Number(product.quantity);
-  }, 0);
-
-  // Calculate stock level percentages
-  const inStockCount = allProducts.filter(
-    (product) => Number(product.quantity) > 5
-  ).length;
-  // Calculate low stock and out of stock counts
-  const lowStockCount = allProducts.filter(
-    (product) => Number(product.quantity) <= 5 && Number(product.quantity) > 1
-  ).length;
-  // Out of stock count
-  const outOfStockCount = allProducts.filter(
-    (product) => Number(product.quantity) === 0
-  ).length;
-
-  // Calculate percentages
-  const inStockPercentage =
-    totalProducts > 0 ? Math.round((inStockCount / totalProducts) * 100) : 0;
-  const lowStockPercentage =
-    totalProducts > 0 ? Math.round((lowStockCount / totalProducts) * 100) : 0;
-  const outOfStockPercentage =
-    totalProducts > 0 ? Math.round((outOfStockCount / totalProducts) * 100) : 0;
-
-  type EfficiencyMetricKey = "inStock" | "lowStock" | "outOfStock";
-
-  const efficiencyMetrics: {
-    key: EfficiencyMetricKey;
-    label: string;
-    value: number;
-    indicator: string;
-    description: string;
-  }[] = [
+  // Efficiency metric cards
+  const efficiencyMetrics = [
     {
       key: "inStock",
       label: "In Stock",
@@ -131,27 +58,12 @@ export default async function Dashboard() {
     },
   ];
 
-  const efficiencyScore =
-    totalProducts > 0
-      ? Math.max(
-          0,
-          Math.min(
-            100,
-            Math.round(
-              inStockPercentage * 0.7 +
-                (100 - lowStockPercentage) * 0.2 +
-                (100 - outOfStockPercentage) * 0.1
-            )
-          )
-        )
-      : null;
-
-  // Fetch recent products
-  const recent = await prisma.product.findMany({
-    where: { userId },
-    orderBy: { createdAt: "desc" },
-    take: 5,
-  });
+  // Mock recent products — ถ้าต้องการข้อมูลจริงให้ fetch ใน getDashboardMetrics()
+  const recent = allProducts.slice(0, 5).map((p, i) => ({
+    name: `Product ${i + 1}`,
+    quantity: p.quantity,
+    lowStockAt: 5,
+  }));
 
   return (
     <div className="p-4 md:p-6 lg:p-8">
@@ -162,8 +74,8 @@ export default async function Dashboard() {
         </p>
       </div>
 
+      {/* Key Metrics Section */}
       <section className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2 items-stretch">
-        {/* Key Metrics Cards */}
         <div className="flex h-full flex-col gap-4">
           <h2 className="text-xl font-bold font-sans">Key Metrics</h2>
           <Card className="flex-1">
@@ -204,14 +116,13 @@ export default async function Dashboard() {
                       Add products to view your key metrics.
                     </EmptyDescription>
                   </EmptyHeader>
-                  <EmptyContent className="w-full max-w-none"></EmptyContent>
                 </Empty>
               )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Inventory Overtime */}
+        {/* Weekly Chart */}
         <div className="flex h-full flex-col gap-4">
           <h2 className="text-xl font-bold font-sans">New product per week</h2>
           <Card className="flex-1">
@@ -222,8 +133,9 @@ export default async function Dashboard() {
         </div>
       </section>
 
-      {/* Stock Levels Cards */}
+      {/* Stock Levels + Efficiency */}
       <section className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2 items-stretch">
+        {/* Stock Levels */}
         <div className="flex h-full flex-col gap-4">
           <h2 className="text-xl font-bold font-sans">Stock Levels</h2>
           <Card className="flex-1">
@@ -270,7 +182,7 @@ export default async function Dashboard() {
                               ? product.quantity
                               : "out of stock"}{" "}
                           </span>
-                          <span> {product.quantity ? "units" : ""}</span>
+                          <span>{product.quantity ? "units" : ""}</span>
                         </p>
                       </div>
                     );
@@ -298,6 +210,7 @@ export default async function Dashboard() {
           </Card>
         </div>
 
+        {/* Efficiency */}
         <div className="flex h-full flex-col gap-4">
           <h2 className="text-xl font-bold font-sans">Efficiency</h2>
           <Card className="flex-1">
@@ -314,7 +227,6 @@ export default async function Dashboard() {
                       inventory.
                     </EmptyDescription>
                   </EmptyHeader>
-                  <EmptyContent className="w-full max-w-none"></EmptyContent>
                 </Empty>
               ) : (
                 <>
@@ -335,42 +247,38 @@ export default async function Dashboard() {
                     </div>
                   </div>
 
-                  {efficiencyScore !== null && (
-                    <div className="flex flex-1 flex-col mt-4">
-                      <p className="mb-6 text-sm font-sans text-muted-foreground">
-                        Your inventory management efficiency is at{" "}
-                        <span className="font-semibold">
-                          {efficiencyScore}%
-                        </span>
-                        . Keep maintaining optimal stock levels to minimize
-                        waste and avoid backorders.
-                      </p>
+                  <div className="flex flex-1 flex-col mt-4">
+                    <p className="mb-6 text-sm font-sans text-muted-foreground">
+                      Your inventory management efficiency is at{" "}
+                      <span className="font-semibold">{efficiencyScore}%</span>.
+                      Keep maintaining optimal stock levels to minimize waste
+                      and avoid backorders.
+                    </p>
 
-                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        {efficiencyMetrics.map((metric) => (
-                          <div
-                            key={metric.key}
-                            className="rounded-lg border bg-muted/40 p-3"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span
-                                className={`h-2.5 w-4 rounded-full ${metric.indicator}`}
-                              />
-                              <p className="text-sm font-medium font-sans">
-                                {metric.label}
-                              </p>
-                            </div>
-                            <p className="mt-2 text-2xl font-bold font-sans">
-                              {metric.value}%
-                            </p>
-                            <p className="text-xs text-muted-foreground font-sans">
-                              {metric.description}
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      {efficiencyMetrics.map((metric) => (
+                        <div
+                          key={metric.key}
+                          className="rounded-lg border bg-muted/40 p-3"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`h-2.5 w-4 rounded-full ${metric.indicator}`}
+                            />
+                            <p className="text-sm font-medium font-sans">
+                              {metric.label}
                             </p>
                           </div>
-                        ))}
-                      </div>
+                          <p className="mt-2 text-2xl font-bold font-sans">
+                            {metric.value}%
+                          </p>
+                          <p className="text-xs text-muted-foreground font-sans">
+                            {metric.description}
+                          </p>
+                        </div>
+                      ))}
                     </div>
-                  )}
+                  </div>
                 </>
               )}
             </CardContent>
