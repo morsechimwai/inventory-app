@@ -1,57 +1,47 @@
-import type { ProductDTO } from "@/lib/types/product";
-import type {
-  WeekProductData,
-  EfficiencyMetrics,
-  ProductWithDate,
-} from "@/lib/types/dashboard";
+import type { ProductDTO } from "@/lib/types/product"
+import type { WeekProductData, EfficiencyMetrics, ProductWithDate } from "@/lib/types/dashboard"
 
-export function calculateWeeklyProducts(
-  allProducts: ProductWithDate[]
-): WeekProductData[] {
-  const now = new Date();
-  const weekProductsData: WeekProductData[] = [];
+export function calculateWeeklyProducts(allProducts: ProductWithDate[]): WeekProductData[] {
+  const now = new Date()
+  const weekProductsData: WeekProductData[] = []
 
   for (let i = 11; i >= 0; i--) {
-    const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - now.getDay() - i * 7);
-    weekStart.setHours(0, 0, 0, 0);
+    const weekStart = new Date(now)
+    weekStart.setDate(now.getDate() - now.getDay() - i * 7)
+    weekStart.setHours(0, 0, 0, 0)
 
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
-    weekEnd.setHours(23, 59, 59, 999);
+    const weekEnd = new Date(weekStart)
+    weekEnd.setDate(weekStart.getDate() + 6)
+    weekEnd.setHours(23, 59, 59, 999)
 
-    const weekLabel = `${String(weekStart.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}/${String(weekStart.getDate() + 1).padStart(2, "0")}`;
+    const weekLabel = `${String(weekStart.getMonth() + 1).padStart(2, "0")}/${String(
+      weekStart.getDate() + 1
+    ).padStart(2, "0")}`
 
     const weekProducts = allProducts.filter((p) => {
-      const d = new Date(p.createdAt);
-      return d >= weekStart && d <= weekEnd;
-    });
+      const d = new Date(p.createdAt)
+      return d >= weekStart && d <= weekEnd
+    })
 
-    weekProductsData.push({ week: weekLabel, products: weekProducts.length });
+    weekProductsData.push({ week: weekLabel, products: weekProducts.length })
   }
 
-  return weekProductsData;
+  return weekProductsData
 }
 
 export function calculateEfficiencyMetrics(
   allProducts: ProductDTO[],
   totalProducts: number
 ): EfficiencyMetrics {
-  const inStockCount = allProducts.filter((p) => p.quantity > 5).length;
-  const lowStockCount = allProducts.filter(
-    (p) => p.quantity <= 5 && p.quantity > 1
-  ).length;
-  const outOfStockCount = allProducts.filter((p) => p.quantity === 0).length;
+  const inStockCount = 0
+  const lowStockCount = 0
+  const outOfStockCount = 0
 
-  const inStockPercentage =
-    totalProducts > 0 ? Math.round((inStockCount / totalProducts) * 100) : 0;
+  const inStockPercentage = totalProducts > 0 ? Math.round((inStockCount / totalProducts) * 100) : 0
   const lowStockPercentage =
-    totalProducts > 0 ? Math.round((lowStockCount / totalProducts) * 100) : 0;
+    totalProducts > 0 ? Math.round((lowStockCount / totalProducts) * 100) : 0
   const outOfStockPercentage =
-    totalProducts > 0 ? Math.round((outOfStockCount / totalProducts) * 100) : 0;
+    totalProducts > 0 ? Math.round((outOfStockCount / totalProducts) * 100) : 0
 
   const efficiencyScore =
     totalProducts > 0
@@ -66,68 +56,51 @@ export function calculateEfficiencyMetrics(
             )
           )
         )
-      : null;
+      : null
 
   return {
     efficiencyScore,
     inStockPercentage,
     lowStockPercentage,
     outOfStockPercentage,
-  };
+  }
 }
 
 export function calculateWeeklyTrends(allProducts: ProductWithDate[]) {
-  const now = new Date();
+  const now = new Date()
 
-  const startOfThisWeek = new Date();
-  startOfThisWeek.setDate(now.getDate() - now.getDay());
-  startOfThisWeek.setHours(0, 0, 0, 0);
+  const startOfThisWeek = new Date()
+  startOfThisWeek.setDate(now.getDate() - now.getDay())
+  startOfThisWeek.setHours(0, 0, 0, 0)
 
-  const startOfLastWeek = new Date(startOfThisWeek);
-  startOfLastWeek.setDate(startOfThisWeek.getDate() - 7);
+  const startOfLastWeek = new Date(startOfThisWeek)
+  startOfLastWeek.setDate(startOfThisWeek.getDate() - 7)
 
-  const endOfLastWeek = new Date(startOfThisWeek);
-  endOfLastWeek.setMilliseconds(-1);
+  const endOfLastWeek = new Date(startOfThisWeek)
+  endOfLastWeek.setMilliseconds(-1)
 
-  const thisWeekProducts = allProducts.filter(
-    (p) => new Date(p.createdAt) >= startOfThisWeek
-  );
+  const thisWeekProducts = allProducts.filter((p) => new Date(p.createdAt) >= startOfThisWeek)
   const lastWeekProducts = allProducts.filter(
-    (p) =>
-      new Date(p.createdAt) >= startOfLastWeek &&
-      new Date(p.createdAt) < startOfThisWeek
-  );
+    (p) => new Date(p.createdAt) >= startOfLastWeek && new Date(p.createdAt) < startOfThisWeek
+  )
 
   const safePercent = (curr: number, prev: number) => {
-    return prev > 0 ? ((curr - prev) / prev) * 100 : 0;
-  };
+    return prev > 0 ? ((curr - prev) / prev) * 100 : 0
+  }
 
-  const productTrend = safePercent(
-    thisWeekProducts.length,
-    lastWeekProducts.length
-  );
+  const productTrend = safePercent(thisWeekProducts.length, lastWeekProducts.length)
 
-  const totalValueThisWeek = thisWeekProducts.reduce(
-    (sum, p) => sum + Number(p.price) * Number(p.quantity),
-    0
-  );
-  const totalValueLastWeek = lastWeekProducts.reduce(
-    (sum, p) => sum + Number(p.price) * Number(p.quantity),
-    0
-  );
-  const totalValueTrend = safePercent(totalValueThisWeek, totalValueLastWeek);
+  const totalValueThisWeek = 0
+  const totalValueLastWeek = 0
+  const totalValueTrend = safePercent(totalValueThisWeek, totalValueLastWeek)
 
-  const lowStockThisWeek = thisWeekProducts.filter(
-    (p) => p.quantity <= 5
-  ).length;
-  const lowStockLastWeek = lastWeekProducts.filter(
-    (p) => p.quantity <= 5
-  ).length;
-  const lowStockTrend = safePercent(lowStockThisWeek, lowStockLastWeek);
+  const lowStockThisWeek = 0
+  const lowStockLastWeek = 0
+  const lowStockTrend = safePercent(lowStockThisWeek, lowStockLastWeek)
 
   return {
     productTrend,
     totalValueTrend,
     lowStockTrend,
-  };
+  }
 }
