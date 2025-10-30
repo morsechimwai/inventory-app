@@ -9,8 +9,8 @@ export const productFormSchema = z.object({
     .min(0, "Low stock must be at least 0")
     .max(9999999999, "Low stock must be less than 10,000,000,000")
     .optional(),
-  categoryId: z.cuid().optional(),
-  unitId: z.cuid().min(1, "Unit is required"),
+  categoryId: z.cuid("Category is required").optional(),
+  unitId: z.cuid("Unit is required"),
 })
 
 export type ProductFormValues = z.infer<typeof productFormSchema>
