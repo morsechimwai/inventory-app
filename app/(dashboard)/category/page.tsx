@@ -208,7 +208,8 @@ export default function CategoryPage() {
     <section className="p-4 md:p-6 lg:p-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <p className="text-muted-foreground font-sans">
-          Manage your inventory and track your products here.
+          Organize your products into clear categories to keep your inventory tidy and easy to
+          navigate.
         </p>
         {categories.length > 0 && (
           <Button

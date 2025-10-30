@@ -41,12 +41,16 @@ import { Info, ListPlus, SquarePen, PackageOpen } from "lucide-react"
 
 // Types
 import { ProductDTO } from "@/lib/types/product"
+import { CategoryDTO } from "@/lib/types/category"
+import { UnitDTO } from "@/lib/types/unit"
 
 // Data Table Columns
 import { columns } from "./columns"
 
 // Actions
 import { getAllProducts } from "@/lib/actions/products"
+import { getAllCategories } from "@/lib/actions/categories"
+import { getAllUnits } from "@/lib/actions/units"
 import {
   createProductAction,
   updateProductAction,
@@ -74,6 +78,8 @@ export default function ProductPage() {
   const [products, setProducts] = useState<ProductDTO[]>([])
   const [editingProduct, setEditingProduct] = useState<ProductDTO | null>(null)
   const [productToDelete, setProductToDelete] = useState<ProductDTO | null>(null)
+  const [categories, setCategories] = useState<CategoryDTO[]>([])
+  const [units, setUnits] = useState<UnitDTO[]>([])
   // Sheet state
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   // Loading state
@@ -95,6 +101,40 @@ export default function ProductPage() {
     } catch (error) {
       console.error(error)
       toast.error(error instanceof Error ? error.message : "Failed to load products.")
+    }
+  }, [])
+
+  // Load categories
+  const loadCategories = useCallback(async () => {
+    try {
+      const result = await getAllCategories()
+
+      if (result.success) {
+        setCategories(result.data?.data ?? [])
+      } else {
+        toast.error(result.errorMessage ?? "Failed to load categories")
+        console.error(result.errorMessage, result.code, result.meta)
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error(error instanceof Error ? error.message : "Failed to load categories.")
+    }
+  }, [])
+
+  // Load units
+  const loadUnits = useCallback(async () => {
+    try {
+      const result = await getAllUnits()
+
+      if (result.success) {
+        setUnits(result.data?.data ?? [])
+      } else {
+        toast.error(result.errorMessage ?? "Failed to load units")
+        console.error(result.errorMessage, result.code, result.meta)
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error(error instanceof Error ? error.message : "Failed to load units.")
     }
   }, [])
 
@@ -223,8 +263,20 @@ export default function ProductPage() {
   // Load on mount
   useEffect(() => {
     setLoading(true)
-    loadProducts().finally(() => setLoading(false))
-  }, [loadProducts])
+    Promise.all([loadProducts(), loadCategories(), loadUnits()]).finally(() => setLoading(false))
+  }, [loadProducts, loadCategories, loadUnits])
+
+  // Auto-select first available unit when creating a product
+  useEffect(() => {
+    if (!isSheetOpen) return
+    if (editingProduct) return
+    if (units.length === 0) return
+
+    const currentUnitId = form.getValues("unitId")
+    if (!currentUnitId) {
+      form.setValue("unitId", units[0].id)
+    }
+  }, [editingProduct, form, isSheetOpen, units])
 
   const isEditing = Boolean(editingProduct)
 
@@ -232,7 +284,7 @@ export default function ProductPage() {
     <section className="p-4 md:p-6 lg:p-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <p className="text-muted-foreground font-sans">
-          Manage your inventory and track your products here.
+          View and manage all your products in one place — stock levels, details, and status.
         </p>
         {products.length > 0 && (
           <Button
@@ -353,7 +405,7 @@ export default function ProductPage() {
                       <Input
                         id={field.name}
                         type="text"
-                        placeholder="Apple iPhone 17 Air"
+                        placeholder="Hydraulic Oil 32"
                         autoComplete="off"
                         disabled={saving}
                         aria-invalid={fieldState.invalid}
@@ -370,7 +422,7 @@ export default function ProductPage() {
                 control={form.control}
                 name="categoryId"
                 render={({ field, fieldState }) => {
-                  const { value, ...fieldProps } = field
+                  const { value, onChange, ref, ...fieldProps } = field
 
                   return (
                     <Field data-invalid={fieldState.invalid}>
@@ -381,15 +433,25 @@ export default function ProductPage() {
                         </span>
                       </FieldLabel>
                       <FieldContent>
-                        <Input
+                        <select
                           id={field.name}
-                          type="text"
-                          autoComplete="off"
-                          disabled={saving}
+                          ref={ref}
                           value={value ?? ""}
+                          onChange={(event) => onChange(event.target.value || undefined)}
+                          disabled={saving}
                           aria-invalid={fieldState.invalid}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           {...fieldProps}
-                        />
+                        >
+                          <option value="">
+                            {categories.length === 0 ? "No categories yet" : "Uncategorized"}
+                          </option>
+                          {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                              {category.name}
+                            </option>
+                          ))}
+                        </select>
                         <FieldError errors={[fieldState.error]} />
                       </FieldContent>
                     </Field>
@@ -453,21 +515,31 @@ export default function ProductPage() {
                   control={form.control}
                   name="unitId"
                   render={({ field, fieldState }) => {
-                    const { value, ...fieldProps } = field
+                    const { value, onChange, ref, ...fieldProps } = field
 
                     return (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor={field.name}>Unit</FieldLabel>
                         <FieldContent>
-                          <Input
+                          <select
                             id={field.name}
-                            type="text"
-                            autoComplete="off"
-                            disabled={saving}
+                            ref={ref}
                             value={value ?? ""}
+                            onChange={(event) => onChange(event.target.value || undefined)}
+                            disabled={saving}
                             aria-invalid={fieldState.invalid}
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             {...fieldProps}
-                          />
+                          >
+                            <option value="">
+                              {units.length === 0 ? "No units yet" : "Select unit"}
+                            </option>
+                            {units.map((unit) => (
+                              <option key={unit.id} value={unit.id}>
+                                {unit.name}
+                              </option>
+                            ))}
+                          </select>
                           <FieldError errors={[fieldState.error]} />
                         </FieldContent>
                       </Field>

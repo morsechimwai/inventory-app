@@ -90,13 +90,13 @@ export default async function DashboardPage() {
     <div className="p-4 md:p-6 lg:p-8">
       <div className="mb-6">
         <p className="text-muted-foreground font-sans">
-          Welcome to the Dashboard! Here you can find an overview of your inventory and recent
-          activity.
+          Your inventory at a glance — recent activity, key stats, and quick shortcuts to keep
+          everything running smoothly.
         </p>
       </div>
 
       {/* Key Metrics Section */}
-      <section className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2 items-stretch">
+      <section className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-2 items-stretch">
         <div className="flex h-full flex-col gap-4">
           <h2 className="text-xl font-bold font-sans">Key Metrics</h2>
           <Card className="flex-1">
@@ -175,8 +175,10 @@ export default async function DashboardPage() {
                     <EmptyMedia variant="icon">
                       <BarChart2 className="size-8 text-muted-foreground" />
                     </EmptyMedia>
-                    <EmptyTitle>No data available</EmptyTitle>
-                    <EmptyDescription>Add products to view your key metrics.</EmptyDescription>
+                    <EmptyTitle>No insights yet</EmptyTitle>
+                    <EmptyDescription>
+                      Add your first product to see your inventory data here.
+                    </EmptyDescription>
                   </EmptyHeader>
                 </Empty>
               )}
@@ -196,7 +198,7 @@ export default async function DashboardPage() {
       </section>
 
       {/* Stock Levels + Efficiency */}
-      <section className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2 items-stretch">
+      <section className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-2 items-stretch">
         {/* Stock Levels */}
         <div className="flex h-full flex-col gap-4">
           <h2 className="text-xl font-bold font-sans">Stock Levels</h2>
@@ -238,12 +240,14 @@ export default async function DashboardPage() {
                     <EmptyMedia variant="icon">
                       <PackageOpen className="size-8 text-muted-foreground" />
                     </EmptyMedia>
-                    <EmptyTitle>No Products</EmptyTitle>
-                    <EmptyDescription>Go to your inventory to add products.</EmptyDescription>
+                    <EmptyTitle>No products yet</EmptyTitle>
+                    <EmptyDescription>
+                      Add products to start managing your inventory.
+                    </EmptyDescription>
                   </EmptyHeader>
                   <EmptyContent className="w-full max-w-none">
                     <Button asChild className="w-full">
-                      <Link href="/inventory">View Inventory</Link>
+                      <Link href="/product">Go to products</Link>
                     </Button>
                   </EmptyContent>
                 </Empty>
@@ -263,9 +267,9 @@ export default async function DashboardPage() {
                     <EmptyMedia variant="icon">
                       <ChartPie className="size-8 text-muted-foreground" />
                     </EmptyMedia>
-                    <EmptyTitle>No Efficiency Data</EmptyTitle>
+                    <EmptyTitle>No efficiency data yet</EmptyTitle>
                     <EmptyDescription>
-                      Start tracking your efficiency by adding products to your inventory.
+                      Add products to start seeing efficiency insights here.
                     </EmptyDescription>
                   </EmptyHeader>
                 </Empty>
