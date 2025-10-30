@@ -14,17 +14,111 @@ datasource db {
 }
 
 model Product {
-  id String @id @default(cuid())
+  // Primary fields
+  id     String @id @default(cuid())
   userId String // Stack Auth user ID
-  name String
-  sku String? @unique
-  price Decimal @db.Decimal(12, 2)
-  quantity Int @default(0)
-  lowStockAt Int?
 
+  // Form fields
+  name       String
+  sku        String?
+  lowStockAt Int?
+  categoryId String? @db.VarChar(255)
+  unitId     String  @db.VarChar(255)
+
+  // Relations
+  category  Category?       @relation(fields: [categoryId], references: [id])
+  unit      Unit            @relation(fields: [unitId], references: [id])
+  movements StockMovement[]
+
+  // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Indexes
+  @@unique([userId, sku]) // SKU ซ้ำได้ระหว่างผู้ใช้ แต่ไม่ซ้ำใน user เดียวกัน
   @@index([userId, name])
   @@index([createdAt])
+}
+
+model Category {
+  // Primary fields
+  id     String @id @default(cuid())
+  userId String // Stack Auth user ID
+
+  // Form fields
+  name     String
+  products Product[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Indexes
+  @@unique([userId, name]) // ชื่อซ้ำได้ระหว่างผู้ใช้คนละคน
+  @@index([userId])
+}
+
+model Unit {
+  // Primary fields
+  id     String @id @default(cuid())
+  userId String // Stack Auth user ID
+
+  // Form fields
+  name     String // เช่น ชิ้น, กล่อง, กิโลกรัม
+  products Product[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Indexes
+  @@unique([userId, name]) // ให้ผู้ใช้คนละคนมี "กล่อง" ได้
+  @@index([userId])
+}
+
+model StockMovement {
+  // Primary fields
+  id        String @id @default(cuid())
+  productId String
+  userId    String // Stack Auth user ID
+
+  // Form fields
+  movementType  MovementType // ประเภทการเคลื่อนไหวของสินค้า
+  quantity      Decimal       @db.Decimal(12, 3) // จำนวนที่เคลื่อนไหว
+  unitCost      Decimal?      @db.Decimal(12, 2) // ราคาต่อหน่วยตอนเคลื่อนไหว
+  totalCost     Decimal?      @db.Decimal(14, 2) // ราคารวมตอนเคลื่อนไหว
+  referenceType ReferenceType @default(MANUAL)
+  referenceId   String? // id ของเอกสารอ้างอิง
+  reason        String? // เหตุผลการปรับยอด (สำหรับ ADJUST)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id])
+
+  // Indexes
+  @@index([productId]) // ดูประวัติการเคลื่อนไหวของสินค้า เร็วขึ้น
+  @@index([createdAt]) // ดูประวัติการเคลื่อนไหวตามวันที่ เร็วขึ้น
+  @@index([movementType, createdAt]) // filter รายงานตามประเภท + วันที่ เร็วขึ้น
+  @@index([referenceType, referenceId]) // filter ตามเอกสารอ้างอิง เร็วขึ้น
+  @@index([userId, createdAt]) // filter ตามผู้ใช้ + วันที่ เร็วขึ้น
+  @@index([productId, movementType]) // filter สินค้าตามประเภทการเคลื่อนไหว เร็วขึ้น
+  @@index([productId, createdAt]) // filter สินค้าตามวันที่ เร็วขึ้น
+}
+
+enum MovementType {
+  IN // สินค้าเข้ามาในคลัง
+  OUT // สินค้าออกจากคลัง
+  ADJUST // ปรับยอด (นับแล้วผิด, ของหาย, สินค้าเสีย etc.)
+}
+
+enum ReferenceType {
+  PURCHASE // สำหรับการสั่งซื้อสินค้าเข้าคลัง
+  SALE // สำหรับการขายสินค้าออกจากคลัง
+  RETURN // สำหรับการคืนสินค้าเข้าคลัง
+  TRANSFER // สำหรับการโอนสินค้าระหว่างคลัง
+  ADJUSTMENT // สำหรับการปรับยอด
+  MANUAL // สำหรับการบันทึกแบบ Manual
 }
