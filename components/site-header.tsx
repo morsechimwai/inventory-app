@@ -30,10 +30,14 @@ export function SiteHeader() {
   const currentPath =
     normalizePath(pathname).split("/").pop() === "dashboard"
       ? "dashboard"
+      : normalizePath(pathname).split("/").pop() === "inventory-activity"
+      ? "activity"
       : normalizePath(pathname).split("/").pop() === "product"
       ? "product"
-      : normalizePath(pathname).split("/").pop() === "settings"
-      ? "settings"
+      : normalizePath(pathname).split("/").pop() === "category"
+      ? "category"
+      : normalizePath(pathname).split("/").pop() === "unit"
+      ? "unit"
       : normalizePath(pathname).split("/").pop() === "account-settings"
       ? "settings"
       : null
