@@ -161,9 +161,7 @@ export default function ProductPage() {
         toast.success(`Deleted ${productToDelete.name}`, { id: toastId })
         await loadProducts()
       } else {
-        toast.error(`Failed to delete ${productToDelete.name}`, {
-          id: toastId,
-        })
+        toast.error(result.errorMessage ?? "Failed to delete product.", { id: toastId })
         console.error(result.errorMessage, result.code, result.meta)
       }
     } catch (error) {
@@ -315,8 +313,11 @@ export default function ProductPage() {
                           <TooltipTrigger asChild>
                             <Info className="size-3.5 text-sm font-normal" />
                           </TooltipTrigger>
-                          <TooltipContent side="right">
+                          <TooltipContent side="top">
                             <p>Stock Keeping Unit (SKU)</p>
+                            <p>Example formats:</p>
+                            <p>{`SKU-ITEM-0001`}</p>
+                            <p>{`BRAND-TYPE-001`}</p>
                           </TooltipContent>
                         </Tooltip>
                         <span className="text-sm font-normal text-muted-foreground">
@@ -327,6 +328,7 @@ export default function ProductPage() {
                         <Input
                           id={field.name}
                           type="text"
+                          placeholder="SKU-XXXX-####"
                           autoComplete="off"
                           disabled={saving}
                           value={value ?? ""}
@@ -351,6 +353,7 @@ export default function ProductPage() {
                       <Input
                         id={field.name}
                         type="text"
+                        placeholder="Apple iPhone 17 Air"
                         autoComplete="off"
                         disabled={saving}
                         aria-invalid={fieldState.invalid}
@@ -411,8 +414,9 @@ export default function ProductPage() {
                             <TooltipTrigger asChild>
                               <Info className="size-3.5 text-sm font-normal" />
                             </TooltipTrigger>
-                            <TooltipContent side="right">
+                            <TooltipContent side="top">
                               <p>Low stock threshold</p>
+                              <p>Notify when inventory is running low.</p>
                             </TooltipContent>
                           </Tooltip>
                           <span className="text-sm font-normal text-muted-foreground">
@@ -423,13 +427,17 @@ export default function ProductPage() {
                           <Input
                             id={field.name}
                             type="number"
+                            placeholder="< 10"
+                            inputMode="numeric"
                             autoComplete="off"
                             disabled={saving}
                             value={inputValue}
-                            onChange={(event) => {
-                              const nextValue = event.target.value
-                              onChange(nextValue === "" ? undefined : nextValue)
+                            onKeyDown={(e) => {
+                              if (["e", "E"].includes(e.key)) e.preventDefault()
                             }}
+                            onChange={(e) =>
+                              onChange(e.target.value === "" ? undefined : e.target.value)
+                            }
                             aria-invalid={fieldState.invalid}
                             {...fieldProps}
                           />
@@ -479,7 +487,7 @@ export default function ProductPage() {
                 Cancel
               </Button>
               <Button type="submit" disabled={saving}>
-                {isEditing ? "Save changes" : "Add product"}
+                {isEditing ? "Save changes" : "Add Product"}
               </Button>
             </SheetFooter>
           </form>

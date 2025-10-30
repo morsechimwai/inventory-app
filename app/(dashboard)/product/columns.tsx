@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
 // Icons
-import { SquarePen, Trash2, MoreHorizontal } from "lucide-react";
+import { SquarePen, Trash2, MoreVertical } from "lucide-react"
 
 // Components
 import {
@@ -9,15 +9,15 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
 
 // Types
-import { ColumnDef } from "@tanstack/react-table";
-import { ProductDTO } from "@/lib/types/product";
+import { ColumnDef } from "@tanstack/react-table"
+import { ProductDTO } from "@/lib/types/product"
 
 // Utils
-import { formatCurrencyTHB } from "@/lib/utils";
+import { formatCurrencyTHB } from "@/lib/utils"
 
 export const columns = (
   onEdit: (product: ProductDTO) => void,
@@ -30,8 +30,7 @@ export const columns = (
   {
     accessorKey: "sku",
     header: "SKU",
-    cell: ({ getValue }) =>
-      getValue<string>() ? getValue<string>().toUpperCase() : "-",
+    cell: ({ getValue }) => (getValue<string>() ? getValue<string>().toUpperCase() : "-"),
   },
   {
     accessorKey: "price",
@@ -45,24 +44,18 @@ export const columns = (
   {
     accessorKey: "lowStockAt",
     header: "Low Stock At",
-    cell: ({ getValue }) =>
-      getValue<number>() ? `< ${getValue<number>()}` : `-`,
+    cell: ({ getValue }) => (getValue<number>() ? `< ${getValue<number>()}` : `-`),
   },
   {
     id: "actions",
     header: "",
     cell: ({ row }) => {
-      const product = row.original;
+      const product = row.original
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8 p-0 data-[state=open]:bg-muted"
-            >
-              <MoreHorizontal className="size-4" />
-              <span className="sr-only">Open menu</span>
+            <Button className="w-full justify-end" variant="ghost" size="icon">
+              <MoreVertical />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -70,16 +63,13 @@ export const columns = (
               <SquarePen className="size-4" />
               <span>Edit</span>
             </DropdownMenuItem>
-            <DropdownMenuItem
-              variant="destructive"
-              onSelect={() => onDelete(product)}
-            >
+            <DropdownMenuItem variant="destructive" onSelect={() => onDelete(product)}>
               <Trash2 className="size-4" />
               <span>Delete</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      );
+      )
     },
   },
-];
+]
