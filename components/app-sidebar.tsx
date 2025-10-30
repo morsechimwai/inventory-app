@@ -29,6 +29,12 @@ const UserButton = dynamic(() => import("@stackframe/stack").then((mod) => mod.U
   ssr: false,
 })
 
+interface Navigation {
+  title: string
+  url: string
+  icon: LucideIcon
+}
+
 interface NavigationGroup {
   label: string
   items: Navigation[]
