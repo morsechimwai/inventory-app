@@ -1,7 +1,7 @@
 "use client"
 
 // Icons
-import { SquarePen, Trash2, MoreHorizontal, MoreVertical } from "lucide-react"
+import { SquarePen, Trash2, MoreVertical, Tags } from "lucide-react"
 
 // Components
 import {
@@ -16,8 +16,6 @@ import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
 import { CategoryDTO } from "@/lib/types/category"
 
-// Utils
-
 export const columns = (
   onEdit: (category: CategoryDTO) => void,
   onDelete: (category: CategoryDTO) => void
@@ -25,6 +23,12 @@ export const columns = (
   {
     accessorKey: "name",
     header: "Name",
+    cell: ({ getValue }) => (
+      <span>
+        <Tags className="inline-block mr-1 text-muted-foreground size-4" />
+        {getValue<string>()}
+      </span>
+    ),
   },
   {
     id: "actions",

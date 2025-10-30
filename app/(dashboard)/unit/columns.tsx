@@ -1,7 +1,7 @@
 "use client"
 
 // Icons
-import { SquarePen, Trash2, MoreVertical } from "lucide-react"
+import { SquarePen, Trash2, MoreVertical, Hash } from "lucide-react"
 
 // Components
 import {
@@ -23,6 +23,12 @@ export const columns = (
   {
     accessorKey: "name",
     header: "Name",
+    cell: ({ getValue }) => (
+      <span>
+        <Hash className="inline-block mr-1 text-muted-foreground size-4" />
+        {getValue<string>()}
+      </span>
+    ),
   },
   {
     id: "actions",

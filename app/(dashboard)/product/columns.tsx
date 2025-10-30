@@ -24,27 +24,29 @@ export const columns = (
   onDelete: (product: ProductDTO) => void
 ): ColumnDef<ProductDTO>[] => [
   {
-    accessorKey: "name",
-    header: "Name",
-  },
-  {
     accessorKey: "sku",
     header: "SKU",
-    cell: ({ getValue }) => (getValue<string>() ? getValue<string>().toUpperCase() : "-"),
+    cell: ({ getValue }) => getValue<string>().toUpperCase() || "-",
   },
   {
-    accessorKey: "price",
-    header: "Price",
-    cell: ({ getValue }) => formatCurrencyTHB(getValue<number>()),
+    accessorKey: "name",
+    header: "Name",
+    cell: ({ getValue }) => getValue<string>(),
   },
   {
-    accessorKey: "quantity",
-    header: "Qty",
+    accessorKey: "categoryId",
+    header: "Category",
+    cell: ({ getValue }) => getValue<string>() || "-",
   },
   {
     accessorKey: "lowStockAt",
     header: "Low Stock At",
     cell: ({ getValue }) => (getValue<number>() ? `< ${getValue<number>()}` : `-`),
+  },
+  {
+    accessorKey: "unitId",
+    header: "Unit",
+    cell: ({ getValue }) => getValue<string>(),
   },
   {
     id: "actions",
