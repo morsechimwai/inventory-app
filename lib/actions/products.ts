@@ -17,7 +17,7 @@ import {
 
 // Types
 import type { ActionResult } from "@/lib/types/error"
-import type { CreateProductInput, ProductDTO, ProductEntity } from "@/lib/types/product"
+import type { CreateProductInput, ProductDTO } from "@/lib/types/product"
 
 // Error Handling
 import { withErrorHandling } from "@/lib/errors/with-error-handling"
@@ -25,7 +25,7 @@ import { AppError } from "@/lib/errors/app-error"
 
 export interface ProductCreateResult {
   message: string
-  data?: ProductEntity
+  data?: ProductDTO
   meta?: { userId: string }
 }
 

@@ -1,16 +1,11 @@
 // lib/services/products.ts
 
 import { prisma } from "@/lib/db/prisma"
-import type { ProductDTO, ProductEntity } from "@/lib/types/product"
+import type { ProductDTO, CreateProductInput } from "@/lib/types/product"
 import { AppError } from "../errors/app-error"
 
-type CreateProductInput = Omit<ProductDTO, "id">
-
 // Create a new product (CRUD - Create)
-export async function createProduct(
-  userId: string,
-  data: CreateProductInput
-): Promise<ProductEntity> {
+export async function createProduct(userId: string, data: CreateProductInput): Promise<ProductDTO> {
   try {
     return prisma.product.create({
       data: { ...data, userId },
@@ -44,7 +39,7 @@ export async function updateProduct(
   userId: string,
   id: string,
   data: Partial<ProductDTO>
-): Promise<ProductEntity> {
+): Promise<ProductDTO> {
   const existing = await prisma.product.findFirst({
     where: { id, userId },
     select: { id: true },
@@ -66,7 +61,7 @@ export async function updateProduct(
 }
 
 // Delete product by ID (CRUD - Delete)
-export async function deleteProductById(userId: string, id: string): Promise<ProductEntity> {
+export async function deleteProductById(userId: string, id: string): Promise<ProductDTO> {
   const existing = await prisma.product.findFirst({
     where: { id, userId },
     select: { id: true },
