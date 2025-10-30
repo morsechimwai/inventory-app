@@ -45,6 +45,8 @@ export interface ProductDeleteResult {
   meta?: { id: string; userId: string }
 }
 
+// TODO: Sanitize inputs to safeguard against XSS attacks
+
 // Create a new product (CRUD - Create)
 export async function createProductAction(
   data: CreateProductInput
