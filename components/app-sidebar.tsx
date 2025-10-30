@@ -42,18 +42,18 @@ interface NavigationGroup {
 
 const navigationGroups: NavigationGroup[] = [
   {
-    label: "Monitor",
+    label: "Overview",
     items: [
-      { title: "dashboard", url: "/dashboard", icon: BarChart2 },
-      { title: "inventory activity", url: "/inventory-activity", icon: ArrowUpDown },
+      { title: "Dashboard", url: "/dashboard", icon: BarChart2 },
+      { title: "Activity", url: "/inventory-activity", icon: ArrowUpDown },
+      { title: "Products", url: "/product", icon: Package },
     ],
   },
   {
-    label: "Management",
+    label: "Setup",
     items: [
-      { title: "category", url: "/category", icon: Tags },
-      { title: "product", url: "/product", icon: Package },
-      { title: "unit", url: "/unit", icon: Hash },
+      { title: "Categories", url: "/category", icon: Tags },
+      { title: "Units", url: "/unit", icon: Hash },
     ],
   },
 ]
