@@ -10,7 +10,11 @@ import { prisma } from "@/lib/db/prisma";
 import { AppError } from "@/lib/errors/app-error";
 
 // Types
-import type { DashboardMetrics, KeyMetrics } from "@/lib/types/dashboard";
+import type {
+  DashboardMetrics,
+  KeyMetrics,
+  ProductWithDate,
+} from "@/lib/types/dashboard";
 
 // Utils
 import {
@@ -41,7 +45,7 @@ async function getKeyMetrics(userId: string): Promise<KeyMetrics> {
   const [totalProducts, lowStock, allProducts] = await Promise.all([
     prisma.product.count({ where: { userId } }),
     prisma.product.count({
-      where: { userId, lowStockAt: { not: null }, quantity: { lte: 5 } },
+      where: { userId, lowStockAt: { not: null } },
     }),
     prisma.product.findMany({
       where: { userId },
@@ -49,26 +53,16 @@ async function getKeyMetrics(userId: string): Promise<KeyMetrics> {
         id: true,
         name: true,
         sku: true,
-        price: true,
-        quantity: true,
         lowStockAt: true,
         createdAt: true,
       },
     }),
   ]);
 
-  const totalValue = allProducts.reduce(
-    (sum, p) => sum + Number(p.price) * Number(p.quantity),
-    0
-  );
-
   return {
     totalProducts,
     lowStock,
-    totalValue,
-    allProducts: allProducts.map((p) => ({
-      ...p,
-      price: Number(p.price),
-    })),
+    totalValue: 0,
+    allProducts: allProducts as ProductWithDate[],
   };
 }

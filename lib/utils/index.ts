@@ -1,8 +1,14 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return twMerge(clsx(inputs))
+}
+
+export const normalize = (v: unknown): string | number | null => {
+  if (v === "" || v === undefined || v === null) return null
+  if (typeof v === "string" || typeof v === "number") return v
+  return null // fallback
 }
 
 export function formatCurrencyTHB(amount: number): string {
@@ -11,13 +17,13 @@ export function formatCurrencyTHB(amount: number): string {
     currency: "THB",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amount);
+  }).format(amount)
 }
 
 export function formatCurrencyTHBText(amount: number): string {
   const formatted = new Intl.NumberFormat("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amount);
-  return `${formatted} THB`;
+  }).format(amount)
+  return `${formatted} THB`
 }
