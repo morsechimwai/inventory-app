@@ -117,7 +117,7 @@ export default function AppSidebar() {
             <div className="rounded-md bg-sky-400 p-1.5">
               <Origami className="text-sky-50 size-3.5" />
             </div>
-            <span className="text-lg font-black font-sans">StocKit</span>
+            <span className="text-2xl font-black font-sans">StocKit</span>
           </Link>
         </SidebarMenuButton>
       </SidebarHeader>
