@@ -1,14 +1,11 @@
 // lib/services/categories.ts
 
 import { prisma } from "@/lib/db/prisma"
-import type { CategoryDTO, CreateCategoryInput } from "@/lib/types/category"
+import type { CategoryEntity, CategoryInput, CategoryDTO } from "@/lib/types/category"
 import { AppError } from "../errors/app-error"
 
 // Create a new category (CRUD - Create)
-export async function createCategory(
-  userId: string,
-  data: CreateCategoryInput
-): Promise<CategoryDTO> {
+export async function createCategory(userId: string, data: CategoryInput): Promise<CategoryEntity> {
   try {
     return prisma.category.create({
       data: { ...data, userId },
@@ -37,8 +34,8 @@ export async function getCategoriesByUserId(userId: string): Promise<CategoryDTO
 export async function updateCategory(
   userId: string,
   id: string,
-  data: Partial<CategoryDTO>
-): Promise<CategoryDTO> {
+  data: Partial<CategoryInput>
+): Promise<CategoryEntity> {
   const existing = await prisma.category.findFirst({
     where: { id, userId },
     select: { id: true },
@@ -60,7 +57,7 @@ export async function updateCategory(
 }
 
 // Delete category by ID (CRUD - Delete)
-export async function deleteCategoryById(userId: string, id: string): Promise<CategoryDTO> {
+export async function deleteCategoryById(userId: string, id: string): Promise<CategoryEntity> {
   const existing = await prisma.category.findFirst({
     where: { id, userId },
     select: { id: true },

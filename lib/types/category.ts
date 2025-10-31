@@ -1,4 +1,13 @@
 import type { Category } from "@prisma/client"
 
-export type CreateCategoryInput = Omit<CategoryDTO, "id">
-export type CategoryDTO = Omit<Category, "userId" | "createdAt" | "updatedAt">
+// Entity
+export type CategoryEntity = Category
+
+// Form input
+export type CategoryInput = Omit<Category, "id" | "userId" | "createdAt" | "updatedAt">
+
+// DTO for output
+export type CategoryDTO = {
+  id: string
+  name: string
+}
