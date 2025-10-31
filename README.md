@@ -171,51 +171,45 @@ The optional `prisma/seed.ts` script references a demo user ID—adjust it if yo
 | `pnpm start`  | Serve the production build from `.next`  |
 | `pnpm lint`   | Lint the codebase with ESLint            |
 
-## 🤓 Analytics Formulae (Nerd Mode)
+## Analytics Formulae
 The dashboard’s trending and efficiency widgets are computed with deterministic transforms so you always know what the numbers mean.[^1][^2]
 
 ### Weekly Trending
-We split products into disjoint week-long buckets. Let $\mathcal{W}_0$ be the set of records created during the current ISO week and $\mathcal{W}_{-1}$ the prior week. Define a generic percent-change helper
-$$
-\operatorname{Trend}(a,b)=
-\begin{cases}
-\dfrac{a-b}{b}\times 100 & \text{if } b>0,\\[6pt]
-0 & \text{otherwise,}
-\end{cases}
-$$
-which avoids division by zero when no products landed in the comparison window.
+We split products into disjoint week-long buckets.
 
-The three trend signals shown on the dashboard are:
-$$
-\begin{aligned}
-T_{\text{prod}} &= \operatorname{Trend}\!\left(\lvert\mathcal{W}_0\rvert,\lvert\mathcal{W}_{-1}\rvert\right), \\
-T_{\text{value}} &= \operatorname{Trend}\!\left(\sum_{p\in\mathcal{W}_0}\mathrm{price}_p \cdot \mathrm{qty}_p,\sum_{p\in\mathcal{W}_{-1}}\mathrm{price}_p \cdot \mathrm{qty}_p\right), \\
-T_{\text{low}} &= \operatorname{Trend}\!\left(\lvert\mathcal{L}_0\rvert,\lvert\mathcal{L}_{-1}\rvert\right),
-\end{aligned}
-$$
-where $\mathcal{L}_t=\{p\in\mathcal{W}_t\mid \mathrm{qty}_p\leq 5\}$ captures low-inventory products tracked against the five-unit service-level threshold.[^2]
+Let `W0` = current ISO week, `W-1` = prior week.
+
+Define Trend(a,b):
+
+![trend](https://latex.codecogs.com/png.image?\dpi{150}\operatorname{Trend}(a,b)=\begin{cases}\frac{a-b}{b}\times100&\text{if }b>0,\\0&\text{otherwise}\end{cases})
+
+Dashboard signals:
+
+![signals](https://latex.codecogs.com/png.image?\dpi{150}T_{prod}=\operatorname{Trend}(|W_0|,|W_{-1}|),\quad
+T_{value}=\operatorname{Trend}(\sum_{p\in W_0}price_p\cdot qty_p,\sum_{p\in W_{-1}}price_p\cdot qty_p),\quad
+T_{low}=\operatorname{Trend}(|L_0|,|L_{-1}|))
+
+`L_t` = { products in `W_t` with qty ≤ 5 }.
 
 ### Inventory Efficiency Score
-Let $N$ be the total product count for the signed-in workspace and define category percentages
-$$
-\begin{aligned}
-P_{\text{in}} &= \frac{N_{\text{in}}}{N}\times 100, \\
-P_{\text{low}} &= \frac{N_{\text{low}}}{N}\times 100, \\
-P_{\text{out}} &= \frac{N_{\text{out}}}{N}\times 100,
-\end{aligned}
-$$
-with $N_{\text{in}}=\lvert\{p\mid \mathrm{qty}_p>5\}\rvert$, $N_{\text{low}}=\lvert\{p\mid 1<\mathrm{qty}_p\leq 5\}\rvert$, and $N_{\text{out}}=\lvert\{p\mid \mathrm{qty}_p=0\}\rvert$. The efficiency widget renders
-$$
-E = \operatorname{clip}_{[0,100]}\!\left(\operatorname{round}\left(0.7\,P_{\text{in}} + 0.2\,(100-P_{\text{low}}) + 0.1\,(100-P_{\text{out}})\right)\right),
-$$
-assigning more weight to healthy stock while still rewarding reductions in low or empty bins. The $\operatorname{clip}$ operator bounds the score between 0 and 100, and $\operatorname{round}$ matches JavaScript's midpoint-away-from-zero rounding for legible UX.[^3]
+Let `N` = total product count.
 
-## Roadmap
-- Sync dashboard metrics with live inbound/outbound stock transactions
-- Introduce role-based access control and audit logging
-- Enable supplier management, purchase orders, and transfer workflows
-- Add alerting (webhooks/email) for low stock and stockouts
-- Polish responsive UX and accessibility coverage
+Percent buckets:
+
+![percent](https://latex.codecogs.com/png.image?\dpi{150}P_{in}=\frac{N_{in}}{N}\times100,\quad
+P_{low}=\frac{N_{low}}{N}\times100,\quad
+P_{out}=\frac{N_{out}}{N}\times100)
+
+Counts:
+
+- `N_in`: qty > 5
+- `N_low`: 1 < qty ≤ 5
+- `N_out`: qty = 0
+
+Efficiency:
+
+![eff](https://latex.codecogs.com/png.image?\dpi{150}E=\operatorname{clip}_{[0,100]}(\operatorname{round}(0.7P_{in}+0.2(100-P_{low})+0.1(100-P_{out}))))
+
 
 ## Contributing & license
 Pull requests, issues, and feature ideas are welcome. microFeed ships under the [MIT License](./LICENSE), so you can adapt it for commercial products, internal tools, or SaaS offerings without friction.
