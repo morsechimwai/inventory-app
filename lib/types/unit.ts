@@ -4,7 +4,7 @@ import type { Unit } from "@prisma/client"
 export type UnitEntity = Unit
 
 // Form input
-export type UnitInput = Omit<Unit, "id" | "userId" | "createdAt" | "updatedAt">
+export type UnitInput = Pick<Unit, "name">
 
 // DTO for output
 export type UnitDTO = {

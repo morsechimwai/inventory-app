@@ -12,7 +12,7 @@ import { createUnit, deleteUnitById, getUnitsByUserId, updateUnit } from "@/lib/
 
 // Types
 import type { ActionResult } from "@/lib/types/error"
-import type { CreateUnitInput, UnitDTO } from "@/lib/types/unit"
+import type { UnitInput, UnitDTO } from "@/lib/types/unit"
 
 // Error Handling
 import { withErrorHandling } from "@/lib/errors/with-error-handling"
@@ -20,7 +20,6 @@ import { AppError } from "@/lib/errors/app-error"
 
 export interface UnitCreateResult {
   message: string
-  data?: UnitDTO
   meta?: { userId: string }
 }
 
@@ -41,18 +40,15 @@ export interface UnitDeleteResult {
 }
 
 // Create a new unit (CRUD - Create)
-export async function createUnitAction(
-  data: CreateUnitInput
-): Promise<ActionResult<UnitCreateResult>> {
+export async function createUnitAction(data: UnitInput): Promise<ActionResult<UnitCreateResult>> {
   return withErrorHandling(async () => {
     const user = await getCurrentUser()
     if (!user) throw new AppError("UNAUTHORIZED", "Please log in first.")
 
-    const unit = await createUnit(user.id, data)
+    await createUnit(user.id, data)
     revalidatePath("/dashboard/unit")
     return {
       message: "Unit created successfully",
-      data: unit,
       meta: { userId: user.id },
     }
   })
