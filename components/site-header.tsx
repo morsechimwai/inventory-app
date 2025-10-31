@@ -57,7 +57,7 @@ export function SiteHeader() {
           </Breadcrumb>
         </h1>
         <div className="ml-auto flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="hidden sm:flex">
+          <Button variant="ghost" size="sm" className="hidden sm:flex" asChild>
             <Link
               href="https://github.com/morsechimwai/stockit-nextjs-prisma-neon"
               rel="noopener noreferrer"
