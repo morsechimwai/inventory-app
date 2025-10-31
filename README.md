@@ -38,6 +38,97 @@ prisma/                   // Schema, migrations, seed script
 public/                   // Static assets
 ```
 
+## Database Schema
+Prisma models are scoped by `userId` so each Stack-authenticated workspace owns its own catalogue. Columns marked `*` are required.
+
+### Product
+| Column*        | Type                 | Notes                                                       |
+|----------------|----------------------|-------------------------------------------------------------|
+| id*            | `String`             | Primary key generated with `cuid()`                        |
+| userId*        | `String`             | Foreign key to Stack user; drives row-level isolation      |
+| name*          | `String`             | Product display name                                        |
+| sku            | `String?`            | User-scoped unique constraint with `userId`                |
+| lowStockAt     | `Int?`               | Optional threshold that triggers low stock warnings       |
+| categoryId     | `String?`            | Nullable FK to `Category` (`@db.VarChar(255)`)             |
+| unitId*        | `String`             | Required FK to `Unit` (`@db.VarChar(255)`)                 |
+| currentStock*  | `Decimal(12,3)`      | Cached on-hand quantity, defaults to `0`                   |
+| createdAt*     | `DateTime`           | Defaults to `now()`                                         |
+| updatedAt*     | `DateTime`           | Auto-updated timestamp                                      |
+
+**Indexes**
+- `@@unique([userId, sku])`
+- `@@index([userId, name])`
+- `@@index([createdAt])`
+
+**Relations**
+- Optional `category` via `categoryId`
+- Required `unit` via `unitId`
+- One-to-many `movements`
+
+### Category
+| Column*    | Type        | Notes                                                   |
+|------------|-------------|---------------------------------------------------------|
+| id*        | `String`    | Primary key generated with `cuid()`                    |
+| userId*    | `String`    | Stack user owner                                        |
+| name*      | `String`    | User-scoped unique category name                        |
+| createdAt* | `DateTime`  | Defaults to `now()`                                     |
+| updatedAt* | `DateTime`  | Auto-updated timestamp                                  |
+
+**Indexes**
+- `@@unique([userId, name])`
+- `@@index([userId])`
+
+**Relations**
+- One-to-many `products`
+
+### Unit
+| Column*    | Type        | Notes                                                   |
+|------------|-------------|---------------------------------------------------------|
+| id*        | `String`    | Primary key generated with `cuid()`                    |
+| userId*    | `String`    | Stack user owner                                        |
+| name*      | `String`    | Display label such as "กล่อง", "กิโลกรัม"             |
+| createdAt* | `DateTime`  | Defaults to `now()`                                     |
+| updatedAt* | `DateTime`  | Auto-updated timestamp                                  |
+
+**Indexes**
+- `@@unique([userId, name])`
+- `@@index([userId])`
+
+**Relations**
+- One-to-many `products`
+
+### StockMovement
+| Column*       | Type                 | Notes                                                                 |
+|---------------|----------------------|-----------------------------------------------------------------------|
+| id*           | `String`             | Primary key generated with `cuid()`                                  |
+| productId*    | `String`             | FK to `Product`                                                       |
+| userId*       | `String`             | Stack user owner                                                      |
+| movementType* | `MovementType`       | Enum describing IN, OUT, or ADJUST movements                          |
+| quantity*     | `Decimal(12,3)`      | Quantity moved                                                        |
+| unitCost      | `Decimal(12,2)?`     | Optional per-unit cost at movement time                               |
+| totalCost     | `Decimal(14,2)?`     | Optional aggregate cost                                               |
+| referenceType | `ReferenceType`      | Defaults to `MANUAL`                                                  |
+| referenceId   | `String?`            | Optional document identifier                                          |
+| reason        | `String?`            | Optional adjustment reason                                            |
+| createdAt*    | `DateTime`           | Defaults to `now()`                                                   |
+| updatedAt*    | `DateTime`           | Auto-updated timestamp                                                |
+
+**Indexes**
+- `@@index([productId])`
+- `@@index([createdAt])`
+- `@@index([movementType, createdAt])`
+- `@@index([referenceType, referenceId])`
+- `@@index([userId, createdAt])`
+- `@@index([productId, movementType])`
+- `@@index([productId, createdAt])`
+
+**Relations**
+- Belongs to `product`
+
+### Enums
+- `MovementType`: `IN`, `OUT`, `ADJUST`
+- `ReferenceType`: `PURCHASE`, `SALE`, `RETURN`, `TRANSFER`, `ADJUSTMENT`, `MANUAL`
+
 ## Prerequisites
 - Node.js 20+
 - pnpm
