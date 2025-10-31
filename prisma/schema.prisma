@@ -25,6 +25,9 @@ model Product {
   categoryId String? @db.VarChar(255)
   unitId     String  @db.VarChar(255)
 
+  // Cache fields
+  currentStock Decimal @default(0) @db.Decimal(12, 3)
+
   // Relations
   category  Category?       @relation(fields: [categoryId], references: [id])
   unit      Unit            @relation(fields: [unitId], references: [id])
