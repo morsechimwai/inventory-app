@@ -1,11 +1,16 @@
-import type { Prisma, Product } from "@prisma/client"
+import type { Product } from "@prisma/client"
 
 // Entity
 export type ProductEntity = Product
 
 // Form input
-export type ProductInput = Pick<Product, "name" | "unitId"> &
-  Partial<Pick<Product, "sku" | "lowStockAt" | "categoryId">>
+export type ProductInput = {
+  name: string
+  sku: string | null
+  lowStockAt: number | null
+  categoryId: string | null
+  unitId: string
+}
 
 // DTO for output with relation
 export type ProductDTO = {
@@ -13,7 +18,7 @@ export type ProductDTO = {
   name: string
   sku: string | null
   lowStockAt: number | null
-  currentStock: Prisma.Decimal
+  currentStock: number
   category: { id: string; name: string } | null
   unit: { id: string; name: string }
 }

@@ -2,6 +2,10 @@ import type { ProductDTO } from "@/lib/types/product";
 
 export type ProductWithDate = ProductDTO & {
   createdAt: Date;
+  inventoryValue: number;
+  latestUnitCost: number;
+  isLowStock: boolean;
+  isOutOfStock: boolean;
 };
 
 export interface WeekProductData {
