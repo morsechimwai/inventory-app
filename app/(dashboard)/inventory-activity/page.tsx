@@ -63,8 +63,11 @@ import {
   updateStockMovementAction,
 } from "@/lib/actions/stock-movements"
 import { getAllProducts } from "@/lib/actions/products"
-import { toNumberOrNull, toStringOrNull } from "@/lib/utils"
 
+// Utils
+import { coerceNumber, coerceNumberOrNull, coerceStringOrNull } from "@/lib/utils/coerce"
+
+// Meta info for movement types
 type MovementDetail = {
   buttonLabel: string
   createTitle: string
@@ -97,6 +100,7 @@ const movementTypeMeta: Record<MovementType, MovementDetail> = {
   },
 }
 
+// Reference type options
 const referenceTypeOptions = Object.values(ReferenceType)
 const movementButtonOrder: MovementType[] = [MovementType.IN, MovementType.OUT, MovementType.ADJUST]
 
@@ -173,12 +177,12 @@ export default function InventoryActivityPage() {
     const payload = {
       productId: values.productId,
       movementType: values.movementType,
-      quantity: toNumberOrNull(values.quantity),
-      unitCost: toNumberOrNull(values.unitCost),
-      totalCost: toNumberOrNull(values.totalCost),
+      quantity: values.quantity,
+      unitCost: values.unitCost ?? null,
+      totalCost: values.totalCost ?? null,
       referenceType: values.referenceType,
-      referenceId: toStringOrNull(values.referenceId),
-      reason: toStringOrNull(values.reason),
+      referenceId: values.referenceId ?? null,
+      reason: values.reason ?? null,
     }
 
     try {
@@ -249,11 +253,6 @@ export default function InventoryActivityPage() {
 
   // Open create sheet
   const handleOpenCreate = (movementType: MovementType) => {
-    if (products.length === 0) {
-      toast.info("Add a product first, then log your stock activity.")
-      return
-    }
-
     setEditingStockMovement(null)
     form.reset({
       ...defaultFormValues,
@@ -268,7 +267,7 @@ export default function InventoryActivityPage() {
     (movement: StockMovementDTO) => {
       setEditingStockMovement(movement)
       form.reset({
-        productId: movement.productId,
+        productId: movement.product.id,
         movementType: movement.movementType,
         quantity: movement.quantity,
         unitCost: movement.unitCost ?? undefined,
@@ -383,12 +382,9 @@ export default function InventoryActivityPage() {
                 <EmptyMedia variant="icon">
                   <History className="size-8 text-muted-foreground" />
                 </EmptyMedia>
-                <EmptyTitle>No activity yet.</EmptyTitle>
-                <EmptyDescription>
-                  Log your first stock movement to start a clean activity trail.
-                </EmptyDescription>
+                <EmptyTitle>No activity yet</EmptyTitle>
               </EmptyHeader>
-              <EmptyContent className="flex flex-row justify-center gap-2">
+              <EmptyContent className="flex flex-row justify-center gap-2 mt-2">
                 {movementButtonOrder.map((type) => {
                   const { buttonLabel, icon: Icon } = movementTypeMeta[type]
                   return (
@@ -404,10 +400,14 @@ export default function InventoryActivityPage() {
                   )
                 })}
               </EmptyContent>
-              {products.length === 0 && (
-                <EmptyContent className="text-sm text-muted-foreground">
+              {products.length === 0 ? (
+                <EmptyDescription className="text-sm text-amber-500">
                   Add a product first so we know which item you&apos;re updating.
-                </EmptyContent>
+                </EmptyDescription>
+              ) : (
+                <EmptyDescription>
+                  Log your first stock movement to start a clean activity trail.
+                </EmptyDescription>
               )}
             </Empty>
           }
@@ -444,7 +444,7 @@ export default function InventoryActivityPage() {
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <option value="">
-                          {products.length === 0 ? "No products yet" : "Select product"}
+                          {products.length === 0 ? "No product yet." : "Select product"}
                         </option>
                         {products.map((product) => (
                           <option key={product.id} value={product.id}>

@@ -4,6 +4,8 @@
 import { useState, useCallback, useEffect, useMemo } from "react"
 import { Controller, useForm } from "react-hook-form"
 
+import Link from "next/link"
+
 // Components
 import {
   Dialog,
@@ -37,7 +39,7 @@ import TableLoading from "@/components/skeleton/table-loading"
 import { toast } from "sonner"
 
 // Icons
-import { Info, SquarePen, PackageOpen, PackagePlus } from "lucide-react"
+import { Info, SquarePen, PackageOpen, PackagePlus, Hash, CircleAlert } from "lucide-react"
 
 // Types
 import { ProductDTO } from "@/lib/types/product"
@@ -63,7 +65,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { defaultFormValues, productFormSchema } from "./schema"
 
 // Utils
-import { toNumberOrNull, toStringOrNull } from "@/lib/utils"
+import { coerceNumberOrNull, coerceStringOrNull } from "@/lib/utils/coerce"
 
 export default function ProductPage() {
   // Custom Hook Form
@@ -146,9 +148,9 @@ export default function ProductPage() {
     // Prepare payload
     const payload = {
       name: values.name,
-      sku: toStringOrNull(values.sku),
-      lowStockAt: toNumberOrNull(values.lowStockAt),
-      categoryId: toStringOrNull(values.categoryId),
+      sku: coerceStringOrNull(values.sku),
+      lowStockAt: coerceNumberOrNull(values.lowStockAt),
+      categoryId: coerceStringOrNull(values.categoryId),
       unitId: values.unitId,
     }
 
@@ -308,23 +310,53 @@ export default function ProductPage() {
             <Empty>
               <EmptyHeader>
                 <EmptyMedia variant="icon">
-                  <PackageOpen className="size-8 text-muted-foreground" />
+                  {units.length === 0 ? (
+                    <CircleAlert className="size-8 text-amber-500" />
+                  ) : (
+                    <PackageOpen className="size-8 text-muted-foreground" />
+                  )}
                 </EmptyMedia>
-                <EmptyTitle>No product found.</EmptyTitle>
-                <EmptyDescription>
-                  Get started by adding your first product to the inventory.
-                </EmptyDescription>
+
+                <EmptyTitle>
+                  {units.length === 0 ? (
+                    <span className=" text-amber-500">
+                      You need at least one unit before adding products.
+                    </span>
+                  ) : (
+                    " No products yet"
+                  )}
+                </EmptyTitle>
               </EmptyHeader>
-              <EmptyContent className="flex items-center">
-                <Button
-                  className="font-sans font-bold text-sm"
-                  onClick={handleOpenCreate}
-                  disabled={saving}
-                >
-                  <PackagePlus className="mr-1 size-4" />
-                  <span>Add Product</span>
-                </Button>
-              </EmptyContent>
+
+              {/* Case: missing unit */}
+              {units.length === 0 && (
+                <>
+                  <EmptyContent className="mt-2">
+                    <Button variant="link" className="font-sans font-bold text-sm" asChild>
+                      <Link href="/unit">Go to unit page</Link>
+                    </Button>
+                  </EmptyContent>
+                </>
+              )}
+
+              {/* Case: ready to add product */}
+              {units.length > 0 && (
+                <>
+                  <EmptyContent className="mt-2">
+                    <Button
+                      className="font-sans font-bold text-sm"
+                      onClick={handleOpenCreate}
+                      disabled={saving}
+                    >
+                      <PackagePlus className="mr-1 size-4" />
+                      <span>Add Product</span>
+                    </Button>
+                  </EmptyContent>
+                  <EmptyDescription>
+                    Start by adding your first product to manage your inventory effectively.
+                  </EmptyDescription>
+                </>
+              )}
             </Empty>
           }
         />
@@ -427,7 +459,20 @@ export default function ProductPage() {
                   return (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor={field.name}>
-                        <span>Category</span>
+                        <span>Category</span>{" "}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="size-3.5 text-sm font-normal" />
+                          </TooltipTrigger>
+                          <TooltipContent side="top">
+                            {categories.length === 0 ? (
+                              <p>
+                                No categories available. Create categories to better organize your
+                                products.
+                              </p>
+                            ) : null}
+                          </TooltipContent>
+                        </Tooltip>
                         <span className="text-sm font-normal text-muted-foreground">
                           (optional)
                         </span>
@@ -443,9 +488,7 @@ export default function ProductPage() {
                           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           {...fieldProps}
                         >
-                          <option value="">
-                            {categories.length === 0 ? "No categories yet" : "Uncategorized"}
-                          </option>
+                          <option value="">Uncategorized</option>
                           {categories.map((category) => (
                             <option key={category.id} value={category.id}>
                               {category.name}

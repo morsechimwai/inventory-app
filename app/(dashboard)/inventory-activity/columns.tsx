@@ -28,18 +28,8 @@ import type { StockMovementDTO } from "@/lib/types/stock-movement"
 import { MovementType, ReferenceType } from "@prisma/client"
 
 // Utils
-import { formatCurrencyTHBText } from "@/lib/utils"
+import { dateFormatter, quantityFormatter, currencyFormatterTHB } from "@/lib/utils/formatters"
 import { createElement } from "react"
-
-const dateFormatter = new Intl.DateTimeFormat("th-TH", {
-  dateStyle: "medium",
-  timeStyle: "short",
-})
-
-const quantityFormatter = new Intl.NumberFormat("en-US", {
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 3,
-})
 
 const movementTypeLabels: Record<MovementType, { title: string; icon: LucideIcon }> = {
   [MovementType.IN]: {
@@ -106,7 +96,9 @@ export const columns = (
     header: "Unit Cost",
     cell: ({ row }) => {
       const { unitCost } = row.original
-      return unitCost !== null && unitCost !== undefined ? formatCurrencyTHBText(unitCost) : "-"
+      return unitCost !== null && unitCost !== undefined
+        ? currencyFormatterTHB.format(unitCost)
+        : "-"
     },
   },
   {
@@ -114,7 +106,9 @@ export const columns = (
     header: "Total Cost",
     cell: ({ row }) => {
       const { totalCost } = row.original
-      return totalCost !== null && totalCost !== undefined ? formatCurrencyTHBText(totalCost) : "-"
+      return totalCost !== null && totalCost !== undefined
+        ? currencyFormatterTHB.format(totalCost)
+        : "-"
     },
   },
   {

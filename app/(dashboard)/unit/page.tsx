@@ -7,7 +7,14 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import TableLoading from "@/components/skeleton/table-loading"
 import { DataTable } from "@/components/data-table"
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import {
   Sheet,
   SheetContent,
@@ -28,7 +35,7 @@ import { Field, FieldContent, FieldError, FieldLabel } from "@/components/ui/fie
 import { toast } from "sonner"
 
 // Icons
-import { Hash, ListPlus, SquarePen } from "lucide-react"
+import { CircleSlash2, Hash, ListPlus, SquarePen } from "lucide-react"
 
 // Types
 import { UnitDTO } from "@/lib/types/unit"
@@ -234,9 +241,11 @@ export default function UnitPage() {
             <Empty>
               <EmptyHeader>
                 <EmptyMedia variant="icon">
-                  <Hash className="size-8 text-muted-foreground" />
+                  <CircleSlash2 className="size-8 text-muted-foreground" />
                 </EmptyMedia>
-                <EmptyTitle>No units found.</EmptyTitle>
+                <EmptyTitle>No units yet</EmptyTitle>
+              </EmptyHeader>
+              <EmptyContent className="mt-2">
                 <Button
                   className="mt-4 font-sans font-bold text-sm"
                   onClick={handleOpenCreate}
@@ -245,7 +254,10 @@ export default function UnitPage() {
                   <ListPlus className="mr-1 size-4" />
                   <span>Add Unit</span>
                 </Button>
-              </EmptyHeader>
+              </EmptyContent>
+              <EmptyDescription>
+                Units help standardize product measurements across your inventory.
+              </EmptyDescription>
             </Empty>
           }
         />

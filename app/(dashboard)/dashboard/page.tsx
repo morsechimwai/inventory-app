@@ -22,8 +22,8 @@ import { BarChart2, ChartPie, PackageOpen, TrendingUp } from "lucide-react"
 import { getDashboardMetrics } from "@/lib/actions/dashboard"
 
 // Utils
-import { formatCurrencyTHBText } from "@/lib/utils"
 import { calculateWeeklyTrends } from "@/lib/utils/dashboard"
+import { currencyFormatterTHB } from "@/lib/utils/formatters"
 
 export default async function DashboardPage() {
   const { keyMetrics, weekProductsData, efficiency } = await getDashboardMetrics()
@@ -146,9 +146,9 @@ export default async function DashboardPage() {
                   <div className="flex h-full flex-col items-center justify-center">
                     <h3 className="text-base font-semibold font-sans">Total Value</h3>
                     <p className="text-3xl font-bold font-sans">
-                      {formatCurrencyTHBText(totalValue).split(" ")[0]}
+                      {currencyFormatterTHB.format(totalValue).split(" ")[0]}
                       <span className="text-lg font-semibold font-sans ml-1">
-                        {formatCurrencyTHBText(totalValue).split(" ")[1]}
+                        {currencyFormatterTHB.format(totalValue).split(" ")[1]}
                       </span>
                     </p>
 
@@ -240,7 +240,7 @@ export default async function DashboardPage() {
                     <EmptyMedia variant="icon">
                       <PackageOpen className="size-8 text-muted-foreground" />
                     </EmptyMedia>
-                    <EmptyTitle>No products yet</EmptyTitle>
+                    <EmptyTitle>No product yet</EmptyTitle>
                     <EmptyDescription>
                       Add products to start managing your inventory.
                     </EmptyDescription>
