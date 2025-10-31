@@ -1,4 +1,4 @@
-import type { Product } from "@prisma/client"
+import type { Prisma, Product } from "@prisma/client"
 
 // Entity
 export type ProductEntity = Product
@@ -13,7 +13,7 @@ export type ProductDTO = {
   name: string
   sku: string | null
   lowStockAt: number | null
-  currentStock: number
+  currentStock: Prisma.Decimal
   category: { id: string; name: string } | null
   unit: { id: string; name: string }
 }

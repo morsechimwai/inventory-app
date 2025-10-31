@@ -4,6 +4,16 @@ import { prisma } from "@/lib/db/prisma"
 import type { ProductEntity, ProductInput, ProductDTO } from "@/lib/types/product"
 import { AppError } from "../errors/app-error"
 
+// Helper to assert product ownership
+async function assertProductOwnership(userId: string, productId: string) {
+  const product = await prisma.product.findFirst({
+    where: { id: productId, userId },
+    select: { id: true },
+  })
+
+  if (!product) throw new AppError("NOT_FOUND", "Product not found.")
+}
+
 // Create a new product (CRUD - Create)
 export async function createProduct(userId: string, data: ProductInput): Promise<ProductEntity> {
   try {
@@ -17,7 +27,7 @@ export async function createProduct(userId: string, data: ProductInput): Promise
 
 // Get products by user ID (CRUD - Read)
 export async function getProductsByUserId(userId: string): Promise<ProductDTO[]> {
-  const products = await prisma.product.findMany({
+  return await prisma.product.findMany({
     where: { userId },
     select: {
       id: true,
@@ -30,11 +40,6 @@ export async function getProductsByUserId(userId: string): Promise<ProductDTO[]>
     },
     orderBy: { createdAt: "desc" },
   })
-
-  return products.map((p) => ({
-    ...p,
-    currentStock: p.currentStock.toNumber(),
-  }))
 }
 
 // Update existing product (CRUD - Update)
@@ -43,14 +48,9 @@ export async function updateProduct(
   id: string,
   data: Partial<ProductInput>
 ): Promise<ProductEntity> {
-  const existing = await prisma.product.findFirst({
-    where: { id, userId },
-    select: { id: true },
-  })
-
-  if (!existing) throw new AppError("NOT_FOUND", "Product not found.")
-
   try {
+    // Ensure the product belongs to the user
+    await assertProductOwnership(userId, id)
     return prisma.product.update({
       where: { id },
       data,
@@ -62,14 +62,9 @@ export async function updateProduct(
 
 // Delete product by ID (CRUD - Delete)
 export async function deleteProductById(userId: string, id: string): Promise<ProductEntity> {
-  const existing = await prisma.product.findFirst({
-    where: { id, userId },
-    select: { id: true },
-  })
-
-  if (!existing) throw new AppError("NOT_FOUND", "Product not found.")
-
   try {
+    // Ensure the product belongs to the user
+    await assertProductOwnership(userId, id)
     return prisma.product.delete({ where: { id } })
   } catch {
     throw new AppError("DB_DELETE_FAILED", "Failed to delete product.", { id })

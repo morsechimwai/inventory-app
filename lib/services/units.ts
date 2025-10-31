@@ -4,6 +4,16 @@ import { prisma } from "@/lib/db/prisma"
 import type { UnitEntity, UnitInput, UnitDTO } from "@/lib/types/unit"
 import { AppError } from "../errors/app-error"
 
+// Helper to assert unit ownership
+async function assertUnitOwnership(userId: string, unitId: string) {
+  const unit = await prisma.unit.findFirst({
+    where: { id: unitId, userId },
+    select: { id: true },
+  })
+
+  if (!unit) throw new AppError("NOT_FOUND", "Unit not found.")
+}
+
 // Create a new unit (CRUD - Create)
 export async function createUnit(userId: string, data: UnitInput): Promise<UnitEntity> {
   try {
@@ -37,14 +47,9 @@ export async function updateUnit(
   id: string,
   data: Partial<UnitInput>
 ): Promise<UnitEntity> {
-  const existing = await prisma.unit.findFirst({
-    where: { id, userId },
-    select: { id: true },
-  })
-
-  if (!existing) throw new AppError("NOT_FOUND", "Unit not found.")
-
   try {
+    // Ensure the unit belongs to the user
+    await assertUnitOwnership(userId, id)
     return prisma.unit.update({
       where: { id },
       data,
@@ -59,14 +64,9 @@ export async function updateUnit(
 
 // Delete unit by ID (CRUD - Delete)
 export async function deleteUnitById(userId: string, id: string): Promise<UnitEntity> {
-  const existing = await prisma.unit.findFirst({
-    where: { id, userId },
-    select: { id: true },
-  })
-
-  if (!existing) throw new AppError("NOT_FOUND", "Unit not found.")
-
   try {
+    // Ensure the unit belongs to the user
+    await assertUnitOwnership(userId, id)
     return prisma.unit.delete({ where: { id } })
   } catch {
     throw new AppError("DB_DELETE_FAILED", "Failed to delete unit.", {
