@@ -7,7 +7,14 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import TableLoading from "@/components/skeleton/table-loading"
 import { DataTable } from "@/components/data-table"
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import {
   Sheet,
   SheetContent,
@@ -28,7 +35,7 @@ import { Field, FieldContent, FieldError, FieldLabel } from "@/components/ui/fie
 import { toast } from "sonner"
 
 // Icons
-import { ListPlus, Shapes, SquarePen } from "lucide-react"
+import { CircleSlash2, ListPlus, Shapes, SquarePen } from "lucide-react"
 
 // Types
 import { CategoryDTO } from "@/lib/types/category"
@@ -233,9 +240,11 @@ export default function CategoryPage() {
             <Empty>
               <EmptyHeader>
                 <EmptyMedia variant="icon">
-                  <Shapes className="size-8 text-muted-foreground" />
+                  <CircleSlash2 className="size-8 text-muted-foreground" />
                 </EmptyMedia>
-                <EmptyTitle>No categories found.</EmptyTitle>
+                <EmptyTitle>No categories yet</EmptyTitle>
+              </EmptyHeader>
+              <EmptyContent>
                 <Button
                   className="mt-4 font-sans font-bold text-sm"
                   onClick={handleOpenCreate}
@@ -244,7 +253,10 @@ export default function CategoryPage() {
                   <ListPlus className="mr-1 size-4" />
                   <span>Add Category</span>
                 </Button>
-              </EmptyHeader>
+              </EmptyContent>
+              <EmptyDescription>
+                Categories help organize your products and make them easier to find.
+              </EmptyDescription>
             </Empty>
           }
         />
