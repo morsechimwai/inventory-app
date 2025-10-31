@@ -1,11 +1,11 @@
 // lib/services/units.ts
 
 import { prisma } from "@/lib/db/prisma"
-import type { UnitDTO, CreateUnitInput } from "@/lib/types/unit"
+import type { UnitEntity, UnitInput, UnitDTO } from "@/lib/types/unit"
 import { AppError } from "../errors/app-error"
 
 // Create a new unit (CRUD - Create)
-export async function createUnit(userId: string, data: CreateUnitInput): Promise<UnitDTO> {
+export async function createUnit(userId: string, data: UnitInput): Promise<UnitEntity> {
   try {
     return prisma.unit.create({
       data: { ...data, userId },
@@ -35,8 +35,8 @@ export async function getUnitsByUserId(userId: string): Promise<UnitDTO[]> {
 export async function updateUnit(
   userId: string,
   id: string,
-  data: Partial<UnitDTO>
-): Promise<UnitDTO> {
+  data: Partial<UnitInput>
+): Promise<UnitEntity> {
   const existing = await prisma.unit.findFirst({
     where: { id, userId },
     select: { id: true },
@@ -58,7 +58,7 @@ export async function updateUnit(
 }
 
 // Delete unit by ID (CRUD - Delete)
-export async function deleteUnitById(userId: string, id: string): Promise<UnitDTO> {
+export async function deleteUnitById(userId: string, id: string): Promise<UnitEntity> {
   const existing = await prisma.unit.findFirst({
     where: { id, userId },
     select: { id: true },
