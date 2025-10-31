@@ -4,7 +4,9 @@ import type { Unit } from "@prisma/client"
 export type UnitEntity = Unit
 
 // Form input
-export type UnitInput = Pick<Unit, "name">
+export type UnitInput = {
+  name: string
+}
 
 // DTO for output
 export type UnitDTO = {
