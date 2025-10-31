@@ -3,63 +3,15 @@
 import { prisma } from "@/lib/db/prisma"
 import type {
   StockMovementDTO,
-  StockMovementEntity,
   StockMovementInput,
+  StockMovementEntity,
 } from "@/lib/types/stock-movement"
 import { AppError } from "@/lib/errors/app-error"
-import type { Prisma } from "@prisma/client"
 
-const stockMovementSelect = {
-  id: true,
-  productId: true,
-  movementType: true,
-  quantity: true,
-  unitCost: true,
-  totalCost: true,
-  referenceType: true,
-  referenceId: true,
-  reason: true,
-  createdAt: true,
-  updatedAt: true,
-  product: {
-    select: {
-      id: true,
-      name: true,
-      unit: {
-        select: {
-          id: true,
-          name: true,
-        },
-      },
-    },
-  },
-} satisfies Prisma.StockMovementSelect
+//
+import { decimalToNumber } from "../utils/decimal"
 
-type StockMovementWithProduct = Prisma.StockMovementGetPayload<{
-  select: typeof stockMovementSelect
-}>
-
-const mapToDTO = (movement: StockMovementWithProduct): StockMovementDTO => ({
-  id: movement.id,
-  productId: movement.productId,
-  product: {
-    id: movement.product.id,
-    name: movement.product.name,
-    unit: movement.product.unit
-      ? { id: movement.product.unit.id, name: movement.product.unit.name }
-      : null,
-  },
-  movementType: movement.movementType,
-  quantity: movement.quantity.toNumber(),
-  unitCost: movement.unitCost ? movement.unitCost.toNumber() : null,
-  totalCost: movement.totalCost ? movement.totalCost.toNumber() : null,
-  referenceType: movement.referenceType,
-  referenceId: movement.referenceId,
-  reason: movement.reason,
-  createdAt: movement.createdAt,
-  updatedAt: movement.updatedAt,
-})
-
+// Helper to assert product ownership
 async function assertProductOwnership(userId: string, productId: string) {
   const product = await prisma.product.findFirst({
     where: { id: productId, userId },
@@ -73,16 +25,15 @@ async function assertProductOwnership(userId: string, productId: string) {
 export async function createStockMovement(
   userId: string,
   data: StockMovementInput
-): Promise<StockMovementDTO> {
+): Promise<StockMovementEntity> {
   try {
+    // Ensure the product belongs to the user
     await assertProductOwnership(userId, data.productId)
 
-    const movement = await prisma.stockMovement.create({
+    // Create the stock movement
+    return await prisma.stockMovement.create({
       data: { ...data, userId },
-      select: stockMovementSelect,
     })
-
-    return mapToDTO(movement)
   } catch (error) {
     if (error instanceof AppError) throw error
     throw new AppError("DB_CREATE_FAILED", "Failed to create stock movement.", { data })
@@ -93,11 +44,36 @@ export async function createStockMovement(
 export async function getStockMovementsByUserId(userId: string): Promise<StockMovementDTO[]> {
   const movements = await prisma.stockMovement.findMany({
     where: { userId },
-    select: stockMovementSelect,
+    select: {
+      id: true,
+      movementType: true,
+      quantity: true,
+      unitCost: true,
+      totalCost: true,
+      referenceType: true,
+      referenceId: true,
+      reason: true,
+      product: {
+        select: {
+          id: true,
+          name: true,
+          unit: {
+            select: { id: true, name: true },
+          },
+        },
+      },
+      createdAt: true,
+      updatedAt: true,
+    },
     orderBy: { createdAt: "desc" },
   })
 
-  return movements.map(mapToDTO)
+  return movements.map((m) => ({
+    ...m,
+    quantity: decimalToNumber(m.quantity),
+    unitCost: m.unitCost !== null ? decimalToNumber(m.unitCost) : null,
+    totalCost: m.totalCost !== null ? decimalToNumber(m.totalCost) : null,
+  }))
 }
 
 // Update existing stock movement (CRUD - Update)

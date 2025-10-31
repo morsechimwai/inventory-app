@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/db/prisma"
 import type { ProductEntity, ProductInput, ProductDTO } from "@/lib/types/product"
 import { AppError } from "../errors/app-error"
+import { decimalToNumber } from "../utils/decimal"
 
 // Helper to assert product ownership
 async function assertProductOwnership(userId: string, productId: string) {
@@ -27,7 +28,7 @@ export async function createProduct(userId: string, data: ProductInput): Promise
 
 // Get products by user ID (CRUD - Read)
 export async function getProductsByUserId(userId: string): Promise<ProductDTO[]> {
-  return await prisma.product.findMany({
+  const products = await prisma.product.findMany({
     where: { userId },
     select: {
       id: true,
@@ -40,6 +41,11 @@ export async function getProductsByUserId(userId: string): Promise<ProductDTO[]>
     },
     orderBy: { createdAt: "desc" },
   })
+
+  return products.map((p) => ({
+    ...p,
+    currentStock: decimalToNumber(p.currentStock),
+  }))
 }
 
 // Update existing product (CRUD - Update)
