@@ -65,8 +65,11 @@ export function SiteHeader() {
               className="dark:text-foreground font-sans"
             >
               <div className="flex items-center gap-1">
-                <Github className="mr-2 size-4" />
-                <span>View on GitHub</span>
+                <span className="flex items-center">
+                  <span>View on</span>
+                  <Github className="mx-1 size-3.5" />
+                  <span>GitHub</span>
+                </span>
               </div>
             </Link>
           </Button>
