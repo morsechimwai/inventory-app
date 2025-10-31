@@ -241,13 +241,13 @@ export default function UnitPage() {
             <Empty>
               <EmptyHeader>
                 <EmptyMedia variant="icon">
-                  <CircleSlash2 className="size-8 text-muted-foreground" />
+                  <CircleSlash2 className="size-6 text-muted-foreground" />
                 </EmptyMedia>
                 <EmptyTitle>No units yet</EmptyTitle>
               </EmptyHeader>
-              <EmptyContent className="mt-2">
+              <EmptyContent>
                 <Button
-                  className="mt-4 font-sans font-bold text-sm"
+                  className="font-sans font-bold text-sm"
                   onClick={handleOpenCreate}
                   disabled={saving}
                 >

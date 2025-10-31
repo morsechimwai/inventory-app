@@ -311,9 +311,9 @@ export default function ProductPage() {
               <EmptyHeader>
                 <EmptyMedia variant="icon">
                   {units.length === 0 ? (
-                    <CircleAlert className="size-8 text-amber-500" />
+                    <CircleAlert className="size-6.5 text-amber-500" />
                   ) : (
-                    <PackageOpen className="size-8 text-muted-foreground" />
+                    <PackageOpen className="size-6.5 text-muted-foreground" />
                   )}
                 </EmptyMedia>
 
@@ -323,7 +323,7 @@ export default function ProductPage() {
                       You need at least one unit before adding products.
                     </span>
                   ) : (
-                    " No products yet"
+                    "No products yet"
                   )}
                 </EmptyTitle>
               </EmptyHeader>
@@ -331,7 +331,7 @@ export default function ProductPage() {
               {/* Case: missing unit */}
               {units.length === 0 && (
                 <>
-                  <EmptyContent className="mt-2">
+                  <EmptyContent>
                     <Button variant="link" className="font-sans font-bold text-sm" asChild>
                       <Link href="/unit">Go to unit page</Link>
                     </Button>
@@ -342,7 +342,7 @@ export default function ProductPage() {
               {/* Case: ready to add product */}
               {units.length > 0 && (
                 <>
-                  <EmptyContent className="mt-2">
+                  <EmptyContent>
                     <Button
                       className="font-sans font-bold text-sm"
                       onClick={handleOpenCreate}

@@ -240,13 +240,13 @@ export default function CategoryPage() {
             <Empty>
               <EmptyHeader>
                 <EmptyMedia variant="icon">
-                  <CircleSlash2 className="size-8 text-muted-foreground" />
+                  <CircleSlash2 className="size-6 text-muted-foreground" />
                 </EmptyMedia>
                 <EmptyTitle>No categories yet</EmptyTitle>
               </EmptyHeader>
               <EmptyContent>
                 <Button
-                  className="mt-4 font-sans font-bold text-sm"
+                  className="font-sans font-bold text-sm"
                   onClick={handleOpenCreate}
                   disabled={saving}
                 >
