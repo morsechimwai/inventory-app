@@ -1,4 +1,3 @@
-import type { ProductDTO } from "@/lib/types/product"
 import type { WeekProductData, EfficiencyMetrics, ProductWithDate } from "@/lib/types/dashboard"
 
 export function calculateWeeklyProducts(allProducts: ProductWithDate[]): WeekProductData[] {
@@ -30,12 +29,22 @@ export function calculateWeeklyProducts(allProducts: ProductWithDate[]): WeekPro
 }
 
 export function calculateEfficiencyMetrics(
-  allProducts: ProductDTO[],
+  allProducts: ProductWithDate[],
   totalProducts: number
 ): EfficiencyMetrics {
-  const inStockCount = 0
-  const lowStockCount = 0
-  const outOfStockCount = 0
+  let inStockCount = 0
+  let lowStockCount = 0
+  let outOfStockCount = 0
+
+  allProducts.forEach((product) => {
+    if (product.isOutOfStock) {
+      outOfStockCount += 1
+    } else if (product.isLowStock) {
+      lowStockCount += 1
+    } else if (product.currentStock > 0) {
+      inStockCount += 1
+    }
+  })
 
   const inStockPercentage = totalProducts > 0 ? Math.round((inStockCount / totalProducts) * 100) : 0
   const lowStockPercentage =
@@ -90,12 +99,19 @@ export function calculateWeeklyTrends(allProducts: ProductWithDate[]) {
 
   const productTrend = safePercent(thisWeekProducts.length, lastWeekProducts.length)
 
-  const totalValueThisWeek = 0
-  const totalValueLastWeek = 0
+  const sumInventoryValue = (items: ProductWithDate[]) =>
+    items.reduce((total, product) => total + product.inventoryValue, 0)
+
+  const totalValueThisWeek = sumInventoryValue(thisWeekProducts)
+  const totalValueLastWeek = sumInventoryValue(lastWeekProducts)
   const totalValueTrend = safePercent(totalValueThisWeek, totalValueLastWeek)
 
-  const lowStockThisWeek = 0
-  const lowStockLastWeek = 0
+  const lowStockThisWeek = thisWeekProducts.filter(
+    (product) => product.isLowStock || product.isOutOfStock
+  ).length
+  const lowStockLastWeek = lastWeekProducts.filter(
+    (product) => product.isLowStock || product.isOutOfStock
+  ).length
   const lowStockTrend = safePercent(lowStockThisWeek, lowStockLastWeek)
 
   return {
