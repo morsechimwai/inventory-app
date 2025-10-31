@@ -16,9 +16,6 @@ import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
 import { ProductDTO } from "@/lib/types/product"
 
-// Utils
-import { formatCurrencyTHB } from "@/lib/utils"
-
 export const columns = (
   onEdit: (product: ProductDTO) => void,
   onDelete: (product: ProductDTO) => void
@@ -34,7 +31,7 @@ export const columns = (
     cell: ({ getValue }) => getValue<string>(),
   },
   {
-    accessorKey: "categoryId",
+    accessorKey: "category.name",
     header: "Category",
     cell: ({ getValue }) => getValue<string>() || "-",
   },
@@ -44,7 +41,12 @@ export const columns = (
     cell: ({ getValue }) => (getValue<number>() ? `< ${getValue<number>()}` : `-`),
   },
   {
-    accessorKey: "unitId",
+    accessorKey: "currentStock",
+    header: "Current Stock",
+    cell: ({ getValue }) => getValue<number>(),
+  },
+  {
+    accessorKey: "unit.name",
     header: "Unit",
     cell: ({ getValue }) => getValue<string>(),
   },
