@@ -1,12 +1,12 @@
 // Next.js
-import Link from "next/link";
+import Link from "next/link"
 
 // Icons
-import { Origami, PackageCheck, ShieldCheck, Truck } from "lucide-react";
+import { Github, Origami, PackageCheck, ShieldCheck, Truck } from "lucide-react"
 
 // Components
-import { Button } from "@/components/ui/button";
-import { SignIn } from "@stackframe/stack";
+import { Button } from "@/components/ui/button"
+import { SignIn } from "@stackframe/stack"
 
 export default function Home() {
   return (
@@ -30,44 +30,35 @@ export default function Home() {
               Inventory Management System
             </h1>
             <p className="font-sans text-base text-muted-foreground sm:text-lg">
-              Track your own stock levels, catch low inventory early, and plan
-              restocks from one fast dashboard built for lean teams.
+              Track your own stock levels, catch low inventory early, and plan restocks from one
+              fast dashboard built for lean teams.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-border/70 p-4 text-left shadow-sm">
               <PackageCheck className="mb-3 h-8 w-8 text-primary" />
-              <p className="font-sans text-2xl font-semibold text-foreground">
-                99.9%
-              </p>
-              <p className="font-sans text-sm text-muted-foreground">
-                Stock accuracy
-              </p>
+              <p className="font-sans text-2xl font-semibold text-foreground">99.9%</p>
+              <p className="font-sans text-sm text-muted-foreground">Stock accuracy</p>
             </div>
             <div className="rounded-xl border border-border/70 p-4 text-left shadow-sm">
               <Truck className="mb-3 h-8 w-8 text-primary" />
-              <p className="font-sans text-2xl font-semibold text-foreground">
-                2 min
-              </p>
-              <p className="font-sans text-sm text-muted-foreground">
-                Update intervals
-              </p>
+              <p className="font-sans text-2xl font-semibold text-foreground">2 min</p>
+              <p className="font-sans text-sm text-muted-foreground">Update intervals</p>
             </div>
             <div className="rounded-xl border border-border/70 p-4 text-left shadow-sm">
               <ShieldCheck className="mb-3 h-8 w-8 text-primary" />
-              <p className="font-sans text-2xl font-semibold text-foreground">
-                24/7
-              </p>
-              <p className="font-sans text-sm text-muted-foreground">
-                Secure access
-              </p>
+              <p className="font-sans text-2xl font-semibold text-foreground">24/7</p>
+              <p className="font-sans text-sm text-muted-foreground">Secure access</p>
             </div>
           </div>
           <p className="font-sans text-base text-muted-foreground sm:text-sm">
-            Open-source simple inventory management system built with Next.js,
-            Neon Auth, and Prisma.
-            <Button variant="link">
-              <Link href="#">View on Github</Link>
+            Open-source simple inventory management system built with Next.js, Neon Auth, and
+            Prisma.
+            <Button variant="link" asChild>
+              <Link className="flex items-center" href="#">
+                <span>View on</span> <Github className="mx-1 size-3.5" />
+                <span>GitHub</span>
+              </Link>
             </Button>
           </p>
         </section>
@@ -76,5 +67,5 @@ export default function Home() {
         </div>
       </div>
     </main>
-  );
+  )
 }
