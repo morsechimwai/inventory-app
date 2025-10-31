@@ -1,7 +1,7 @@
 "use client"
 
 // Icons
-import { SquarePen, Trash2, MoreVertical } from "lucide-react"
+import { SquarePen, Trash2, MoreVertical, Tags } from "lucide-react"
 
 // Components
 import {
@@ -23,32 +23,43 @@ export const columns = (
   {
     accessorKey: "sku",
     header: "SKU",
-    cell: ({ getValue }) => getValue<string>().toUpperCase() || "-",
+    cell: ({ row }) => row.original.sku || "-",
   },
   {
     accessorKey: "name",
     header: "Name",
-    cell: ({ getValue }) => getValue<string>(),
+    cell: ({ row }) => row.original.name || "-",
   },
   {
     accessorKey: "category.name",
     header: "Category",
-    cell: ({ getValue }) => getValue<string>() || "-",
-  },
-  {
-    accessorKey: "lowStockAt",
-    header: "Low Stock At",
-    cell: ({ getValue }) => (getValue<number>() ? `< ${getValue<number>()}` : `-`),
+    cell: ({ row }) => {
+      const categoryName = row.original.category?.name
+      return (
+        <div className="inline-flex items-center gap-1">
+          <Tags className="size-3.5" />
+          <span>{categoryName ? categoryName : "Uncategorized"}</span>
+        </div>
+      )
+    },
   },
   {
     accessorKey: "currentStock",
     header: "Current Stock",
-    cell: ({ getValue }) => getValue<number>(),
+    cell: ({ row }) => {
+      const { currentStock, unit } = row.original
+      const unitName = unit?.name
+      return `${currentStock} ${unitName}`
+    },
   },
   {
-    accessorKey: "unit.name",
-    header: "Unit",
-    cell: ({ getValue }) => getValue<string>(),
+    accessorKey: "lowStockAt",
+    header: "Low Stock At",
+    cell: ({ row }) => {
+      const { lowStockAt, unit } = row.original
+      const unitName = unit?.name
+      return lowStockAt ? `< ${lowStockAt} ${unitName}` : `-`
+    },
   },
   {
     id: "actions",

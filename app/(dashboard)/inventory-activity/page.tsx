@@ -39,7 +39,7 @@ import { Input } from "@/components/ui/input"
 
 // Icons
 import type { LucideIcon } from "lucide-react"
-import { ArrowDownToLine, ArrowUpToLine, History, Scale } from "lucide-react"
+import { ArrowDownToLine, ArrowUpToLine, History, Forklift } from "lucide-react"
 
 // Toast
 import { toast } from "sonner"
@@ -65,36 +65,35 @@ import {
 import { getAllProducts } from "@/lib/actions/products"
 import { toNumberOrNull, toStringOrNull } from "@/lib/utils"
 
-const movementTypeMeta: Record<
-  MovementType,
-  {
-    buttonLabel: string
-    createTitle: string
-    editTitle: string
-    description: string
-    icon: LucideIcon
-  }
-> = {
+type MovementDetail = {
+  buttonLabel: string
+  createTitle: string
+  editTitle: string
+  description: string
+  icon: LucideIcon
+}
+
+const movementTypeMeta: Record<MovementType, MovementDetail> = {
   [MovementType.IN]: {
-    buttonLabel: "Log Stock In",
-    createTitle: "Log Stock In",
+    buttonLabel: "Stock In",
+    createTitle: "Stock In",
     editTitle: "Edit Stock In",
     description: "Capture stock that just arrived so your counts stay accurate.",
     icon: ArrowDownToLine,
   },
   [MovementType.OUT]: {
-    buttonLabel: "Log Stock Out",
-    createTitle: "Log Stock Out",
+    buttonLabel: "Stock Out",
+    createTitle: "Stock Out",
     editTitle: "Edit Stock Out",
     description: "Track what leaves the shelf — sales, usage, or transfers.",
     icon: ArrowUpToLine,
   },
   [MovementType.ADJUST]: {
-    buttonLabel: "Log Adjustment",
-    createTitle: "Log Adjustment",
+    buttonLabel: "Adjustment",
+    createTitle: "Adjustment",
     editTitle: "Edit Adjustment",
     description: "Make a quick correction after a stock check or audit.",
-    icon: Scale,
+    icon: Forklift,
   },
 }
 
@@ -315,10 +314,8 @@ export default function InventoryActivityPage() {
   useEffect(() => {
     if (!isSheetOpen) return
 
-    const hasQuantity =
-      quantityValue !== undefined && quantityValue !== null && quantityValue !== ""
-    const hasUnitCost =
-      unitCostValue !== undefined && unitCostValue !== null && unitCostValue !== ""
+    const hasQuantity = quantityValue !== undefined && quantityValue !== null && quantityValue !== 0
+    const hasUnitCost = unitCostValue !== undefined && unitCostValue !== null && unitCostValue !== 0
 
     const currentTotal = form.getValues("totalCost")
 
@@ -536,9 +533,7 @@ export default function InventoryActivityPage() {
                 render={({ field, fieldState }) => {
                   const { value, ref, name } = field
                   const displayValue =
-                    value === undefined || value === null || value === ""
-                      ? ""
-                      : Number(value).toFixed(2)
+                    value === undefined || value === null ? "" : Number(value).toFixed(2)
                   return (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor={field.name}>
@@ -664,7 +659,7 @@ export default function InventoryActivityPage() {
                           onChange={(event) =>
                             onChange(event.target.value === "" ? undefined : event.target.value)
                           }
-                          className="flex min-h-[96px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="flex min-h-18 max-h-28 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           {...fieldProps}
                         />
                         <FieldError errors={[fieldState.error]} />

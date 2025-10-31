@@ -23,11 +23,11 @@ export const columns = (
   {
     accessorKey: "name",
     header: "Name",
-    cell: ({ getValue }) => (
-      <span>
-        <Hash className="inline-block mr-1 text-muted-foreground size-4" />
-        {getValue<string>()}
-      </span>
+    cell: ({ row }) => (
+      <div className="inline-flex items-center gap-1">
+        <Hash className="size-3.5" />
+        {row.original.name}
+      </div>
     ),
   },
   {

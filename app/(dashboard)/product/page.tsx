@@ -37,7 +37,7 @@ import TableLoading from "@/components/skeleton/table-loading"
 import { toast } from "sonner"
 
 // Icons
-import { Info, ListPlus, SquarePen, PackageOpen } from "lucide-react"
+import { Info, SquarePen, PackageOpen, PackagePlus } from "lucide-react"
 
 // Types
 import { ProductDTO } from "@/lib/types/product"
@@ -292,7 +292,7 @@ export default function ProductPage() {
             onClick={handleOpenCreate}
             disabled={saving}
           >
-            <ListPlus className="mr-1 size-4" />
+            <PackagePlus className="mr-1 size-4" />
             <span>Add Product</span>
           </Button>
         )}
@@ -321,7 +321,7 @@ export default function ProductPage() {
                   onClick={handleOpenCreate}
                   disabled={saving}
                 >
-                  <ListPlus className="mr-1 size-4" />
+                  <PackagePlus className="mr-1 size-4" />
                   <span>Add Product</span>
                 </Button>
               </EmptyContent>
@@ -338,7 +338,7 @@ export default function ProductPage() {
                 {isEditing ? (
                   <SquarePen className="mr-1 size-4.5" />
                 ) : (
-                  <ListPlus className="mr-1 size-4.5" />
+                  <PackagePlus className="mr-1 size-4.5" />
                 )}
                 <span className="text-bold">{isEditing ? "Edit Product" : "Add Product"}</span>
               </SheetTitle>

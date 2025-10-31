@@ -1,7 +1,15 @@
 "use client"
 
 // Icons
-import { MoreVertical, SquarePen, Trash2 } from "lucide-react"
+import {
+  ArrowDownToLine,
+  ArrowUpToLine,
+  Forklift,
+  LucideIcon,
+  MoreVertical,
+  SquarePen,
+  Trash2,
+} from "lucide-react"
 
 // Components
 import {
@@ -21,6 +29,7 @@ import { MovementType, ReferenceType } from "@prisma/client"
 
 // Utils
 import { formatCurrencyTHBText } from "@/lib/utils"
+import { createElement } from "react"
 
 const dateFormatter = new Intl.DateTimeFormat("th-TH", {
   dateStyle: "medium",
@@ -32,10 +41,19 @@ const quantityFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 3,
 })
 
-const movementTypeLabels: Record<MovementType, string> = {
-  [MovementType.IN]: "Stock In",
-  [MovementType.OUT]: "Stock Out",
-  [MovementType.ADJUST]: "Adjust",
+const movementTypeLabels: Record<MovementType, { title: string; icon: LucideIcon }> = {
+  [MovementType.IN]: {
+    title: "Stock In",
+    icon: ArrowDownToLine,
+  },
+  [MovementType.OUT]: {
+    title: "Stock Out",
+    icon: ArrowUpToLine,
+  },
+  [MovementType.ADJUST]: {
+    title: "Adjustment",
+    icon: Forklift,
+  },
 }
 
 const referenceTypeLabels: Record<ReferenceType, string> = {
@@ -64,7 +82,15 @@ export const columns = (
   {
     accessorKey: "movementType",
     header: "Type",
-    cell: ({ row }) => movementTypeLabels[row.original.movementType],
+    cell: ({ row }) => {
+      const { movementType } = row.original
+      return (
+        <div className="inline-flex items-center gap-1">
+          {createElement(movementTypeLabels[movementType].icon, { className: "size-3.5" })}
+          {movementTypeLabels[movementType].title}
+        </div>
+      )
+    },
   },
   {
     id: "quantity",
