@@ -63,7 +63,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { defaultFormValues, productFormSchema } from "./schema"
 
 // Utils
-import { normalize } from "@/lib/utils"
+import { toNumberOrNull, toStringOrNull } from "@/lib/utils"
 
 export default function ProductPage() {
   // Custom Hook Form
@@ -146,9 +146,9 @@ export default function ProductPage() {
     // Prepare payload
     const payload = {
       name: values.name,
-      sku: normalize(values.sku) as string | null,
-      lowStockAt: normalize(values.lowStockAt) as number | null,
-      categoryId: normalize(values.categoryId) as string | null,
+      sku: toStringOrNull(values.sku),
+      lowStockAt: toNumberOrNull(values.lowStockAt),
+      categoryId: toStringOrNull(values.categoryId),
       unitId: values.unitId,
     }
 
@@ -241,8 +241,8 @@ export default function ProductPage() {
         name: product.name,
         sku: product.sku ?? undefined,
         lowStockAt: product.lowStockAt ?? undefined,
-        categoryId: product.categoryId ?? undefined,
-        unitId: product.unitId,
+        categoryId: product.category?.id ?? undefined,
+        unitId: product.unit?.id,
       })
       setIsSheetOpen(true)
     },
