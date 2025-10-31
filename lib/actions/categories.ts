@@ -16,7 +16,7 @@ import {
 
 // Types
 import type { ActionResult } from "@/lib/types/error"
-import type { CreateCategoryInput, CategoryDTO } from "@/lib/types/category"
+import type { CategoryInput, CategoryDTO } from "@/lib/types/category"
 
 // Error Handling
 import { withErrorHandling } from "@/lib/errors/with-error-handling"
@@ -24,7 +24,6 @@ import { AppError } from "@/lib/errors/app-error"
 
 export interface CategoryCreateResult {
   message: string
-  data?: CategoryDTO
   meta?: { userId: string }
 }
 
@@ -46,17 +45,16 @@ export interface CategoryDeleteResult {
 
 // Create a new category (CRUD - Create)
 export async function createCategoryAction(
-  data: CreateCategoryInput
+  data: CategoryInput
 ): Promise<ActionResult<CategoryCreateResult>> {
   return withErrorHandling(async () => {
     const user = await getCurrentUser()
     if (!user) throw new AppError("UNAUTHORIZED", "Please log in first.")
 
-    const category = await createCategory(user.id, data)
+    await createCategory(user.id, data)
     revalidatePath("/dashboard/category")
     return {
       message: "Category created successfully",
-      data: category,
       meta: { userId: user.id },
     }
   })

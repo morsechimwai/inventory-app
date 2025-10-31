@@ -4,7 +4,7 @@ import type { Category } from "@prisma/client"
 export type CategoryEntity = Category
 
 // Form input
-export type CategoryInput = Omit<Category, "id" | "userId" | "createdAt" | "updatedAt">
+export type CategoryInput = Pick<Category, "name">
 
 // DTO for output
 export type CategoryDTO = {
