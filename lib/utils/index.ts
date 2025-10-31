@@ -1,16 +1,16 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
+// Utility to merge class names
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const normalize = (v: unknown): string | number | null => {
-  if (v === "" || v === undefined || v === null) return null
-  if (typeof v === "string" || typeof v === "number") return v
-  return null // fallback
-}
+// Normalize input: convert empty strings to null
+export const toStringOrNull = (v: unknown) => (v === "" || v == null ? null : String(v))
+export const toNumberOrNull = (v: unknown) => (v === "" || v == null ? null : Number(v))
 
+// Format number as Thai Baht currency
 export function formatCurrencyTHB(amount: number): string {
   return new Intl.NumberFormat("th-TH", {
     style: "currency",
@@ -20,6 +20,7 @@ export function formatCurrencyTHB(amount: number): string {
   }).format(amount)
 }
 
+// Format number as Thai Baht currency text without symbol
 export function formatCurrencyTHBText(amount: number): string {
   const formatted = new Intl.NumberFormat("en-US", {
     minimumFractionDigits: 2,
