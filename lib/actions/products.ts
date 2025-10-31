@@ -17,7 +17,7 @@ import {
 
 // Types
 import type { ActionResult } from "@/lib/types/error"
-import type { CreateProductInput, ProductDTO } from "@/lib/types/product"
+import type { ProductInput, ProductDTO } from "@/lib/types/product"
 
 // Error Handling
 import { withErrorHandling } from "@/lib/errors/with-error-handling"
@@ -25,7 +25,6 @@ import { AppError } from "@/lib/errors/app-error"
 
 export interface ProductCreateResult {
   message: string
-  data?: ProductDTO
   meta?: { userId: string }
 }
 
@@ -49,17 +48,16 @@ export interface ProductDeleteResult {
 
 // Create a new product (CRUD - Create)
 export async function createProductAction(
-  data: CreateProductInput
+  data: ProductInput
 ): Promise<ActionResult<ProductCreateResult>> {
   return withErrorHandling(async () => {
     const user = await getCurrentUser()
     if (!user) throw new AppError("UNAUTHORIZED", "Please log in first.")
 
-    const product = await createProduct(user.id, data)
+    await createProduct(user.id, data)
     revalidatePath("/inventory")
     return {
       message: "Product created successfully",
-      data: product,
       meta: { userId: user.id },
     }
   })
@@ -84,7 +82,7 @@ export async function getAllProducts(): Promise<ActionResult<ProductListResult>>
 // Update an existing product by ID (CRUD - Update)
 export async function updateProductAction(
   id: string,
-  data: Partial<ProductDTO>
+  data: Partial<ProductInput>
 ): Promise<ActionResult<ProductUpdateResult>> {
   return withErrorHandling(async () => {
     const user = await getCurrentUser()

@@ -33,7 +33,7 @@ export async function getProductsByUserId(userId: string): Promise<ProductDTO[]>
 
   return products.map((p) => ({
     ...p,
-    currentStock: Number(p.currentStock), // Ensure currentStock is a number
+    currentStock: p.currentStock.toNumber(),
   }))
 }
 
