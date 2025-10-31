@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState, useEffect, useMemo } from "react"
+import { useCallback, useEffect, useMemo } from "react"
 // Next.js
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -61,14 +61,7 @@ const navigationGroups: NavigationGroup[] = [
 export default function AppSidebar() {
   const pathname = usePathname()
   const { resolvedTheme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
   const { isMobile, setOpenMobile } = useSidebar()
-
-  // Ensure mounted for theme detection
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setMounted(true))
-    return () => cancelAnimationFrame(id)
-  }, [])
 
   // Close sidebar on navigation (mobile)
   useEffect(() => {
@@ -84,10 +77,9 @@ export default function AppSidebar() {
     }
   }, [isMobile, setOpenMobile])
 
-  // Toggle theme
   const handleToggleTheme = useCallback(() => {
-    const nextTheme = (resolvedTheme ?? "light") === "dark" ? "light" : "dark"
-    setTheme(nextTheme)
+    const next = resolvedTheme === "dark" ? "light" : "dark"
+    setTheme(next)
   }, [resolvedTheme, setTheme])
 
   // Memoized UserButton
@@ -95,9 +87,6 @@ export default function AppSidebar() {
     () => <UserButton showUserInfo colorModeToggle={handleToggleTheme} />,
     [handleToggleTheme]
   )
-
-  // Render after mount
-  if (!mounted) return null
 
   const normalizePath = (path: string) =>
     path.endsWith("/") && path !== "/" ? path.slice(0, -1) : path
@@ -114,9 +103,6 @@ export default function AppSidebar() {
             href="#"
             onClick={handleNavigate}
           >
-            <div className="rounded-sm bg-sky-400 p-1">
-              <Origami className="text-sky-50 size-2" />
-            </div>
             <span className="text-xl font-black font-sans">StocKit</span>
           </Link>
         </SidebarMenuButton>
