@@ -181,11 +181,12 @@ Let `W0` = current ISO week, `W-1` = prior week.
 
 Define Trend(a,b):
 
-![trend](https://latex.codecogs.com/png.image?\dpi{150}\bg_white\%5Coperatorname%7BTrend%7D%28a%2Cb%29%3D%5Cbegin%7Bcases%7D%5Cfrac%7Ba-b%7D%7Bb%7D%5Ctimes100%26%5Ctext%7Bif%20%7Db%3E0%2C%5C%5C0%26%5Ctext%7Botherwise%7D%5Cend%7Bcases%7D)
+![trend](https://latex.codecogs.com/svg.image?\dpi{150}\bg_white\%5Coperatorname%7BTrend%7D%28a%2Cb%29%3D%5Cbegin%7Bcases%7D%5Cfrac%7Ba-b%7D%7Bb%7D%5Ctimes100%26%5Ctext%7Bif%20%7Db%3E0%2C%5C%5C0%26%5Ctext%7Botherwise%7D%5Cend%7Bcases%7D)
 
 Dashboard signals:
 
-![signals](https://latex.codecogs.com/png.image?\dpi{150}\bg_white\T_%7Bprod%7D%3D%5Coperatorname%7BTrend%7D%28%7CW_0%7C%2C%7CW_%7B-1%7D%7C%29%2C%5Cquad%20T_%7Bvalue%7D%3D%5Coperatorname%7BTrend%7D%28%5Csum_%7Bp%5Cin%20W_0%7Dprice_p%5Ccdot%20qty_p%2C%5Csum_%7Bp%5Cin%20W_%7B-1%7D%7Dprice_p%5Ccdot%20qty_p%29%2C%5Cquad%20T_%7Blow%7D%3D%5Coperatorname%7BTrend%7D%28%7CL_0%7C%2C%7CL_%7B-1%7D%7C%29)
+![signals](https://latex.codecogs.com/svg.image?\bg_white T_%7Bprod%7D=\operatorname%7BTrend%7D(%7CW_0%7C,%7CW_%7B-1%7D%7C),\quad T_%7Bvalue%7D=\operatorname%7BTrend%7D(\sum_%7Bp\in%20W_0%7Dprice_p\cdot%20qty_p,\sum_%7Bp\in%20W_%7B-1%7D%7Dprice_p\cdot%20qty_p),\quad T_%7Blow%7D=\operatorname%7BTrend%7D(%7CL_0%7C,%7CL_%7B-1%7D%7C))
+
 
 `L_t` = { products in `W_t` with qty ≤ 5 }.
 
@@ -194,7 +195,7 @@ Let `N` = total product count.
 
 Percent buckets:
 
-![percent](https://latex.codecogs.com/png.image?\dpi{150}\bg_white\P_%7Bin%7D%3D%5Cfrac%7BN_%7Bin%7D%7D%7BN%7D%5Ctimes100%2C%5Cquad%20P_%7Blow%7D%3D%5Cfrac%7BN_%7Blow%7D%7D%7BN%7D%5Ctimes100%2C%5Cquad%20P_%7Bout%7D%3D%5Cfrac%7BN_%7Bout%7D%7D%7BN%7D%5Ctimes100)
+![percent](https://latex.codecogs.com/svg.image?\dpi{150}\bg_white\P_%7Bin%7D%3D%5Cfrac%7BN_%7Bin%7D%7D%7BN%7D%5Ctimes100%2C%5Cquad%20P_%7Blow%7D%3D%5Cfrac%7BN_%7Blow%7D%7D%7BN%7D%5Ctimes100%2C%5Cquad%20P_%7Bout%7D%3D%5Cfrac%7BN_%7Bout%7D%7D%7BN%7D%5Ctimes100)
 
 Counts:
 
@@ -204,7 +205,8 @@ Counts:
 
 Efficiency:
 
-![eff](https://latex.codecogs.com/png.image?\dpi{150}\bg_white\E%3D%5Coperatorname%7Bclip%7D_%7B%5B0%2C100%5D%7D%28%5Coperatorname%7Bround%7D%280.7P_%7Bin%7D%2B0.2%28100-P_%7Blow%7D%29%2B0.1%28100-P_%7Bout%7D%29%29%29)
+![eff](https://latex.codecogs.com/svg.image?\bg_white E=\operatorname%7Bclip%7D_%7B%5B0,100%5D%7D(\operatorname%7Bround%7D(0.7P_%7Bin%7D+0.2(100-P_%7Blow%7D)+0.1(100-P_%7Bout%7D))))
+
 
 ## Contributing & license
 Pull requests, issues, and feature ideas are welcome. microFeed ships under the [MIT License](./LICENSE), so you can adapt it for commercial products, internal tools, or SaaS offerings without friction.
