@@ -25,8 +25,26 @@ import { getDashboardMetrics } from "@/lib/actions/dashboard"
 import { calculateWeeklyTrends } from "@/lib/utils/dashboard"
 import { currencyFormatterTHB } from "@/lib/utils/formatters"
 
+const STOCK_LEVEL_STYLES = {
+  OUT_OF_STOCK: {
+    bg: "bg-red-400",
+    text: "text-red-400",
+    label: "Out of Stock",
+  },
+  LOW: {
+    bg: "bg-amber-400",
+    text: "text-amber-400",
+    label: "Low Stock",
+  },
+  HEALTHY: {
+    bg: "bg-emerald-400",
+    text: "text-emerald-400",
+    label: "Healthy",
+  },
+} as const
+
 export default async function DashboardPage() {
-  const { keyMetrics, weekProductsData, efficiency } = await getDashboardMetrics()
+  const { keyMetrics, weekProductsData, efficiency, stockLevels } = await getDashboardMetrics()
 
   /**
    * :: Key metrics
@@ -79,12 +97,6 @@ export default async function DashboardPage() {
       description: "Restock immediately",
     },
   ]
-
-  // Mock recent products — ถ้าต้องการข้อมูลจริงให้ fetch ใน getDashboardMetrics()
-  const recent = allProducts.slice(0, 5).map((p, i) => ({
-    name: p.name,
-    lowStockAt: 5,
-  }))
 
   return (
     <div className="p-4 md:p-6 lg:p-8">
@@ -204,32 +216,35 @@ export default async function DashboardPage() {
           <h2 className="text-xl font-bold font-sans">Stock Levels</h2>
           <Card className="flex-1">
             <CardContent className="flex h-full w-full">
-              {recent.length > 0 ? (
+              {stockLevels.length > 0 ? (
                 <div className="flex-1 space-y-2">
-                  {recent.map((product, key) => {
-                    // const stockLevel =
-                    //   product.quantity === 0
-                    //     ? 0
-                    //     : product.quantity <= (product.lowStockAt || 5)
-                    //     ? 1
-                    //     : 2
-
-                    const bgColors = ["bg-red-400", "bg-amber-400", "bg-emerald-400"]
-                    const textColors = ["text-red-400", "text-amber-400", "text-emerald-400"]
-
+                  {stockLevels.map((product) => {
+                    const styles = STOCK_LEVEL_STYLES[product.stockLevel]
+                    const isOutOfStock = product.stockLevel === "OUT_OF_STOCK"
+                    const stockText = isOutOfStock
+                      ? "Out of stock"
+                      : `${product.currentStock} ${product.unitName}`
+                    const threshold =
+                      product.lowStockAt !== null
+                        ? `· Min ${product.lowStockAt} ${product.unitName}`
+                        : ""
                     return (
                       <div
-                        key={key}
+                        key={product.id}
                         className="flex flex-col gap-2 rounded-lg bg-muted/50 p-2 sm:flex-row sm:items-center sm:justify-between"
                       >
-                        {/* <div className="flex items-center gap-2">
-                          <span className={`w-4 h-2.5 rounded-full ${bgColors[stockLevel]}`} />
-                          <p className="text-sm font-medium font-sans">{product.name}</p>
-                        </div> */}
-                        {/* <p className={`text-sm font-medium ${textColors[stockLevel]} font-sans`}>
-                          <span>{product.quantity ? product.quantity : "out of stock"} </span>
-                          <span>{product.quantity ? "units" : ""}</span>
-                        </p> */}
+                        <div className="flex items-center gap-2">
+                          <span className={`h-2.5 w-4 rounded-full ${styles.bg}`} />
+                          <div>
+                            <p className="text-sm font-medium font-sans">{product.name}</p>
+                            <p className="text-xs text-muted-foreground font-sans">
+                              {styles.label} {threshold}
+                            </p>
+                          </div>
+                        </div>
+                        <p className={`text-sm font-medium font-sans ${styles.text}`}>
+                          {stockText}
+                        </p>
                       </div>
                     )
                   })}
