@@ -45,18 +45,18 @@ const navigationGroups: NavigationGroup[] = [
     label: "overview",
     items: [
       { title: "dashboard", url: "/dashboard", icon: BarChart2 },
-      { title: "activity", url: "/inventory-activity", icon: ArrowUpDown },
+      { title: "activity", url: "/inventory-activities", icon: ArrowUpDown },
     ],
   },
   {
     label: "inventory",
-    items: [{ title: "product", url: "/product", icon: Package }],
+    items: [{ title: "product", url: "/products", icon: Package }],
   },
   {
     label: "setup",
     items: [
-      { title: "category", url: "/category", icon: Tags },
-      { title: "unit", url: "/unit", icon: Hash },
+      { title: "category", url: "/categories", icon: Tags },
+      { title: "unit", url: "/units", icon: Hash },
     ],
   },
 ]

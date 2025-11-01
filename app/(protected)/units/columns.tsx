@@ -13,16 +13,17 @@ import {
 import { Button } from "@/components/ui/button"
 
 // Types
-import { ColumnDef } from "@tanstack/react-table"
 import { UnitDTO } from "@/lib/types/unit"
+import { AppColumnDef } from "@/lib/types/data-table"
 
 export const columns = (
   onEdit: (unit: UnitDTO) => void,
   onDelete: (unit: UnitDTO) => void
-): ColumnDef<UnitDTO>[] => [
+): AppColumnDef<UnitDTO>[] => [
   {
     accessorKey: "name",
     header: "Name",
+    enableSearch: true,
     cell: ({ row }) => (
       <div className="inline-flex items-center gap-1">
         <Hash className="size-3.5" />

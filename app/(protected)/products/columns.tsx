@@ -13,26 +13,29 @@ import {
 import { Button } from "@/components/ui/button"
 
 // Types
-import { ColumnDef } from "@tanstack/react-table"
 import { ProductDTO } from "@/lib/types/product"
+import { AppColumnDef } from "@/lib/types/data-table"
 
 export const columns = (
   onEdit: (product: ProductDTO) => void,
   onDelete: (product: ProductDTO) => void
-): ColumnDef<ProductDTO>[] => [
+): AppColumnDef<ProductDTO>[] => [
   {
     accessorKey: "sku",
     header: "SKU",
+    enableSearch: true,
     cell: ({ row }) => row.original.sku || "-",
   },
   {
     accessorKey: "name",
     header: "Name",
+    enableSearch: true,
     cell: ({ row }) => row.original.name || "-",
   },
   {
     accessorKey: "category.name",
     header: "Category",
+    enableSearch: true,
     cell: ({ row }) => {
       const categoryName = row.original.category?.name
       return (

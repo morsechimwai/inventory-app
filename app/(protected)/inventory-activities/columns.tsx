@@ -20,10 +20,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 
-// Tables
-import type { ColumnDef } from "@tanstack/react-table"
-
 // Types
+import { AppColumnDef } from "@/lib/types/data-table"
 import type { StockMovementDTO } from "@/lib/types/stock-movement"
 import { MovementType, ReferenceType } from "@prisma/client"
 
@@ -58,20 +56,23 @@ const referenceTypeLabels: Record<ReferenceType, string> = {
 export const columns = (
   onEdit: (movement: StockMovementDTO) => void,
   onDelete: (movement: StockMovementDTO) => void
-): ColumnDef<StockMovementDTO>[] => [
+): AppColumnDef<StockMovementDTO>[] => [
   {
     accessorKey: "createdAt",
     header: "When",
+    enableSearch: true,
     cell: ({ row }) => dateFormatter.format(new Date(row.original.createdAt)),
   },
   {
     accessorKey: "product.name",
     header: "Product",
+    enableSearch: true,
     cell: ({ row }) => row.original.product.name,
   },
   {
     accessorKey: "movementType",
     header: "Type",
+    enableSearch: true,
     cell: ({ row }) => {
       const { movementType } = row.original
       return (
@@ -114,6 +115,7 @@ export const columns = (
   {
     accessorKey: "referenceType",
     header: "Reference",
+    enableSearch: true,
     cell: ({ row }) => {
       const { referenceType, referenceId } = row.original
       const label = referenceTypeLabels[referenceType]
@@ -123,6 +125,7 @@ export const columns = (
   {
     accessorKey: "reason",
     header: "Notes",
+    enableSearch: true,
     cell: ({ row }) => row.original.reason ?? "-",
   },
   {
