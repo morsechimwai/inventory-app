@@ -5,7 +5,7 @@ export const currencyFormatterTHB = new Intl.NumberFormat("th-TH", {
   maximumFractionDigits: 2,
 })
 
-export const dateFormatter = new Intl.DateTimeFormat("th-TH", {
+export const dateFormatter = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
   timeStyle: "short",
 })
