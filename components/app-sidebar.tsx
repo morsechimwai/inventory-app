@@ -42,15 +42,18 @@ interface NavigationGroup {
 
 const navigationGroups: NavigationGroup[] = [
   {
-    label: "Overview",
+    label: "overview",
     items: [
       { title: "dashboard", url: "/dashboard", icon: BarChart2 },
       { title: "activity", url: "/inventory-activity", icon: ArrowUpDown },
-      { title: "product", url: "/product", icon: Package },
     ],
   },
   {
-    label: "Setup",
+    label: "inventory",
+    items: [{ title: "product", url: "/product", icon: Package }],
+  },
+  {
+    label: "setup",
     items: [
       { title: "category", url: "/category", icon: Tags },
       { title: "unit", url: "/unit", icon: Hash },
@@ -103,11 +106,11 @@ export default function AppSidebar() {
             href="#"
             onClick={handleNavigate}
           >
+            <Origami className="size-7 stroke-3 stroke-sky-400" />
             <span className="text-xl font-black font-sans">StocKit</span>
           </Link>
         </SidebarMenuButton>
       </SidebarHeader>
-
       <SidebarContent className="px-2 mt-6">
         {navigationGroups.map((group) => (
           <div key={group.label} className="mb-6">

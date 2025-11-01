@@ -57,20 +57,14 @@ export function SiteHeader() {
           </Breadcrumb>
         </h1>
         <div className="ml-auto flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="hidden sm:flex" asChild>
+          <Button variant="link" asChild className="p-0 h-auto font-medium text-sm">
             <Link
               href="https://github.com/morsechimwai/stockit-nextjs-prisma-neon"
-              rel="noopener noreferrer"
               target="_blank"
-              className="dark:text-foreground font-sans"
+              className="inline-flex items-center gap-1"
             >
-              <div className="flex items-center gap-1">
-                <span className="flex items-center">
-                  <span>View on</span>
-                  <Github className="mx-1 size-3.5" />
-                  <span>GitHub</span>
-                </span>
-              </div>
+              <Github className="size-4" />
+              View code on GitHub
             </Link>
           </Button>
         </div>
