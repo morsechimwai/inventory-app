@@ -1,9 +1,9 @@
-# 🦜 stocKit
+# StocKit
 
 <!-- PROJECT LOGO -->
 <p align="center">
   <a href="#">
-    <img src="public/icon.png" alt="stocKit Logo" width="120" height="120">
+    <img src="public/icon.png" alt="StocKit Logo" width="120" height="120">
   </a>
 </p>
 
@@ -37,6 +37,12 @@ stack/                    // Stack client/server configuration
 prisma/                   // Schema, migrations, seed script
 public/                   // Static assets
 ```
+
+## Stock Movements Service
+- Core service logic lives in `lib/services/stock-movements.ts`, keeping stock quantities in sync by wrapping every mutation in a Prisma transaction and undoing old deltas before applying new ones.
+- Ownership enforcement (`assertProductOwnership`) ensures a user can only mutate their own products, even inside nested transactions.
+- Helper `calcDelta` centralizes how IN/OUT/ADJUST movements affect inventory counts, making new movement types easy to extend later.
+- Read more in `lib/services/README.md` for rationale and integration notes with the Inventory Activity UI.
 
 ## Database Schema
 Prisma models are scoped by `userId` so each Stack-authenticated workspace owns its own catalogue. Columns marked `*` are required.

@@ -1,12 +1,21 @@
+// lib/services/stock-movements.ts
+// Services for managing stock movements in the inventory system
+
+// Prisma Client
+import type { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/db/prisma"
+
+// Types
 import type {
   StockMovementInput,
   StockMovementEntity,
   StockMovementDTO,
 } from "@/lib/types/stock-movement"
+
+// Errors
 import { AppError } from "@/lib/errors/app-error"
 
-import type { Prisma } from "@prisma/client"
+// Utils
 import { decimalToNumber } from "../utils/decimal"
 
 // ─────────────────────────────────────────────────────────────
