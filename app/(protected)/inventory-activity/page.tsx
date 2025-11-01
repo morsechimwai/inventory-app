@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/dialog"
 import { Field, FieldContent, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import SelectCombobox, { type ComboboxOption } from "@/components/ui/select-combobox"
 
 // Icons
 import type { LucideIcon } from "lucide-react"
@@ -136,6 +137,14 @@ export default function InventoryActivityPage() {
   const selectedProduct = useMemo(
     () => products.find((product) => product.id === selectedProductId) ?? null,
     [products, selectedProductId]
+  )
+  const productOptions = useMemo<ComboboxOption[]>(
+    () =>
+      products.map((product) => ({
+        label: product.sku ? `${product.name} | ${product.sku}` : product.name,
+        value: product.id,
+      })),
+    [products]
   )
   const quantityValue = form.watch("quantity")
   const unitCostValue = form.watch("unitCost")
@@ -439,21 +448,18 @@ export default function InventoryActivityPage() {
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>Product</FieldLabel>
                     <FieldContent>
-                      <select
+                      <SelectCombobox
                         id={field.name}
-                        ref={field.ref}
-                        value={field.value ?? ""}
-                        onChange={(event) => field.onChange(event.target.value || undefined)}
+                        value={field.value ? String(field.value) : undefined}
+                        onChange={(next) => field.onChange(next ?? "")}
+                        onBlur={field.onBlur}
                         disabled={saving || products.length === 0}
-                        aria-invalid={fieldState.invalid}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {products.map((product) => (
-                          <option key={product.id} value={product.id}>
-                            {product.name}
-                          </option>
-                        ))}
-                      </select>
+                        placeholder={
+                          products.length === 0 ? "No products available" : "Search product..."
+                        }
+                        options={productOptions}
+                        ariaInvalid={fieldState.invalid}
+                      />
                       <FieldError errors={[fieldState.error]} />
                     </FieldContent>
                   </Field>
