@@ -29,7 +29,6 @@ import {
 } from "@/components/ui/select"
 import { useSearchOptions } from "@/hooks/use-search-options"
 import { AppColumnDef } from "@/lib/types/data-table"
-import { Button } from "../ui/button"
 
 const toSearchableString = (value: unknown): string => {
   if (value === null || value === undefined) return ""
@@ -105,7 +104,18 @@ export function DataTable<TData>({ columns, data, emptyComponent }: DataTablePro
       return rows
     }
 
-    const targetColumn = table.getColumn(appliedSearch.column)
+    const targetColumn = table.getAllColumns().find((column) => {
+      const accessorKey =
+        "accessorKey" in column.columnDef && typeof column.columnDef.accessorKey === "string"
+          ? column.columnDef.accessorKey
+          : null
+      const columnDefId = typeof column.columnDef.id === "string" ? column.columnDef.id : null
+
+      return [column.id, columnDefId, accessorKey].some(
+        (candidate) => candidate === appliedSearch.column
+      )
+    })
+
     if (!targetColumn) {
       return rows
     }
