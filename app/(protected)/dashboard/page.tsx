@@ -29,11 +29,14 @@ import {
   BarChart2,
   ChartPie,
   Clock3,
+  HeartPulse,
   PackageCheck,
   PackageOpen,
   PackagePlus,
   RefreshCw,
   TrendingUp,
+  TrendingUpDown,
+  Warehouse,
 } from "lucide-react"
 
 // Actions
@@ -169,8 +172,20 @@ export default async function DashboardPage() {
       {/* Key Metrics Section */}
       <section className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-2 items-stretch">
         <div className="flex h-full flex-col gap-4">
-          <h2 className="text-xl font-bold font-sans">Key Metrics</h2>
           <Card className="flex-1">
+            <CardHeader className="flex flex-col gap-2 border-b">
+              <div className="flex items-center gap-2">
+                <span className="flex size-10 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
+                  <TrendingUpDown className="size-5" />
+                </span>
+                <div>
+                  <CardTitle className="font-sans">Key Metrics</CardTitle>
+                  <CardDescription className="font-sans">
+                    Overview of your inventory performance this week.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
             <CardContent className="flex h-full w-full">
               {totalProducts > 0 ? (
                 <div className="grid h-full flex-1 grid-cols-1 place-items-center gap-4 text-center sm:grid-cols-3 sm:items-center">
@@ -244,7 +259,7 @@ export default async function DashboardPage() {
                 <Empty className="w-full">
                   <EmptyHeader className="w-full max-w-none">
                     <EmptyMedia variant="icon">
-                      <BarChart2 className="size-8 text-muted-foreground" />
+                      <TrendingUpDown className="size-8 text-muted-foreground" />
                     </EmptyMedia>
                     <EmptyTitle>No insights yet</EmptyTitle>
                     <EmptyDescription>
@@ -255,7 +270,7 @@ export default async function DashboardPage() {
               )}
             </CardContent>
             <CardFooter className="flex-col items-start gap-1 border-t border-border/40 pt-4">
-              <p className="text-xs text-muted-foreground font-sans">
+              <p className="text-sm text-muted-foreground font-sans">
                 Trend percentages compare the current week against the previous week.
               </p>
             </CardFooter>
@@ -264,8 +279,20 @@ export default async function DashboardPage() {
 
         {/* Weekly Chart */}
         <div className="flex h-full flex-col gap-4">
-          <h2 className="text-xl font-bold font-sans">New product per week</h2>
           <Card className="flex-1">
+            <CardHeader className="flex flex-col gap-2 border-b">
+              <div className="flex items-center gap-2">
+                <span className="flex size-10 items-center justify-center rounded-full bg-sky-500/10 text-sky-600">
+                  <BarChart2 className="size-5" />
+                </span>
+                <div>
+                  <CardTitle className="font-sans">New Products</CardTitle>
+                  <CardDescription className="font-sans">
+                    Products added over the past week.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
             <CardContent>
               <ProductChart data={weekProductsData} />
             </CardContent>
@@ -277,8 +304,20 @@ export default async function DashboardPage() {
       <section className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-2 items-stretch">
         {/* Stock Levels */}
         <div className="flex h-full flex-col gap-4">
-          <h2 className="text-xl font-bold font-sans">Stock Levels</h2>
           <Card className="flex-1">
+            <CardHeader className="flex flex-col gap-2 border-b">
+              <div className="flex items-center gap-2">
+                <span className="flex size-10 items-center justify-center rounded-full bg-pink-500/10 text-pink-600">
+                  <HeartPulse className="size-5" />
+                </span>
+                <div>
+                  <CardTitle className="font-sans">Stock Levels</CardTitle>
+                  <CardDescription className="font-sans">
+                    Current stock status across your products.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
             <CardContent className="flex h-full w-full">
               {stockLevels.length > 0 ? (
                 <div className="flex-1 space-y-2">
@@ -287,10 +326,10 @@ export default async function DashboardPage() {
                     const isOutOfStock = product.stockLevel === "OUT_OF_STOCK"
                     const stockText = isOutOfStock
                       ? "Out of stock"
-                      : `${product.currentStock} ${product.unitName}`
+                      : `${quantityFormatter.format(product.currentStock)} ${product.unitName}`
                     const threshold =
                       product.lowStockAt !== null
-                        ? `Min ${product.lowStockAt} ${product.unitName}`
+                        ? `Min ${quantityFormatter.format(product.lowStockAt)} ${product.unitName}`
                         : null
                     const StockIcon = STOCK_LEVEL_STYLES[product.stockLevel].icon
                     return (
@@ -305,20 +344,19 @@ export default async function DashboardPage() {
                             <StockIcon className="size-5" />
                           </span>
                           <div>
-                            <div className="flex items-center gap-2"></div>
                             <p className="text-sm font-medium font-sans">{product.name}</p>
+
                             <p className="text-xs text-muted-foreground font-sans">
+                              <span className={`${styles.text}`}>{styles.label}</span> -{" "}
                               {STOCK_LEVEL_LABELS[product.stockLevel]}
                               {threshold ? ` · ${threshold}` : ""}
                             </p>
                           </div>
                         </div>
-                        <p className={`text-sm font-medium font-sans ${styles.text}`}>
+
+                        <p className={`text-sm font-base font-sans tracking-wider ${styles.text}`}>
                           {stockText}
                         </p>
-                        {styles.label !== "Out of Stock" ? (
-                          <Badge className={`ml-2 font-black ${styles.bg}`}>{styles.label}</Badge>
-                        ) : null}
                       </div>
                     )
                   })}
@@ -327,7 +365,7 @@ export default async function DashboardPage() {
                 <Empty className="w-full">
                   <EmptyHeader className="w-full max-w-none">
                     <EmptyMedia variant="icon">
-                      <PackageOpen className="size-8 text-muted-foreground" />
+                      <HeartPulse className="size-8 text-muted-foreground" />
                     </EmptyMedia>
                     <EmptyTitle>No product yet</EmptyTitle>
                     <EmptyDescription>
@@ -347,8 +385,20 @@ export default async function DashboardPage() {
 
         {/* Efficiency */}
         <div className="flex h-full flex-col gap-4">
-          <h2 className="text-xl font-bold font-sans">Efficiency</h2>
           <Card className="flex-1">
+            <CardHeader className="flex flex-col gap-2 border-b">
+              <div className="flex items-center gap-2">
+                <span className="flex size-10 items-center justify-center rounded-full bg-violet-500/10 text-violet-600">
+                  <ChartPie className="size-5" />
+                </span>
+                <div>
+                  <CardTitle className="font-sans">Efficiency</CardTitle>
+                  <CardDescription className="font-sans">
+                    How well your inventory is optimized.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
             <CardContent className="flex flex-col h-full w-full">
               {efficiencyScore === null ? (
                 <Empty className="w-full h-full">
@@ -410,7 +460,7 @@ export default async function DashboardPage() {
       <section className="grid grid-cols-1 gap-8 lg:grid-cols-2 items-stretch">
         {/* Recent Activity */}
         <Card className="flex h-full flex-col">
-          <CardHeader className="flex flex-col gap-2">
+          <CardHeader className="flex flex-col gap-2 border-b">
             <div className="flex items-center gap-2">
               <span className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <Clock3 className="size-5" />
@@ -496,7 +546,7 @@ export default async function DashboardPage() {
 
         {/* Restock suggestions */}
         <Card className="flex h-full flex-col">
-          <CardHeader className="flex flex-col gap-2">
+          <CardHeader className="flex flex-col gap-2 border-b">
             <div className="flex items-center gap-2">
               <span className="flex size-10 items-center justify-center rounded-full bg-amber-500/10 text-amber-600">
                 <PackagePlus className="size-5" />
