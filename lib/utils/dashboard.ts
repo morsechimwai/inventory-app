@@ -1,4 +1,8 @@
+// Types
 import type { WeekProductData, EfficiencyMetrics, ProductWithDate } from "@/lib/types/dashboard"
+
+// Helper to format week labels like "Jan 01 - Jan 07"
+import { formatWeekLabel } from "./formatters"
 
 export function calculateWeeklyProducts(allProducts: ProductWithDate[]): WeekProductData[] {
   const now = new Date()
@@ -13,9 +17,7 @@ export function calculateWeeklyProducts(allProducts: ProductWithDate[]): WeekPro
     weekEnd.setDate(weekStart.getDate() + 6)
     weekEnd.setHours(23, 59, 59, 999)
 
-    const weekLabel = `${String(weekStart.getMonth() + 1).padStart(2, "0")}/${String(
-      weekStart.getDate() + 1
-    ).padStart(2, "0")}`
+    const weekLabel = formatWeekLabel(weekStart)
 
     const weekProducts = allProducts.filter((p) => {
       const d = new Date(p.createdAt)
