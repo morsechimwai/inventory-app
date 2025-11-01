@@ -23,6 +23,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import SelectCombobox, { type ComboboxOption } from "@/components/ui/select-combobox"
 import { Input } from "@/components/ui/input"
 import { Field, FieldContent, FieldError, FieldLabel } from "@/components/ui/field"
 import {
@@ -39,7 +40,7 @@ import TableLoading from "@/components/skeleton/table-loading"
 import { toast } from "sonner"
 
 // Icons
-import { Info, SquarePen, PackageOpen, PackagePlus, Hash, CircleAlert } from "lucide-react"
+import { Info, SquarePen, PackageOpen, PackagePlus, CircleAlert } from "lucide-react"
 
 // Types
 import { ProductDTO } from "@/lib/types/product"
@@ -262,6 +263,28 @@ export default function ProductPage() {
     [handleOpenEdit, handleDelete]
   )
 
+  const categoryOptions = useMemo<ComboboxOption[]>(
+    () =>
+      categories
+        .filter((category) => category.name.trim().length > 0)
+        .map((category) => ({
+          label: category.name,
+          value: category.id,
+        })),
+    [categories]
+  )
+
+  const unitOptions = useMemo<ComboboxOption[]>(
+    () =>
+      units
+        .filter((unit) => unit.name.trim().length > 0)
+        .map((unit) => ({
+          label: unit.name,
+          value: unit.id,
+        })),
+    [units]
+  )
+
   // Load on mount
   useEffect(() => {
     setLoading(true)
@@ -455,7 +478,7 @@ export default function ProductPage() {
                 control={form.control}
                 name="categoryId"
                 render={({ field, fieldState }) => {
-                  const { value, onChange, ref, ...fieldProps } = field
+                  const { value, onChange, onBlur } = field
 
                   return (
                     <Field data-invalid={fieldState.invalid}>
@@ -479,23 +502,22 @@ export default function ProductPage() {
                         </span>
                       </FieldLabel>
                       <FieldContent>
-                        <select
+                        <SelectCombobox
                           id={field.name}
-                          ref={ref}
-                          value={value ?? ""}
-                          onChange={(event) => onChange(event.target.value || undefined)}
-                          disabled={saving}
-                          aria-invalid={fieldState.invalid}
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                          {...fieldProps}
-                        >
-                          <option value="">Uncategorized</option>
-                          {categories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                              {category.name}
-                            </option>
-                          ))}
-                        </select>
+                          value={value ?? undefined}
+                          onChange={onChange}
+                          onBlur={onBlur}
+                          disabled={saving || categories.length === 0}
+                          placeholder={
+                            categories.length === 0
+                              ? "No categories available"
+                              : "Search category..."
+                          }
+                          options={categoryOptions}
+                          ariaInvalid={fieldState.invalid}
+                          allowClear
+                          emptyLabel="Uncategorized"
+                        />
                         <FieldError errors={[fieldState.error]} />
                       </FieldContent>
                     </Field>
@@ -559,31 +581,24 @@ export default function ProductPage() {
                   control={form.control}
                   name="unitId"
                   render={({ field, fieldState }) => {
-                    const { value, onChange, ref, ...fieldProps } = field
+                    const { value, onChange, onBlur } = field
 
                     return (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel htmlFor={field.name}>Unit</FieldLabel>
                         <FieldContent>
-                          <select
+                          <SelectCombobox
                             id={field.name}
-                            ref={ref}
-                            value={value ?? ""}
-                            onChange={(event) => onChange(event.target.value || undefined)}
-                            disabled={saving}
-                            aria-invalid={fieldState.invalid}
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            {...fieldProps}
-                          >
-                            <option value="">
-                              {units.length === 0 ? "No units yet" : "Select unit"}
-                            </option>
-                            {units.map((unit) => (
-                              <option key={unit.id} value={unit.id}>
-                                {unit.name}
-                              </option>
-                            ))}
-                          </select>
+                            value={value ?? undefined}
+                            onChange={(selected) => onChange(selected ?? "")}
+                            onBlur={onBlur}
+                            disabled={saving || units.length === 0}
+                            placeholder={
+                              units.length === 0 ? "No units available" : "Search unit..."
+                            }
+                            options={unitOptions}
+                            ariaInvalid={fieldState.invalid}
+                          />
                           <FieldError errors={[fieldState.error]} />
                         </FieldContent>
                       </Field>
