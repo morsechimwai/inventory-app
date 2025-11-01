@@ -10,6 +10,7 @@ import { LayoutProviders } from "./providers"
 
 // Auth
 import { getUserServer } from "@/lib/auth/get-user"
+import { headers } from "next/headers"
 
 export const metadata: Metadata = {
   title: "Dashboard | stocKit",
@@ -23,7 +24,11 @@ interface DashboardLayoutProps {
 export default async function RootLayout({ children }: Readonly<DashboardLayoutProps>) {
   const { user } = await getUserServer()
 
-  if (!user) redirect("/?next=/dashboard")
+  if (!user) {
+    const headersList = await headers()
+    const path = headersList.get("x-invoke-path") || "/dashboard"
+    redirect(`/?next=${path}`)
+  }
 
   return <LayoutProviders>{children}</LayoutProviders>
 }
