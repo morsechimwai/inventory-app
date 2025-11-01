@@ -1,17 +1,17 @@
-"use client";
+"use client"
 
 // Recharts components
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, Label, XAxis, YAxis } from "recharts"
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/components/ui/chart";
+} from "@/components/ui/chart"
 
 interface ProductChart {
-  week: string;
-  products: number;
+  week: string
+  products: number
 }
 
 const chartConfig = {
@@ -19,7 +19,7 @@ const chartConfig = {
     label: "Products",
     color: "var(--chart-1)",
   },
-} satisfies ChartConfig;
+} satisfies ChartConfig
 
 export default function ProductChart({ data }: { data: ProductChart[] }) {
   return (
@@ -31,23 +31,16 @@ export default function ProductChart({ data }: { data: ProductChart[] }) {
           margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
         >
           <CartesianGrid stroke="#f5f5f5" />
-          <XAxis
-            dataKey="week"
-            fontSize={11}
-            tickLine={false}
-            axisLine={false}
-            tickMargin={8}
-          />
-          <YAxis
-            fontSize={11}
-            tickLine={false}
-            axisLine={false}
-            allowDecimals={false}
-          />
-          <ChartTooltip
-            cursor={false}
-            content={<ChartTooltipContent indicator="line" />}
-          />
+          <XAxis dataKey="week" fontSize={12} tickLine={false} axisLine={false} tickMargin={8} />
+          <YAxis fontSize={12} tickLine={false} axisLine={true} allowDecimals={false}>
+            <Label
+              value="Products"
+              angle={-90}
+              position="insideLeft"
+              style={{ textAnchor: "middle", fontSize: 14 }}
+            />
+          </YAxis>
+          <ChartTooltip cursor={true} content={<ChartTooltipContent indicator="line" />} />
           <Area
             dataKey="products"
             type="natural"
@@ -61,5 +54,5 @@ export default function ProductChart({ data }: { data: ProductChart[] }) {
         </AreaChart>
       </ChartContainer>
     </div>
-  );
+  )
 }
