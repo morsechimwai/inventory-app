@@ -2,7 +2,7 @@
 import Link from "next/link"
 
 // Icons
-import { Github, Origami, PackageCheck, ShieldCheck, Truck } from "lucide-react"
+import { Origami, PackageCheck, Truck, ShieldCheck, Github } from "lucide-react"
 
 // Components
 import { Button } from "@/components/ui/button"
@@ -11,57 +11,62 @@ import { SignIn } from "@stackframe/stack"
 export default function Home() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-linear-to-br from-background via-background to-muted">
-      <div className="grid w-full max-w-6xl grid-cols-1 gap-12 px-6 py-16 lg:grid-cols-2 lg:px-12">
+      <div className="grid w-full max-w-6xl grid-cols-1 gap-12 px-6 py-20 lg:grid-cols-2 lg:px-12">
+        {/* Left side – Hero */}
         <section className="space-y-8 text-center lg:text-left">
-          <p className="font-sans inline-flex items-center gap-2 rounded-full border border-border/60 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-400 shadow-sm">
-            <ShieldCheck className="h-4 w-4 text-emerald-400" />
-            Enterprise-grade security
-          </p>
           <div className="space-y-4">
-            <div className="flex items-center gap-5">
-              <div className="rounded-3xl inline-block bg-sky-400 p-4">
+            <div className="flex items-center gap-5 justify-center lg:justify-start">
+              <div className="rounded-3xl bg-sky-400 p-4">
                 <Origami className="text-sky-50 size-12" />
               </div>
               <h1 className="font-sans text-5xl font-black tracking-wide text-sky-400 sm:text-5xl">
-                stocKit
+                StocKit
               </h1>
             </div>
+
             <h1 className="font-sans text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-              Inventory Management System
+              Track stock without spreadsheets.
             </h1>
-            <p className="font-sans text-base text-muted-foreground sm:text-lg">
-              Track your own stock levels, catch low inventory early, and plan restocks from one
-              fast dashboard built for lean teams.
+
+            <p className="font-sans text-base text-muted-foreground sm:text-lg max-w-lg">
+              A clean, simple stock system for solo sellers and small shops. Update inventory in
+              seconds — without ERP chaos or Excel headaches.
             </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-xl border border-border/70 p-4 text-left shadow-sm">
+
+          {/* Key value points */}
+          <ul className="grid gap-4 sm:grid-cols-3 text-left">
+            <li className="rounded-xl border border-border/70 p-4 shadow-sm">
               <PackageCheck className="mb-3 h-8 w-8 text-primary" />
-              <p className="font-sans text-2xl font-semibold text-foreground">99.9%</p>
-              <p className="font-sans text-sm text-muted-foreground">Stock accuracy</p>
-            </div>
-            <div className="rounded-xl border border-border/70 p-4 text-left shadow-sm">
+              <p className="font-sans text-sm text-muted-foreground">Track stock fast</p>
+            </li>
+            <li className="rounded-xl border border-border/70 p-4 shadow-sm">
               <Truck className="mb-3 h-8 w-8 text-primary" />
-              <p className="font-sans text-2xl font-semibold text-foreground">2 min</p>
-              <p className="font-sans text-sm text-muted-foreground">Update intervals</p>
-            </div>
-            <div className="rounded-xl border border-border/70 p-4 text-left shadow-sm">
+              <p className="font-sans text-sm text-muted-foreground">Catch low inventory</p>
+            </li>
+            <li className="rounded-xl border border-border/70 p-4 shadow-sm">
               <ShieldCheck className="mb-3 h-8 w-8 text-primary" />
-              <p className="font-sans text-2xl font-semibold text-foreground">24/7</p>
-              <p className="font-sans text-sm text-muted-foreground">Secure access</p>
-            </div>
-          </div>
-          <p className="font-sans text-base text-muted-foreground sm:text-sm">
-            Open-source simple inventory management system built with Next.js, Neon Auth, and
-            Prisma.
-            <Button variant="link" asChild>
-              <Link className="flex items-center" href="#">
-                <span>View on</span> <Github className="mx-1 size-3.5" />
-                <span>GitHub</span>
+              <p className="font-sans text-sm text-muted-foreground">Secure & reliable</p>
+            </li>
+          </ul>
+
+          {/* Open source trust note */}
+          <div className="pt-3 text-sm text-muted-foreground font-sans flex flex-col items-center gap-2">
+            <span>Open-source and transparent — see how everything works or build on it.</span>
+            <Button variant="link" asChild className="p-0 h-auto font-medium text-sm">
+              <Link
+                href="https://github.com/morsechimwai/stockit-nextjs-prisma-neon"
+                target="_blank"
+                className="inline-flex items-center gap-1"
+              >
+                <Github className="size-4" />
+                View code on GitHub
               </Link>
             </Button>
-          </p>
+          </div>
         </section>
+
+        {/* Right side – Auth */}
         <div className="flex justify-center lg:justify-end">
           <SignIn />
         </div>

@@ -266,7 +266,7 @@ export default async function DashboardPage() {
                 </Empty>
               )}
             </CardContent>
-            <CardFooter className="flex-col items-start gap-1 border-t border-border/40 pt-4">
+            <CardFooter className="[.border-t]:pt-4 border-t">
               <p className="text-sm text-muted-foreground font-sans">
                 Trend percentages compare the current week against the previous week.
               </p>
@@ -369,11 +369,6 @@ export default async function DashboardPage() {
                       Add products to start managing your inventory.
                     </EmptyDescription>
                   </EmptyHeader>
-                  <EmptyContent className="w-full max-w-none">
-                    <Button asChild className="w-full">
-                      <Link href="/product">Go to products</Link>
-                    </Button>
-                  </EmptyContent>
                 </Empty>
               )}
             </CardContent>
@@ -534,7 +529,7 @@ export default async function DashboardPage() {
               </Empty>
             )}
           </CardContent>
-          <CardFooter className="[.border-t]:pt-4">
+          <CardFooter className="[.border-t]:pt-4 border-t">
             <Button asChild variant="outline" className="w-full">
               <Link href="/inventory-activity">Open inventory activity</Link>
             </Button>
@@ -602,15 +597,19 @@ export default async function DashboardPage() {
                   <EmptyMedia variant="icon">
                     <PackageCheck className="size-8 text-muted-foreground" />
                   </EmptyMedia>
-                  <EmptyTitle>All caught up</EmptyTitle>
+                  <EmptyTitle>
+                    {allProducts.length === 0 ? "No products found" : "All caught up"}
+                  </EmptyTitle>
                   <EmptyDescription>
-                    Stock levels look healthy. Keep an eye out for new low-stock alerts.
+                    {allProducts.length === 0
+                      ? "Add products and set reorder thresholds to receive restock suggestions."
+                      : "No products are nearing their reorder points."}
                   </EmptyDescription>
                 </EmptyHeader>
               </Empty>
             )}
           </CardContent>
-          <CardFooter className="[.border-t]:pt-4">
+          <CardFooter className="[.border-t]:pt-4 border-t">
             <Button asChild className="w-full">
               <Link href="/product">Review product catalog</Link>
             </Button>
