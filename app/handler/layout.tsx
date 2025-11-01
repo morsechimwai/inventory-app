@@ -11,7 +11,7 @@ import { getUserServer } from "@/lib/auth/get-user"
 import { LayoutProviders } from "@/app/(protected)/providers"
 
 export const metadata: Metadata = {
-  title: "Dashboard | stocKit",
+  title: "Dashboard",
   description: "Manage your inventory with stocKit",
 }
 

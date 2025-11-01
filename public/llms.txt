@@ -1,0 +1,4 @@
+Owner: StocKit by morsechimwai
+Contact: mailto:morsechimwai@gmail.com
+Policy: allow
+Allow: /

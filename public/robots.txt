@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://stockit-nextjs-prisma-neon.vercel.app/sitemap.xml

@@ -13,7 +13,7 @@ import { getUserServer } from "@/lib/auth/get-user"
 import { headers } from "next/headers"
 
 export const metadata: Metadata = {
-  title: "Dashboard | stocKit",
+  title: "Dashboard",
   description: "Manage your inventory with stocKit",
 }
 
