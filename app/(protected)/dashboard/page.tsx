@@ -13,14 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty"
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 
 // Icons
 import {
@@ -36,7 +29,6 @@ import {
   RefreshCw,
   TrendingUp,
   TrendingUpDown,
-  Warehouse,
 } from "lucide-react"
 
 // Actions
@@ -45,7 +37,6 @@ import { getDashboardMetrics } from "@/lib/actions/dashboard"
 // Utils
 import { calculateWeeklyTrends } from "@/lib/utils/dashboard"
 import { currencyFormatterTHB, formatRelativeTime, quantityFormatter } from "@/lib/utils/formatters"
-import { Badge } from "@/components/ui/badge"
 
 const STOCK_LEVEL_STYLES = {
   OUT_OF_STOCK: {
@@ -67,12 +58,6 @@ const STOCK_LEVEL_STYLES = {
     icon: PackageCheck,
   },
 } as const
-
-const STOCK_LEVEL_LABELS: Record<keyof typeof STOCK_LEVEL_STYLES, string> = {
-  OUT_OF_STOCK: "Needs immediate restock",
-  LOW: "Below preferred threshold",
-  HEALTHY: "Comfortable stock range",
-}
 
 const MOVEMENT_STYLES = {
   IN: {
@@ -177,16 +162,16 @@ export default async function DashboardPage() {
 
   const keyMetricTiles = [
     {
-      key: "totalProducts",
-      title: "Total Products",
-      primary: <p className="text-3xl font-bold font-sans">{totalProducts}</p>,
-      trend: productTrend,
-    },
-    {
       key: "lowStock",
       title: "Low Stock",
       primary: <p className="text-3xl font-bold font-sans">{lowStock}</p>,
       trend: lowStockTrend,
+    },
+    {
+      key: "totalProducts",
+      title: "Total Products",
+      primary: <p className="text-3xl font-bold font-sans">{totalProducts}</p>,
+      trend: productTrend,
     },
     {
       key: "totalValue",
@@ -212,10 +197,11 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Key Metrics Section */}
+      {/* Key Metrics & stock levels */}
       <section className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-2 items-stretch">
+        {/* Key Metrics */}
         <div className="flex h-full flex-col gap-4">
-          <Card className="flex-1">
+          <Card className="flex-1 gap-0">
             <CardHeader className="flex flex-col gap-2 border-b">
               <div className="flex items-center gap-2">
                 <span className="flex size-10 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
@@ -229,13 +215,16 @@ export default async function DashboardPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="flex h-full w-full">
+            <CardContent className="flex h-full w-full p-0">
               {totalProducts > 0 ? (
-                <div className="grid h-full flex-1 grid-cols-1 place-items-center gap-4 text-center sm:grid-cols-3 sm:items-center">
+                <div className="grid h-full flex-1 grid-cols-1 place-items-center text-center">
                   {keyMetricTiles.map(({ key, title, primary, trend }) => {
                     const { prefix, value, text, icon, bg } = formatTrend(trend)
                     return (
-                      <div key={key} className="flex h-full flex-col items-center justify-center">
+                      <div
+                        key={key}
+                        className="flex w-full h-full flex-col items-center justify-center border-b last:border-0 p-4 gap-2"
+                      >
                         <div
                           className={`flex items-center justify-center px-2 ${bg} rounded-full mt-2`}
                         >
@@ -274,31 +263,6 @@ export default async function DashboardPage() {
           </Card>
         </div>
 
-        {/* Weekly Chart */}
-        <div className="flex h-full flex-col gap-4">
-          <Card className="flex-1">
-            <CardHeader className="flex flex-col gap-2 border-b">
-              <div className="flex items-center gap-2">
-                <span className="flex size-10 items-center justify-center rounded-full bg-sky-500/10 text-sky-600">
-                  <BarChart2 className="size-5" />
-                </span>
-                <div>
-                  <CardTitle className="font-sans">New Products</CardTitle>
-                  <CardDescription className="font-sans">
-                    Products added over the past week.
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <ProductChart data={weekProductsData} />
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* Stock Levels + Efficiency */}
-      <section className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-2 items-stretch">
         {/* Stock Levels */}
         <div className="flex h-full flex-col gap-4">
           <Card className="flex-1">
@@ -308,9 +272,9 @@ export default async function DashboardPage() {
                   <HeartPulse className="size-5" />
                 </span>
                 <div>
-                  <CardTitle className="font-sans">Stock Levels</CardTitle>
+                  <CardTitle className="font-sans">Stock Levels Overview</CardTitle>
                   <CardDescription className="font-sans">
-                    Current stock status across your products.
+                    Health status across your inventory.
                   </CardDescription>
                 </div>
               </div>
@@ -319,54 +283,66 @@ export default async function DashboardPage() {
               {stockLevels.length > 0 ? (
                 <div className="flex-1 space-y-2">
                   {stockLevels.map((product) => {
-                    const styles = STOCK_LEVEL_STYLES[product.stockLevel]
-                    const isOutOfStock = product.stockLevel === "OUT_OF_STOCK"
-                    const stockText = isOutOfStock
-                      ? "Out of stock"
-                      : `${quantityFormatter.format(product.currentStock)} ${product.unitName}`
-                    const threshold =
-                      product.lowStockAt !== null
-                        ? `Min ${quantityFormatter.format(product.lowStockAt)} ${product.unitName}`
-                        : null
-                    const StockIcon = STOCK_LEVEL_STYLES[product.stockLevel].icon
+                    const { bg, text, label, icon: Icon } = STOCK_LEVEL_STYLES[product.stockLevel]
+                    const isOut = product.stockLevel === "OUT_OF_STOCK"
+
                     return (
-                      <div
-                        key={product.id}
-                        className="flex flex-col gap-2 rounded-lg bg-muted/50 p-4 sm:flex-row sm:items-center sm:justify-between"
-                      >
+                      <div key={product.id} className="rounded-lg bg-muted/50 p-4 space-y-2">
                         <div className="flex items-center gap-3">
                           <span
-                            className={`flex size-10 items-center justify-center rounded-full text-white ${styles.bg}`}
+                            className={`flex size-10 items-center justify-center rounded-full text-white ${bg}`}
                           >
-                            <StockIcon className="size-5" />
+                            <Icon className="size-5" />
                           </span>
                           <div>
                             <p className="text-sm font-medium font-sans">{product.name}</p>
-
                             <p className="text-xs text-muted-foreground font-sans">
-                              <span className={`${styles.text}`}>{styles.label}</span> -{" "}
-                              {STOCK_LEVEL_LABELS[product.stockLevel]}
-                              {threshold ? ` · ${threshold}` : ""}
+                              <span className={`${text}`}>{label}</span>
                             </p>
                           </div>
                         </div>
 
-                        <p className={`text-sm font-base font-sans tracking-wider ${styles.text}`}>
-                          {stockText}
-                        </p>
+                        {/* Stock amount + percentage */}
+                        <div className="text-sm font-sans flex justify-between">
+                          <span className={`${text}`}>
+                            {isOut ? "0" : quantityFormatter.format(product.currentStock)}{" "}
+                            {product.unitName}
+                          </span>
+
+                          {product.lowStockAt && !isOut && (
+                            <span className="text-xs text-muted-foreground">
+                              {(Math.min(product.currentStock / product.lowStockAt, 1) * 100) | 0}%
+                              of threshold
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Mini progress bar */}
+                        {!isOut && product.lowStockAt && (
+                          <div className="h-1.5 bg-muted rounded overflow-hidden">
+                            <div
+                              className={`${bg} h-full`}
+                              style={{
+                                width: `${
+                                  Math.min(product.currentStock / product.lowStockAt, 1) * 100
+                                }%`,
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
                     )
                   })}
                 </div>
               ) : (
                 <Empty className="w-full">
-                  <EmptyHeader className="w-full max-w-none">
+                  <EmptyHeader>
                     <EmptyMedia variant="icon">
                       <HeartPulse className="size-8 text-muted-foreground" />
                     </EmptyMedia>
                     <EmptyTitle>No product yet</EmptyTitle>
                     <EmptyDescription>
-                      Add products to start managing your inventory.
+                      Add products to start tracking stock health.
                     </EmptyDescription>
                   </EmptyHeader>
                 </Empty>
@@ -374,10 +350,87 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+      </section>
+
+      {/* Restock suggestions & efficiency */}
+      <section className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-2 items-stretch">
+        {/* Restock suggestions */}
+        <Card className="flex h-full flex-col">
+          <CardHeader className="flex flex-col gap-2 border-b">
+            <div className="flex items-center gap-2">
+              <span className="flex size-10 items-center justify-center rounded-full bg-amber-500/10 text-amber-600">
+                <PackagePlus className="size-5" />
+              </span>
+              <div>
+                <CardTitle className="font-sans">Restock Actions</CardTitle>
+                <CardDescription className="font-sans">
+                  Items nearing reorder point with suggested quantities.
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent className="flex-1">
+            {restockSuggestions.length > 0 ? (
+              <div className="space-y-3">
+                {restockSuggestions.map((product) => {
+                  const { text } = STOCK_LEVEL_STYLES[product.stockLevel]
+                  const recommended =
+                    product.recommendedOrder !== null
+                      ? `${quantityFormatter.format(product.recommendedOrder)} ${product.unitName}`
+                      : null
+
+                  return (
+                    <div
+                      key={product.id}
+                      className="rounded-lg border bg-muted/40 p-3 flex justify-between"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold font-sans">{product.name}</p>
+                        <p className="text-xs text-muted-foreground font-sans">
+                          <span>Reorder at </span>
+                          {product.lowStockAt
+                            ? quantityFormatter.format(product.lowStockAt)
+                            : "N/A"}
+                          <span> {product.unitName}</span>
+                        </p>
+                      </div>
+
+                      <div className="text-right">
+                        <p className={`text-sm font-semibold font-sans ${text}`}>
+                          {quantityFormatter.format(product.currentStock)} {product.unitName}
+                        </p>
+                        <p className="text-xs text-muted-foreground font-sans">
+                          {recommended ? `Order ~${recommended}` : "Monitor"}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <Empty className="w-full">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <PackageCheck className="size-8 text-muted-foreground" />
+                  </EmptyMedia>
+                  <EmptyTitle>All good</EmptyTitle>
+                  <EmptyDescription>No urgent restocks required.</EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            )}
+          </CardContent>
+
+          <CardFooter className="border-t pt-4">
+            <Button asChild className="w-full">
+              <Link href="/inventory-activities">Create purchase order</Link>
+            </Button>
+          </CardFooter>
+        </Card>
 
         {/* Efficiency */}
         <div className="flex h-full flex-col gap-4">
-          <Card className="flex-1">
+          <Card className="flex-1 gap-0">
             <CardHeader className="flex flex-col gap-2 border-b">
               <div className="flex items-center gap-2">
                 <span className="flex size-10 items-center justify-center rounded-full bg-violet-500/10 text-violet-600">
@@ -419,7 +472,7 @@ export default async function DashboardPage() {
                     </div>
                   </div>
 
-                  <div className="flex flex-1 flex-col mt-4">
+                  <div className="flex flex-1 flex-col justify-end">
                     <p className="mb-6 text-sm font-sans text-muted-foreground">
                       Your inventory management efficiency is at{" "}
                       <span className="font-semibold">{efficiencyScore}%</span>. Keep maintaining
@@ -448,8 +501,29 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* Activity & Restock */}
+      {/* Weekly chart & recent activity */}
       <section className="grid grid-cols-1 gap-8 lg:grid-cols-2 items-stretch">
+        {/* Weekly Chart */}
+        <div className="flex h-full flex-col gap-4">
+          <Card className="flex-1">
+            <CardHeader className="flex flex-col gap-2 border-b">
+              <div className="flex items-center gap-2">
+                <span className="flex size-10 items-center justify-center rounded-full bg-sky-500/10 text-sky-600">
+                  <BarChart2 className="size-5" />
+                </span>
+                <div>
+                  <CardTitle className="font-sans">New Products</CardTitle>
+                  <CardDescription className="font-sans">
+                    Products added over the past week.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ProductChart data={weekProductsData} />
+            </CardContent>
+          </Card>
+        </div>
         {/* Recent Activity */}
         <Card className="flex h-full flex-col">
           <CardHeader className="flex flex-col gap-2 border-b">
@@ -531,87 +605,7 @@ export default async function DashboardPage() {
           </CardContent>
           <CardFooter className="[.border-t]:pt-4 border-t">
             <Button asChild variant="outline" className="w-full">
-              <Link href="/inventory-activity">Open inventory activity</Link>
-            </Button>
-          </CardFooter>
-        </Card>
-
-        {/* Restock suggestions */}
-        <Card className="flex h-full flex-col">
-          <CardHeader className="flex flex-col gap-2 border-b">
-            <div className="flex items-center gap-2">
-              <span className="flex size-10 items-center justify-center rounded-full bg-amber-500/10 text-amber-600">
-                <PackagePlus className="size-5" />
-              </span>
-              <div>
-                <CardTitle className="font-sans">Restock Suggestions</CardTitle>
-                <CardDescription className="font-sans">
-                  Products approaching their reorder point.
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="flex-1">
-            {restockSuggestions.length > 0 ? (
-              <div className="space-y-3">
-                {restockSuggestions.map((product) => {
-                  const styles = STOCK_LEVEL_STYLES[product.stockLevel]
-                  const thresholdLabel =
-                    product.lowStockAt !== null
-                      ? `Reorder at ${quantityFormatter.format(product.lowStockAt)} ${
-                          product.unitName
-                        }`
-                      : "Set a reorder threshold"
-
-                  const recommended =
-                    product.recommendedOrder !== null
-                      ? `${quantityFormatter.format(product.recommendedOrder)} ${product.unitName}`
-                      : null
-
-                  return (
-                    <div
-                      key={product.id}
-                      className="flex items-start justify-between gap-4 rounded-lg border bg-muted/40 p-3"
-                    >
-                      <div>
-                        <p className="text-sm font-semibold font-sans">{product.name}</p>
-                        <p className="text-xs text-muted-foreground font-sans">
-                          {product.categoryName ?? "Uncategorised"} · {thresholdLabel}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className={`text-sm font-semibold font-sans ${styles.text}`}>
-                          {quantityFormatter.format(product.currentStock)} {product.unitName}
-                        </p>
-                        <p className="text-xs text-muted-foreground font-sans">
-                          {recommended ? `Order ~${recommended}` : "Monitor levels"}
-                        </p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            ) : (
-              <Empty className="w-full">
-                <EmptyHeader className="w-full max-w-none">
-                  <EmptyMedia variant="icon">
-                    <PackageCheck className="size-8 text-muted-foreground" />
-                  </EmptyMedia>
-                  <EmptyTitle>
-                    {allProducts.length === 0 ? "No products found" : "All caught up"}
-                  </EmptyTitle>
-                  <EmptyDescription>
-                    {allProducts.length === 0
-                      ? "Add products and set reorder thresholds to receive restock suggestions."
-                      : "No products are nearing their reorder points."}
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            )}
-          </CardContent>
-          <CardFooter className="[.border-t]:pt-4 border-t">
-            <Button asChild className="w-full">
-              <Link href="/product">Review product catalog</Link>
+              <Link href="/inventory-activities">Open inventory activities</Link>
             </Button>
           </CardFooter>
         </Card>
