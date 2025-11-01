@@ -4,7 +4,7 @@ import type { WeekProductData, EfficiencyMetrics, ProductWithDate } from "@/lib/
 // Helper to format week labels like "Jan 01 - Jan 07"
 import { formatWeekLabel } from "./formatters"
 
-export function calculateWeeklyProducts(allProducts: ProductWithDate[]): WeekProductData[] {
+export const calculateWeeklyProducts = (allProducts: ProductWithDate[]): WeekProductData[] => {
   const now = new Date()
   const weekProductsData: WeekProductData[] = []
 
@@ -30,10 +30,10 @@ export function calculateWeeklyProducts(allProducts: ProductWithDate[]): WeekPro
   return weekProductsData
 }
 
-export function calculateEfficiencyMetrics(
+export const calculateEfficiencyMetrics = (
   allProducts: ProductWithDate[],
   totalProducts: number
-): EfficiencyMetrics {
+): EfficiencyMetrics => {
   let inStockCount = 0
   let lowStockCount = 0
   let outOfStockCount = 0

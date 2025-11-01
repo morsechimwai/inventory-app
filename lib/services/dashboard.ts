@@ -73,7 +73,11 @@ export async function getDashboardProducts(userId: string): Promise<ProductWithD
     const isOutOfStock = currentStock <= 0
     const isLowStock =
       !isOutOfStock && lowStockAt !== null && lowStockAt > 0 ? currentStock <= lowStockAt : false
-    const stockLevel: StockLevelState = isOutOfStock ? "OUT_OF_STOCK" : isLowStock ? "LOW" : "HEALTHY"
+    const stockLevel: StockLevelState = isOutOfStock
+      ? "OUT_OF_STOCK"
+      : isLowStock
+      ? "LOW"
+      : "HEALTHY"
 
     return {
       id: product.id,

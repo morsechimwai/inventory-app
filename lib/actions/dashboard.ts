@@ -19,10 +19,7 @@ import type {
 } from "@/lib/types/dashboard"
 
 // Utils
-import {
-  calculateWeeklyProducts,
-  calculateEfficiencyMetrics,
-} from "@/lib/utils/dashboard"
+import { calculateWeeklyProducts, calculateEfficiencyMetrics } from "@/lib/utils/dashboard"
 
 const STOCK_LEVEL_PRIORITY: Record<StockLevelState, number> = {
   OUT_OF_STOCK: 0,
@@ -30,12 +27,11 @@ const STOCK_LEVEL_PRIORITY: Record<StockLevelState, number> = {
   HEALTHY: 2,
 }
 
-function buildStockLevels(products: ProductWithDate[]): StockLevelItem[] {
+const buildStockLevels = (products: ProductWithDate[]): StockLevelItem[] => {
   return products
     .slice()
     .sort((a, b) => {
-      const severityDiff =
-        STOCK_LEVEL_PRIORITY[a.stockLevel] - STOCK_LEVEL_PRIORITY[b.stockLevel]
+      const severityDiff = STOCK_LEVEL_PRIORITY[a.stockLevel] - STOCK_LEVEL_PRIORITY[b.stockLevel]
 
       if (severityDiff !== 0) return severityDiff
 
@@ -55,7 +51,7 @@ function buildStockLevels(products: ProductWithDate[]): StockLevelItem[] {
     }))
 }
 
-function buildRestockSuggestions(products: ProductWithDate[]): RestockSuggestion[] {
+const buildRestockSuggestions = (products: ProductWithDate[]): RestockSuggestion[] => {
   return products
     .filter(
       (product) =>
@@ -70,14 +66,14 @@ function buildRestockSuggestions(products: ProductWithDate[]): RestockSuggestion
         a.stockLevel === "OUT_OF_STOCK"
           ? Number.MAX_SAFE_INTEGER
           : a.lowStockAt !== null
-            ? a.lowStockAt - a.currentStock
-            : -1
+          ? a.lowStockAt - a.currentStock
+          : -1
       const urgencyB =
         b.stockLevel === "OUT_OF_STOCK"
           ? Number.MAX_SAFE_INTEGER
           : b.lowStockAt !== null
-            ? b.lowStockAt - b.currentStock
-            : -1
+          ? b.lowStockAt - b.currentStock
+          : -1
 
       if (urgencyA !== urgencyB) return urgencyB - urgencyA
 
@@ -89,8 +85,8 @@ function buildRestockSuggestions(products: ProductWithDate[]): RestockSuggestion
         product.lowStockAt !== null
           ? Math.max(product.lowStockAt - product.currentStock, 0) || product.lowStockAt
           : product.stockLevel === "OUT_OF_STOCK"
-            ? 1
-            : null
+          ? 1
+          : null
 
       return {
         id: product.id,
@@ -115,10 +111,7 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
   ])
 
   const weekProductsData = calculateWeeklyProducts(keyMetrics.allProducts)
-  const efficiency = calculateEfficiencyMetrics(
-    keyMetrics.allProducts,
-    keyMetrics.totalProducts
-  )
+  const efficiency = calculateEfficiencyMetrics(keyMetrics.allProducts, keyMetrics.totalProducts)
   const stockLevels = buildStockLevels(keyMetrics.allProducts)
   const restockSuggestions = buildRestockSuggestions(keyMetrics.allProducts)
 
