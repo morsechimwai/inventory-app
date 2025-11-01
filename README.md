@@ -44,6 +44,27 @@ public/                   // Static assets
 - Helper `calcDelta` centralizes how IN/OUT/ADJUST movements affect inventory counts, making new movement types easy to extend later.
 - Read more in `lib/services/README.md` for rationale and integration notes with the Inventory Activity UI.
 
+## Dashboard Efficiency Formula
+- We calculate `efficiencyScore` in `lib/utils/dashboard.ts` by first deriving the product distribution:
+  - `inStockPercentage = round((inStockCount / totalProducts) × 100)`
+  - `lowStockPercentage = round((lowStockCount / totalProducts) × 100)`
+  - `outOfStockPercentage = round((outOfStockCount / totalProducts) × 100)`
+- The final score blends these with weighted penalties and clamps between 0–100:
+
+  ```
+  efficiencyScore = round(
+    clamp(
+      (inStockPercentage × 0.7) +
+      ((100 − lowStockPercentage) × 0.2) +
+      ((100 − outOfStockPercentage) × 0.1),
+      0,
+      100
+    )
+  )
+  ```
+
+- If there are no products (`totalProducts = 0`), the score is reported as `null`.
+
 ## Database Schema
 Prisma models are scoped by `userId` so each Stack-authenticated workspace owns its own catalogue. Columns marked `*` are required.
 
