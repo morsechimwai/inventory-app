@@ -5,7 +5,14 @@ import Link from "next/link"
 import EfficiencyRadialChart from "@/components/charts/efficiency-radial-chart"
 import ProductChart from "@/components/charts/product-chart"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import {
   Empty,
   EmptyContent,
@@ -16,35 +23,87 @@ import {
 } from "@/components/ui/empty"
 
 // Icons
-import { BarChart2, ChartPie, PackageOpen, TrendingUp } from "lucide-react"
+import {
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  BarChart2,
+  ChartPie,
+  Clock3,
+  PackageCheck,
+  PackageOpen,
+  PackagePlus,
+  RefreshCw,
+  TrendingUp,
+} from "lucide-react"
 
 // Actions
 import { getDashboardMetrics } from "@/lib/actions/dashboard"
 
 // Utils
 import { calculateWeeklyTrends } from "@/lib/utils/dashboard"
-import { currencyFormatterTHB } from "@/lib/utils/formatters"
+import { currencyFormatterTHB, formatRelativeTime, quantityFormatter } from "@/lib/utils/formatters"
+import { Badge } from "@/components/ui/badge"
 
 const STOCK_LEVEL_STYLES = {
   OUT_OF_STOCK: {
     bg: "bg-red-400",
     text: "text-red-400",
     label: "Out of Stock",
+    icon: PackageOpen,
   },
   LOW: {
     bg: "bg-amber-400",
     text: "text-amber-400",
     label: "Low Stock",
+    icon: PackagePlus,
   },
   HEALTHY: {
     bg: "bg-emerald-400",
     text: "text-emerald-400",
     label: "Healthy",
+    icon: PackageCheck,
+  },
+} as const
+
+const STOCK_LEVEL_LABELS: Record<keyof typeof STOCK_LEVEL_STYLES, string> = {
+  OUT_OF_STOCK: "Needs immediate restock",
+  LOW: "Below preferred threshold",
+  HEALTHY: "Comfortable stock range",
+}
+
+const MOVEMENT_STYLES = {
+  IN: {
+    label: "Stock in",
+    tone: "text-emerald-500",
+    chip: "bg-emerald-500/10 text-emerald-600",
+    icon: ArrowDownToLine,
+    sign: "+",
+  },
+  OUT: {
+    label: "Stock out",
+    tone: "text-red-500",
+    chip: "bg-red-500/10 text-red-600",
+    icon: ArrowUpFromLine,
+    sign: "−",
+  },
+  ADJUST: {
+    label: "Adjustment",
+    tone: "text-amber-500",
+    chip: "bg-amber-500/10 text-amber-600",
+    icon: RefreshCw,
+    sign: "",
   },
 } as const
 
 export default async function DashboardPage() {
-  const { keyMetrics, weekProductsData, efficiency, stockLevels } = await getDashboardMetrics()
+  const {
+    keyMetrics,
+    weekProductsData,
+    efficiency,
+    stockLevels,
+    recentActivity,
+    restockSuggestions,
+  } = await getDashboardMetrics()
 
   /**
    * :: Key metrics
@@ -195,6 +254,11 @@ export default async function DashboardPage() {
                 </Empty>
               )}
             </CardContent>
+            <CardFooter className="flex-col items-start gap-1 border-t border-border/40 pt-4">
+              <p className="text-xs text-muted-foreground font-sans">
+                Trend percentages compare the current week against the previous week.
+              </p>
+            </CardFooter>
           </Card>
         </div>
 
@@ -226,25 +290,35 @@ export default async function DashboardPage() {
                       : `${product.currentStock} ${product.unitName}`
                     const threshold =
                       product.lowStockAt !== null
-                        ? `· Min ${product.lowStockAt} ${product.unitName}`
-                        : ""
+                        ? `Min ${product.lowStockAt} ${product.unitName}`
+                        : null
+                    const StockIcon = STOCK_LEVEL_STYLES[product.stockLevel].icon
                     return (
                       <div
                         key={product.id}
-                        className="flex flex-col gap-2 rounded-lg bg-muted/50 p-2 sm:flex-row sm:items-center sm:justify-between"
+                        className="flex flex-col gap-2 rounded-lg bg-muted/50 p-4 sm:flex-row sm:items-center sm:justify-between"
                       >
-                        <div className="flex items-center gap-2">
-                          <span className={`h-2.5 w-4 rounded-full ${styles.bg}`} />
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`flex size-10 items-center justify-center rounded-full text-white ${styles.bg}`}
+                          >
+                            <StockIcon className="size-5" />
+                          </span>
                           <div>
+                            <div className="flex items-center gap-2"></div>
                             <p className="text-sm font-medium font-sans">{product.name}</p>
                             <p className="text-xs text-muted-foreground font-sans">
-                              {styles.label} {threshold}
+                              {STOCK_LEVEL_LABELS[product.stockLevel]}
+                              {threshold ? ` · ${threshold}` : ""}
                             </p>
                           </div>
                         </div>
                         <p className={`text-sm font-medium font-sans ${styles.text}`}>
                           {stockText}
                         </p>
+                        {styles.label !== "Out of Stock" ? (
+                          <Badge className={`ml-2 font-black ${styles.bg}`}>{styles.label}</Badge>
+                        ) : null}
                       </div>
                     )
                   })}
@@ -330,6 +404,171 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+      </section>
+
+      {/* Activity & Restock */}
+      <section className="grid grid-cols-1 gap-8 lg:grid-cols-2 items-stretch">
+        {/* Recent Activity */}
+        <Card className="flex h-full flex-col">
+          <CardHeader className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Clock3 className="size-5" />
+              </span>
+              <div>
+                <CardTitle className="font-sans">Recent Activity</CardTitle>
+                <CardDescription className="font-sans">
+                  Latest movements captured across all products.
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="flex-1">
+            {recentActivity.length > 0 ? (
+              <div className="space-y-3">
+                {recentActivity.map((activity) => {
+                  const style = MOVEMENT_STYLES[activity.movementType]
+                  const quantity = quantityFormatter.format(Math.abs(activity.quantity))
+                  const Icon = style.icon
+                  const signSymbol =
+                    activity.movementType === "IN"
+                      ? "+"
+                      : activity.movementType === "OUT"
+                      ? "−"
+                      : activity.quantity < 0
+                      ? "−"
+                      : activity.quantity > 0
+                      ? "+"
+                      : ""
+
+                  return (
+                    <div
+                      key={activity.id}
+                      className="flex items-start justify-between gap-4 rounded-lg border bg-muted/40 p-3"
+                    >
+                      <div className="flex items-start gap-3">
+                        <span
+                          className={`mt-0.5 flex size-9 items-center justify-center rounded-full ${style.chip}`}
+                        >
+                          <Icon className="size-5" />
+                        </span>
+                        <div>
+                          <p className="text-sm font-semibold font-sans">{activity.productName}</p>
+                          <p className="text-xs text-muted-foreground font-sans">
+                            {style.label}
+                            {activity.reason ? ` · ${activity.reason}` : ""}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-sm font-semibold font-sans ${style.tone}`}>
+                          {signSymbol}
+                          {quantity} {activity.unitName}
+                        </p>
+                        <p className="text-xs text-muted-foreground font-sans">
+                          {formatRelativeTime(activity.createdAt)}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <Empty className="w-full">
+                <EmptyHeader className="w-full max-w-none">
+                  <EmptyMedia variant="icon">
+                    <Clock3 className="size-8 text-muted-foreground" />
+                  </EmptyMedia>
+                  <EmptyTitle>No activity logged</EmptyTitle>
+                  <EmptyDescription>
+                    Record purchases, sales, or adjustments to see activity here.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            )}
+          </CardContent>
+          <CardFooter className="[.border-t]:pt-4">
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/inventory-activity">Open inventory activity</Link>
+            </Button>
+          </CardFooter>
+        </Card>
+
+        {/* Restock suggestions */}
+        <Card className="flex h-full flex-col">
+          <CardHeader className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span className="flex size-10 items-center justify-center rounded-full bg-amber-500/10 text-amber-600">
+                <PackagePlus className="size-5" />
+              </span>
+              <div>
+                <CardTitle className="font-sans">Restock Suggestions</CardTitle>
+                <CardDescription className="font-sans">
+                  Products approaching their reorder point.
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="flex-1">
+            {restockSuggestions.length > 0 ? (
+              <div className="space-y-3">
+                {restockSuggestions.map((product) => {
+                  const styles = STOCK_LEVEL_STYLES[product.stockLevel]
+                  const thresholdLabel =
+                    product.lowStockAt !== null
+                      ? `Reorder at ${quantityFormatter.format(product.lowStockAt)} ${
+                          product.unitName
+                        }`
+                      : "Set a reorder threshold"
+
+                  const recommended =
+                    product.recommendedOrder !== null
+                      ? `${quantityFormatter.format(product.recommendedOrder)} ${product.unitName}`
+                      : null
+
+                  return (
+                    <div
+                      key={product.id}
+                      className="flex items-start justify-between gap-4 rounded-lg border bg-muted/40 p-3"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold font-sans">{product.name}</p>
+                        <p className="text-xs text-muted-foreground font-sans">
+                          {product.categoryName ?? "Uncategorised"} · {thresholdLabel}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-sm font-semibold font-sans ${styles.text}`}>
+                          {quantityFormatter.format(product.currentStock)} {product.unitName}
+                        </p>
+                        <p className="text-xs text-muted-foreground font-sans">
+                          {recommended ? `Order ~${recommended}` : "Monitor levels"}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <Empty className="w-full">
+                <EmptyHeader className="w-full max-w-none">
+                  <EmptyMedia variant="icon">
+                    <PackageCheck className="size-8 text-muted-foreground" />
+                  </EmptyMedia>
+                  <EmptyTitle>All caught up</EmptyTitle>
+                  <EmptyDescription>
+                    Stock levels look healthy. Keep an eye out for new low-stock alerts.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            )}
+          </CardContent>
+          <CardFooter className="[.border-t]:pt-4">
+            <Button asChild className="w-full">
+              <Link href="/product">Review product catalog</Link>
+            </Button>
+          </CardFooter>
+        </Card>
       </section>
     </div>
   )

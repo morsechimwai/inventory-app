@@ -132,6 +132,11 @@ export default function InventoryActivityPage() {
   const headerDescription = isEditing
     ? "Update the activity details below."
     : movementMeta.description
+  const selectedProductId = form.watch("productId")
+  const selectedProduct = useMemo(
+    () => products.find((product) => product.id === selectedProductId) ?? null,
+    [products, selectedProductId]
+  )
   const quantityValue = form.watch("quantity")
   const unitCostValue = form.watch("unitCost")
 
@@ -443,9 +448,6 @@ export default function InventoryActivityPage() {
                         aria-invalid={fieldState.invalid}
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        <option value="">
-                          {products.length === 0 ? "No product yet." : "Select product"}
-                        </option>
                         {products.map((product) => (
                           <option key={product.id} value={product.id}>
                             {product.name}
@@ -464,7 +466,10 @@ export default function InventoryActivityPage() {
                 name="quantity"
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>Quantity</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>
+                      Quantity
+                      {selectedProduct ? ` (${selectedProduct.unit.name})` : ""}
+                    </FieldLabel>
                     <FieldContent>
                       <Input
                         id={field.name}
