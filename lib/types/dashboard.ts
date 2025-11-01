@@ -1,3 +1,4 @@
+import type { MovementType } from "@prisma/client"
 import type { ProductDTO } from "@/lib/types/product"
 
 export type StockLevelState = "OUT_OF_STOCK" | "LOW" | "HEALTHY"
@@ -38,6 +39,27 @@ export interface StockBreakdown {
   outOfStock: number
 }
 
+export interface RecentActivityItem {
+  id: string
+  productName: string
+  movementType: MovementType
+  quantity: number
+  unitName: string
+  reason: string | null
+  createdAt: Date
+}
+
+export interface RestockSuggestion {
+  id: string
+  name: string
+  currentStock: number
+  lowStockAt: number | null
+  unitName: string
+  categoryName: string | null
+  stockLevel: StockLevelState
+  recommendedOrder: number | null
+}
+
 export interface KeyMetrics {
   totalProducts: number
   lowStock: number
@@ -52,4 +74,6 @@ export interface DashboardMetrics {
   weekProductsData: WeekProductData[]
   efficiency: EfficiencyMetrics
   stockLevels: StockLevelItem[]
+  recentActivity: RecentActivityItem[]
+  restockSuggestions: RestockSuggestion[]
 }

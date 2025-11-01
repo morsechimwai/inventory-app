@@ -7,7 +7,7 @@ import { getCurrentUser } from "@/lib/auth/auth"
 import { AppError } from "@/lib/errors/app-error"
 
 // Services
-import { getDashboardKeyMetrics } from "@/lib/services/dashboard"
+import { getDashboardKeyMetrics, getRecentStockMovements } from "@/lib/services/dashboard"
 
 // Types
 import type {
@@ -15,6 +15,7 @@ import type {
   ProductWithDate,
   StockLevelItem,
   StockLevelState,
+  RestockSuggestion,
 } from "@/lib/types/dashboard"
 
 // Utils
@@ -54,11 +55,64 @@ function buildStockLevels(products: ProductWithDate[]): StockLevelItem[] {
     }))
 }
 
+function buildRestockSuggestions(products: ProductWithDate[]): RestockSuggestion[] {
+  return products
+    .filter(
+      (product) =>
+        product.stockLevel !== "HEALTHY" ||
+        (product.lowStockAt !== null && product.currentStock <= product.lowStockAt)
+    )
+    .sort((a, b) => {
+      const severityDiff = STOCK_LEVEL_PRIORITY[a.stockLevel] - STOCK_LEVEL_PRIORITY[b.stockLevel]
+      if (severityDiff !== 0) return severityDiff
+
+      const urgencyA =
+        a.stockLevel === "OUT_OF_STOCK"
+          ? Number.MAX_SAFE_INTEGER
+          : a.lowStockAt !== null
+            ? a.lowStockAt - a.currentStock
+            : -1
+      const urgencyB =
+        b.stockLevel === "OUT_OF_STOCK"
+          ? Number.MAX_SAFE_INTEGER
+          : b.lowStockAt !== null
+            ? b.lowStockAt - b.currentStock
+            : -1
+
+      if (urgencyA !== urgencyB) return urgencyB - urgencyA
+
+      return a.createdAt.getTime() - b.createdAt.getTime()
+    })
+    .slice(0, 6)
+    .map((product) => {
+      const recommended =
+        product.lowStockAt !== null
+          ? Math.max(product.lowStockAt - product.currentStock, 0) || product.lowStockAt
+          : product.stockLevel === "OUT_OF_STOCK"
+            ? 1
+            : null
+
+      return {
+        id: product.id,
+        name: product.name,
+        currentStock: product.currentStock,
+        lowStockAt: product.lowStockAt,
+        unitName: product.unit.name,
+        categoryName: product.category?.name ?? null,
+        stockLevel: product.stockLevel,
+        recommendedOrder: recommended,
+      }
+    })
+}
+
 export async function getDashboardMetrics(): Promise<DashboardMetrics> {
   const user = await getCurrentUser()
   if (!user) throw new AppError("UNAUTHORIZED", "Please log in first.")
 
-  const keyMetrics = await getDashboardKeyMetrics(user.id)
+  const [keyMetrics, recentActivity] = await Promise.all([
+    getDashboardKeyMetrics(user.id),
+    getRecentStockMovements(user.id),
+  ])
 
   const weekProductsData = calculateWeeklyProducts(keyMetrics.allProducts)
   const efficiency = calculateEfficiencyMetrics(
@@ -66,11 +120,14 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
     keyMetrics.totalProducts
   )
   const stockLevels = buildStockLevels(keyMetrics.allProducts)
+  const restockSuggestions = buildRestockSuggestions(keyMetrics.allProducts)
 
   return {
     keyMetrics,
     weekProductsData,
     efficiency,
     stockLevels,
+    recentActivity,
+    restockSuggestions,
   }
 }

@@ -6,6 +6,7 @@ import type {
   ProductWithDate,
   StockBreakdown,
   StockLevelState,
+  RecentActivityItem,
 } from "@/lib/types/dashboard"
 import { Prisma } from "@prisma/client"
 import { decimalToNumber } from "../utils/decimal"
@@ -117,4 +118,51 @@ export async function getDashboardKeyMetrics(userId: string): Promise<KeyMetrics
     allProducts,
     stockBreakdown,
   }
+}
+
+type RecentMovementWithRelations = Prisma.StockMovementGetPayload<{
+  select: {
+    id: true
+    movementType: true
+    quantity: true
+    reason: true
+    createdAt: true
+    product: {
+      select: {
+        name: true
+        unit: { select: { name: true } }
+      }
+    }
+  }
+}>
+
+export async function getRecentStockMovements(userId: string): Promise<RecentActivityItem[]> {
+  const movements: RecentMovementWithRelations[] = await prisma.stockMovement.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    take: 12,
+    select: {
+      id: true,
+      movementType: true,
+      quantity: true,
+      reason: true,
+      createdAt: true,
+      product: {
+        select: {
+          name: true,
+          unit: { select: { name: true } },
+        },
+      },
+    },
+  })
+
+  return movements.map((movement) => ({
+    id: movement.id,
+    productName: movement.product.name,
+    movementType: movement.movementType,
+    quantity: decimalToNumber(movement.quantity),
+    unitName: movement.product.unit.name,
+    reason: movement.reason ?? null,
+    createdAt: movement.createdAt,
+  }))
 }
