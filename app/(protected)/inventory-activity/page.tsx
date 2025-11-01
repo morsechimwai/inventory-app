@@ -95,7 +95,7 @@ const movementTypeMeta: Record<MovementType, MovementDetail> = {
     buttonLabel: "Adjustment",
     createTitle: "Adjustment",
     editTitle: "Edit Adjustment",
-    description: "Make a quick correction after a stock check or audit.",
+    description: "Correct stock by difference: + adds, - subtracts.",
     icon: Forklift,
   },
 }
@@ -471,15 +471,29 @@ export default function InventoryActivityPage() {
                         type="number"
                         inputMode="decimal"
                         step="0.001"
-                        placeholder="e.g. 25"
+                        placeholder={
+                          currentMovementType === MovementType.ADJUST ? "+5 or -3" : "e.g. 25"
+                        }
                         autoComplete="off"
                         disabled={saving}
                         aria-invalid={fieldState.invalid}
                         onKeyDown={(event) => {
-                          if (["e", "E", "+", "-"].includes(event.key)) event.preventDefault()
+                          const isAdjust = form.getValues("movementType") === MovementType.ADJUST
+
+                          // Always block scientific notation
+                          if (["e", "E"].includes(event.key)) return event.preventDefault()
+
+                          // Allow +/- only in ADJUST mode
+                          if (!isAdjust && ["+", "-"].includes(event.key))
+                            return event.preventDefault()
                         }}
                         {...field}
                       />
+                      {currentMovementType === MovementType.ADJUST && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Enter difference: +5 to add stock, -2 to remove stock.
+                        </p>
+                      )}
                       <FieldError errors={[fieldState.error]} />
                     </FieldContent>
                   </Field>
@@ -701,6 +715,10 @@ export default function InventoryActivityPage() {
             <p>
               Are you sure you want to delete this entry for{" "}
               <strong>{stockMovementToDelete?.product.name}</strong>?
+            </p>
+            <p className="text-sm text-red-500">
+              Will undo this change (stock will shift by{" "}
+              {stockMovementToDelete?.quantity ? stockMovementToDelete?.quantity * -1 : 0}).
             </p>
           </DialogHeader>
           <DialogFooter>

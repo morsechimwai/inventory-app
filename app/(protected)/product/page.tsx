@@ -319,9 +319,7 @@ export default function ProductPage() {
 
                 <EmptyTitle>
                   {units.length === 0 ? (
-                    <span className=" text-amber-500">
-                      You need at least one unit before adding products.
-                    </span>
+                    <span className=" text-amber-500">No units yet</span>
                   ) : (
                     "No products yet"
                   )}
@@ -331,9 +329,12 @@ export default function ProductPage() {
               {/* Case: missing unit */}
               {units.length === 0 && (
                 <>
+                  <EmptyDescription className="text-amber-500">
+                    You need at least one unit before adding products.
+                  </EmptyDescription>
                   <EmptyContent>
                     <Button variant="link" className="font-sans font-bold text-sm" asChild>
-                      <Link href="/unit">Go to unit page</Link>
+                      <Link href="/unit">Go to Unit</Link>
                     </Button>
                   </EmptyContent>
                 </>
