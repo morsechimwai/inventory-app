@@ -160,6 +160,49 @@ export default async function DashboardPage() {
     },
   ]
 
+  const formatTrend = (trend: number) => {
+    const isPositive = trend >= 0
+    return {
+      text: isPositive ? "text-emerald-600" : "text-red-600",
+      icon: isPositive ? "text-emerald-600" : "text-red-600 rotate-180",
+      bg: isPositive ? "bg-emerald-500/10" : "bg-red-500/10",
+      prefix: isPositive ? "+" : "",
+      value: trend.toFixed(1),
+    }
+  }
+
+  const currencyParts = currencyFormatterTHB.format(totalValue).split(" ")
+  const currencyLead = currencyParts[0] ?? ""
+  const currencyRest = currencyParts.slice(1).join(" ")
+
+  const keyMetricTiles = [
+    {
+      key: "totalProducts",
+      title: "Total Products",
+      primary: <p className="text-3xl font-bold font-sans">{totalProducts}</p>,
+      trend: productTrend,
+    },
+    {
+      key: "lowStock",
+      title: "Low Stock",
+      primary: <p className="text-3xl font-bold font-sans">{lowStock}</p>,
+      trend: lowStockTrend,
+    },
+    {
+      key: "totalValue",
+      title: "Total Value",
+      primary: (
+        <p className="text-3xl font-bold font-sans">
+          {currencyLead}
+          {currencyRest ? (
+            <span className="text-lg font-semibold font-sans ml-1">{currencyRest}</span>
+          ) : null}
+        </p>
+      ),
+      trend: totalValueTrend,
+    },
+  ]
+
   return (
     <div className="p-4 md:p-6 lg:p-8">
       <div className="mb-6">
@@ -189,71 +232,25 @@ export default async function DashboardPage() {
             <CardContent className="flex h-full w-full">
               {totalProducts > 0 ? (
                 <div className="grid h-full flex-1 grid-cols-1 place-items-center gap-4 text-center sm:grid-cols-3 sm:items-center">
-                  <div className="flex h-full flex-col items-center justify-center">
-                    <h3 className="text-base font-semibold font-sans">Total Products</h3>
-                    <p className="text-3xl font-bold font-sans">{totalProducts}</p>
-                    <div className="flex items-center justify-center">
-                      <p
-                        className={`text-sm font-medium font-sans ${
-                          productTrend >= 0 ? "text-emerald-400" : "text-red-400"
-                        }`}
-                      >
-                        {productTrend >= 0 ? "+" : ""}
-                        {productTrend.toFixed(1)}%
-                      </p>
-                      <TrendingUp
-                        className={`size-3.5 ml-1 ${
-                          productTrend >= 0 ? "text-emerald-400" : "text-red-400 rotate-180"
-                        }`}
-                      />
-                    </div>
-                  </div>
+                  {keyMetricTiles.map(({ key, title, primary, trend }) => {
+                    const { prefix, value, text, icon, bg } = formatTrend(trend)
+                    return (
+                      <div key={key} className="flex h-full flex-col items-center justify-center">
+                        <div
+                          className={`flex items-center justify-center px-2 ${bg} rounded-full mt-2`}
+                        >
+                          <p className={`text-sm font-medium font-sans ${text}`}>
+                            {prefix}
+                            {value}%
+                          </p>
+                          <TrendingUp className={`size-3.5 ml-1 ${icon}`} />
+                        </div>
+                        <div className="py-4">{primary}</div>
 
-                  <div className="flex h-full flex-col items-center justify-center">
-                    <h3 className="text-base font-semibold font-sans">Low Stock</h3>
-                    <p className="text-3xl font-bold font-sans">{lowStock}</p>
-                    <div className="flex items-center justify-center">
-                      <p
-                        className={`text-sm font-medium font-sans ${
-                          lowStockTrend >= 0 ? "text-emerald-400" : "text-red-400"
-                        }`}
-                      >
-                        {lowStockTrend >= 0 ? "+" : ""}
-                        {lowStockTrend.toFixed(1)}%
-                      </p>
-                      <TrendingUp
-                        className={`size-3.5 ml-1 ${
-                          lowStockTrend >= 0 ? "text-emerald-400" : "text-red-400 rotate-180"
-                        }`}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex h-full flex-col items-center justify-center">
-                    <h3 className="text-base font-semibold font-sans">Total Value</h3>
-                    <p className="text-3xl font-bold font-sans">
-                      {currencyFormatterTHB.format(totalValue).split(" ")[0]}
-                      <span className="text-lg font-semibold font-sans ml-1">
-                        {currencyFormatterTHB.format(totalValue).split(" ")[1]}
-                      </span>
-                    </p>
-
-                    <div className="flex items-center justify-center">
-                      <p
-                        className={`text-sm font-medium font-sans ${
-                          totalValueTrend >= 0 ? "text-emerald-400" : "text-red-400"
-                        }`}
-                      >
-                        {totalValueTrend >= 0 ? "+" : ""}
-                        {totalValueTrend.toFixed(1)}%
-                      </p>
-                      <TrendingUp
-                        className={`size-3.5 ml-1 ${
-                          totalValueTrend >= 0 ? "text-emerald-400" : "text-red-400 rotate-180"
-                        }`}
-                      />
-                    </div>
-                  </div>
+                        <h3 className="text-base font-semibold font-sans">{title}</h3>
+                      </div>
+                    )
+                  })}
                 </div>
               ) : (
                 <Empty className="w-full">
