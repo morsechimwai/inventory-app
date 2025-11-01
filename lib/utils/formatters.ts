@@ -1,3 +1,4 @@
+// Currency Formatters
 export const currencyFormatterTHB = new Intl.NumberFormat("th-TH", {
   style: "currency",
   currency: "THB",
@@ -5,14 +6,16 @@ export const currencyFormatterTHB = new Intl.NumberFormat("th-TH", {
   maximumFractionDigits: 2,
 })
 
-export const dateFormatter = new Intl.DateTimeFormat("en-US", {
-  dateStyle: "medium",
-  timeStyle: "short",
-})
-
+// Quantity Formatter
 export const quantityFormatter = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 0,
   maximumFractionDigits: 3,
+})
+
+// Date and Time Formatters
+export const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  dateStyle: "medium",
+  timeStyle: "short",
 })
 
 const relativeTimeFormatter = new Intl.RelativeTimeFormat("en", { numeric: "auto" })
@@ -27,7 +30,7 @@ const TIME_DIVISIONS: Array<{ amount: number; unit: Intl.RelativeTimeFormatUnit 
   { amount: Number.POSITIVE_INFINITY, unit: "year" },
 ]
 
-export function formatRelativeTime(input: Date | string): string {
+export const formatRelativeTime = (input: Date | string): string => {
   const value = typeof input === "string" ? new Date(input) : input
   if (Number.isNaN(value.getTime())) return ""
 
@@ -41,4 +44,14 @@ export function formatRelativeTime(input: Date | string): string {
   }
 
   return relativeTimeFormatter.format(Math.round(duration), "year")
+}
+
+// Monday-based week label formatter
+export const formatWeekLabel = (date: Date): string => {
+  const options: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "2-digit",
+  }
+
+  return new Intl.DateTimeFormat("en-US", options).format(date)
 }
