@@ -4,6 +4,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 
+// Next.js
+import Link from "next/link"
+
 // Validation
 import { zodResolver } from "@hookform/resolvers/zod"
 
@@ -64,9 +67,6 @@ import {
   updateStockMovementAction,
 } from "@/lib/actions/stock-movements"
 import { getAllProducts } from "@/lib/actions/products"
-
-// Utils
-import { coerceNumber, coerceNumberOrNull, coerceStringOrNull } from "@/lib/utils/coerce"
 
 // Meta info for movement types
 type MovementDetail = {
@@ -398,31 +398,42 @@ export default function InventoryActivityPage() {
                 </EmptyMedia>
                 <EmptyTitle>No activity yet</EmptyTitle>
               </EmptyHeader>
-              <EmptyContent className="flex flex-row justify-center gap-2 mt-2">
-                {movementButtonOrder.map((type) => {
-                  const { buttonLabel, icon: Icon } = movementTypeMeta[type]
-                  return (
-                    <Button
-                      key={type}
-                      className="font-sans font-bold text-sm"
-                      onClick={() => handleOpenCreate(type)}
-                      disabled={disableCreateButtons}
-                    >
-                      <Icon className="mr-1 size-4" />
-                      <span>{buttonLabel}</span>
+              <EmptyContent className="mt-2">
+                {products.length === 0 ? (
+                  <>
+                    <EmptyDescription className="text-sm text-amber-500">
+                      Add a product first so we know which item you&apos;re updating.
+                    </EmptyDescription>
+                    <Button variant="link" asChild>
+                      <Link href="/products" className="font-sans font-bold text-sm">
+                        Add Product
+                      </Link>
                     </Button>
-                  )
-                })}
+                  </>
+                ) : (
+                  <>
+                    <div className="flex gap-2">
+                      {movementButtonOrder.map((type) => {
+                        const { buttonLabel, icon: Icon } = movementTypeMeta[type]
+                        return (
+                          <Button
+                            key={type}
+                            className="font-sans font-bold text-sm"
+                            onClick={() => handleOpenCreate(type)}
+                            disabled={disableCreateButtons}
+                          >
+                            <Icon className="mr-1 size-4" />
+                            <span>{buttonLabel}</span>
+                          </Button>
+                        )
+                      })}
+                    </div>
+                    <EmptyDescription>
+                      Log your first stock movement to start a clean activity trail.
+                    </EmptyDescription>
+                  </>
+                )}
               </EmptyContent>
-              {products.length === 0 ? (
-                <EmptyDescription className="text-sm text-amber-500">
-                  Add a product first so we know which item you&apos;re updating.
-                </EmptyDescription>
-              ) : (
-                <EmptyDescription>
-                  Log your first stock movement to start a clean activity trail.
-                </EmptyDescription>
-              )}
             </Empty>
           }
         />

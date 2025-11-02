@@ -356,8 +356,8 @@ export default function ProductPage() {
                     You need at least one unit before adding products.
                   </EmptyDescription>
                   <EmptyContent>
-                    <Button variant="link" className="font-sans font-bold text-sm" asChild>
-                      <Link href="/unit">Go to Unit</Link>
+                    <Button variant="link" className="font-sans text-sm" asChild>
+                      <Link href="/units">Go to Unit</Link>
                     </Button>
                   </EmptyContent>
                 </>
