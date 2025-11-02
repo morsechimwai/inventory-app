@@ -27,6 +27,7 @@ model Product {
 
   // Cache fields
   currentStock Decimal @default(0) @db.Decimal(12, 3)
+  avgCost      Decimal @default(0) @db.Decimal(12, 2)
 
   // Relations
   category  Category?       @relation(fields: [categoryId], references: [id])

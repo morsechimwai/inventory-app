@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Product" ADD COLUMN     "avgCost" DECIMAL(12,2) NOT NULL DEFAULT 0;
