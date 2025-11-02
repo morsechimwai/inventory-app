@@ -199,10 +199,6 @@ The optional `prisma/seed.ts` script references a demo user ID—adjust it if yo
    ```
 5. Open http://localhost:3000 and sign in with Stack to access the dashboard and inventory screens.
 
-## Testing
-- `pnpm lint` — type-aware linting for the Next.js app.
-- `pnpm test` — Vitest suite covering the Moving Average Cost helpers and future domain utilities.
-
 ## Available Scripts
 | Script        | Description                              |
 |---------------|------------------------------------------|
