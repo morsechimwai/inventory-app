@@ -1,17 +1,17 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { PolarAngleAxis, RadialBar, RadialBarChart } from "recharts";
+import * as React from "react"
+import { PolarAngleAxis, RadialBar, RadialBarChart } from "recharts"
 
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/components/ui/chart";
+} from "@/components/ui/chart"
 
 interface EfficiencyRadialChartProps {
-  score: number;
+  score: number
 }
 
 const chartConfig = {
@@ -19,15 +19,10 @@ const chartConfig = {
     label: "Efficiency",
     color: "oklch(70.2% 0.183 293.541)",
   },
-} satisfies ChartConfig;
+} satisfies ChartConfig
 
-export default function EfficiencyRadialChart({
-  score,
-}: EfficiencyRadialChartProps) {
-  const normalizedScore = React.useMemo(
-    () => Math.max(0, Math.min(100, score)),
-    [score]
-  );
+export default function EfficiencyRadialChart({ score }: EfficiencyRadialChartProps) {
+  const normalizedScore = React.useMemo(() => Math.max(0, Math.min(100, score)), [score])
 
   const chartData = React.useMemo(
     () => [
@@ -38,13 +33,10 @@ export default function EfficiencyRadialChart({
       },
     ],
     [normalizedScore]
-  );
+  )
 
   return (
-    <ChartContainer
-      config={chartConfig}
-      className="mx-auto aspect-square max-h-[260px] w-full"
-    >
+    <ChartContainer config={chartConfig} className="mx-auto aspect-square w-full">
       <RadialBarChart
         data={chartData}
         startAngle={90}
@@ -52,23 +44,13 @@ export default function EfficiencyRadialChart({
         innerRadius={82}
         outerRadius={100}
       >
-        <PolarAngleAxis
-          type="number"
-          domain={[0, 100]}
-          tick={false}
-          dataKey="value"
-        />
+        <PolarAngleAxis type="number" domain={[0, 100]} tick={false} dataKey="value" />
         <RadialBar dataKey="value" background cornerRadius={6} />
         <ChartTooltip
           cursor={false}
-          content={
-            <ChartTooltipContent
-              hideLabel
-              formatter={(value) => [`Score ${value}%`]}
-            />
-          }
+          content={<ChartTooltipContent hideLabel formatter={(value) => [`Score ${value}%`]} />}
         />
       </RadialBarChart>
     </ChartContainer>
-  );
+  )
 }
