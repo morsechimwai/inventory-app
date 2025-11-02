@@ -14,6 +14,7 @@
 ## Feature Highlights
 - Secure workspace powered by Stack authentication with protected routes and user-scoped Prisma queries.
 - Inventory manager with server actions for create/update/delete, `react-hook-form` + `zod` validation, toast feedback, sheets and dialogs, and empty/loading states.
+- Moving Average Cost engine keeps `Product.currentStock` and `Product.avgCost` in sync so OUT movements price automatically while IN movements recompute weighted-average cost.
 - Insights-driven dashboard surfacing KPI tiles, live stock health, restock cues, efficiency scoring, weekly product trends, and recent inventory movements.
 - Responsive layout with an off-canvas sidebar, breadcrumb header, skeleton placeholders, and reusable UI primitives.
 - Prisma-backed PostgreSQL data model for per-user products, with `revalidatePath` ensuring UI freshness after mutations.
@@ -47,10 +48,9 @@ public/                   // Static assets
 ```
 
 ## Stock Movements Service
-- Core service logic lives in `lib/services/stock-movements.ts`, keeping stock quantities in sync by wrapping every mutation in a Prisma transaction and undoing old deltas before applying new ones.
+- Core service logic lives in `lib/services/stock-movements.ts`, where each create/update/delete runs inside a Prisma transaction and delegates pricing + stock math to the MAC helpers.
 - Ownership enforcement (`assertProductOwnership`) ensures a user can only mutate their own products, even inside nested transactions.
-- Helper `calcDelta` centralizes how IN/OUT/ADJUST movements affect inventory counts, making new movement types easy to extend later.
-- Read more in `lib/services/README.md` for rationale and integration notes with the Inventory Activity UI.
+- Pure Moving Average Cost math sits in `lib/services/stock-movement-math.ts` with Vitest coverage at `lib/services/__tests__/stock-movement-math.test.ts`, making it straightforward to evolve costing rules without touching Prisma code.
 
 ## Dashboard Efficiency Formula
 - We calculate `efficiencyScore` in [`lib/utils/dashboard.ts`](lib/utils/dashboard.ts) by first deriving the product distribution:
@@ -87,6 +87,7 @@ Prisma models are scoped by `userId` so each Stack-authenticated workspace owns 
 | categoryId     | `String?`            | Nullable FK to `Category` (`@db.VarChar(255)`)             |
 | unitId*        | `String`             | Required FK to `Unit` (`@db.VarChar(255)`)                 |
 | currentStock*  | `Decimal(12,3)`      | Cached on-hand quantity, defaults to `0`                   |
+| avgCost*       | `Decimal(12,2)`      | Cached moving-average cost, defaults to `0`                |
 | createdAt*     | `DateTime`           | Defaults to `now()`                                         |
 | updatedAt*     | `DateTime`           | Auto-updated timestamp                                      |
 
@@ -138,10 +139,10 @@ Prisma models are scoped by `userId` so each Stack-authenticated workspace owns 
 | id*           | `String`             | Primary key generated with `cuid()`                                  |
 | productId*    | `String`             | FK to `Product`                                                       |
 | userId*       | `String`             | Stack user owner                                                      |
-| movementType* | `MovementType`       | Enum describing IN, OUT, or ADJUST movements                          |
+| movementType* | `MovementType`       | Enum describing IN or OUT movements (Adjustment reserved for future use) |
 | quantity*     | `Decimal(12,3)`      | Quantity moved                                                        |
-| unitCost      | `Decimal(12,2)?`     | Optional per-unit cost at movement time                               |
-| totalCost     | `Decimal(14,2)?`     | Optional aggregate cost                                               |
+| unitCost      | `Decimal(12,2)?`     | Per-unit cost persisted for history; IN requires input, OUT auto-uses the product average |
+| totalCost     | `Decimal(14,2)?`     | Calculated as `quantity × unitCost`                                     |
 | referenceType | `ReferenceType`      | Defaults to `MANUAL`                                                  |
 | referenceId   | `String?`            | Optional document identifier                                          |
 | reason        | `String?`            | Optional adjustment reason                                            |
@@ -161,7 +162,7 @@ Prisma models are scoped by `userId` so each Stack-authenticated workspace owns 
 - Belongs to `product`
 
 ### Enums
-- `MovementType`: `IN`, `OUT`, `ADJUST`
+- `MovementType`: `IN`, `OUT` *(Adjustment reserved for future release)*
 - `ReferenceType`: `PURCHASE`, `SALE`, `RETURN`, `TRANSFER`, `ADJUSTMENT`, `MANUAL`
 
 ## Prerequisites
@@ -197,6 +198,10 @@ The optional `prisma/seed.ts` script references a demo user ID—adjust it if yo
    pnpm dev
    ```
 5. Open http://localhost:3000 and sign in with Stack to access the dashboard and inventory screens.
+
+## Testing
+- `pnpm lint` — type-aware linting for the Next.js app.
+- `pnpm test` — Vitest suite covering the Moving Average Cost helpers and future domain utilities.
 
 ## Available Scripts
 | Script        | Description                              |
