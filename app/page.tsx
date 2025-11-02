@@ -2,11 +2,17 @@
 import Link from "next/link"
 
 // Icons
-import { Origami, PackageCheck, Truck, ShieldCheck, Github } from "lucide-react"
+import { Origami, PackageCheck, Truck, ShieldCheck, Github, type LucideIcon } from "lucide-react"
 
 // Components
 import { Button } from "@/components/ui/button"
 import { SignIn } from "@stackframe/stack"
+
+const heroHighlights: Array<{ icon: LucideIcon; label: string }> = [
+  { icon: PackageCheck, label: "Track stock fast" },
+  { icon: Truck, label: "Catch low inventory" },
+  { icon: ShieldCheck, label: "Secure & reliable" },
+]
 
 export default function Home() {
   return (
@@ -14,7 +20,7 @@ export default function Home() {
       <div className="grid w-full max-w-6xl grid-cols-1 gap-12 px-6 py-20 lg:grid-cols-2 lg:px-12">
         {/* Left side – Hero */}
         <section className="space-y-8 text-center lg:text-left">
-          <div className="space-y-4">
+          <div className="space-y-12">
             <div className="flex items-center gap-5 justify-center lg:justify-start">
               <div className="rounded-3xl bg-sky-400 p-4">
                 <Origami className="text-sky-50 size-12" />
@@ -36,18 +42,15 @@ export default function Home() {
 
           {/* Key value points */}
           <ul className="grid gap-4 sm:grid-cols-3 text-left">
-            <li className="rounded-xl border border-border/70 p-4 shadow-sm">
-              <PackageCheck className="mb-3 h-8 w-8 text-primary" />
-              <p className="font-sans text-sm text-muted-foreground">Track stock fast</p>
-            </li>
-            <li className="rounded-xl border border-border/70 p-4 shadow-sm">
-              <Truck className="mb-3 h-8 w-8 text-primary" />
-              <p className="font-sans text-sm text-muted-foreground">Catch low inventory</p>
-            </li>
-            <li className="rounded-xl border border-border/70 p-4 shadow-sm">
-              <ShieldCheck className="mb-3 h-8 w-8 text-primary" />
-              <p className="font-sans text-sm text-muted-foreground">Secure & reliable</p>
-            </li>
+            {heroHighlights.map(({ icon: Icon, label }) => (
+              <li
+                key={label}
+                className="rounded-xl border border-border/70 p-4 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 ease-in-out"
+              >
+                <Icon className="mb-3 h-8 w-8 text-primary" />
+                <p className="font-sans text-sm text-muted-foreground">{label}</p>
+              </li>
+            ))}
           </ul>
 
           {/* Open source trust note */}
