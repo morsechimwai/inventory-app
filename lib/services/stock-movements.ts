@@ -2,6 +2,7 @@
 // Services for managing stock movements in the inventory system
 
 // Prisma Client
+import { MovementType } from "@prisma/client"
 import type { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/db/prisma"
 
@@ -17,6 +18,20 @@ import { AppError } from "@/lib/errors/app-error"
 
 // Utils
 import { decimalToNumber } from "../utils/decimal"
+import {
+  applyMovementMAC,
+  revertMovementMAC,
+  type ProductSnapshot,
+} from "../utils/stock-movement-math"
+
+const assertSupportedMovementType = (movementType: MovementType) => {
+  if (movementType === MovementType.ADJUST) {
+    throw new AppError(
+      "UNSUPPORTED_MOVEMENT",
+      "Adjustment movements are not supported in this release."
+    )
+  }
+}
 
 // ─────────────────────────────────────────────────────────────
 // Product Ownership Check (Overloaded for prisma/tx)
@@ -46,15 +61,35 @@ async function assertProductOwnership(
   if (!product) throw new AppError("NOT_FOUND", "Product not found or unauthorized.")
 }
 
-// ─────────────────────────────────────────────────────────────
-// Movement delta calculator
-// IN = +qty, OUT = -qty, ADJUST = signed value
-// ─────────────────────────────────────────────────────────────
+async function getProductSnapshot(
+  tx: Prisma.TransactionClient,
+  productId: string
+): Promise<ProductSnapshot> {
+  const product = await tx.product.findUnique({
+    where: { id: productId },
+    select: { currentStock: true, avgCost: true },
+  })
 
-function calcDelta(type: "IN" | "OUT" | "ADJUST", qty: number) {
-  if (type === "IN") return qty
-  if (type === "OUT") return -qty
-  return qty // ADJUST
+  if (!product) throw new AppError("NOT_FOUND", "Product not found.")
+
+  return {
+    currentStock: product.currentStock,
+    avgCost: product.avgCost,
+  }
+}
+
+async function updateProductCaches(
+  tx: Prisma.TransactionClient,
+  productId: string,
+  snapshot: ProductSnapshot
+) {
+  await tx.product.update({
+    where: { id: productId },
+    data: {
+      currentStock: snapshot.currentStock,
+      avgCost: snapshot.avgCost,
+    },
+  })
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -67,19 +102,25 @@ export async function createStockMovement(
 ): Promise<StockMovementEntity> {
   return prisma.$transaction(async (tx) => {
     await assertProductOwnership(userId, data.productId, tx)
+    assertSupportedMovementType(data.movementType)
+
+    const snapshot = await getProductSnapshot(tx, data.productId)
+    const computation = applyMovementMAC(snapshot, {
+      movementType: data.movementType,
+      quantity: Number(data.quantity),
+      unitCost: data.unitCost ?? null,
+    })
 
     const movement = await tx.stockMovement.create({
-      data: { ...data, userId },
-    })
-
-    const delta = calcDelta(data.movementType, decimalToNumber(data.quantity))
-
-    await tx.product.update({
-      where: { id: data.productId },
       data: {
-        currentStock: { increment: delta },
+        ...data,
+        userId,
+        unitCost: computation.unitCost,
+        totalCost: computation.totalCost,
       },
     })
+
+    await updateProductCaches(tx, data.productId, computation.nextState)
 
     return movement
   })
@@ -90,7 +131,10 @@ export async function createStockMovement(
 // ─────────────────────────────────────────────────────────────
 export async function getStockMovementsByUserId(userId: string): Promise<StockMovementDTO[]> {
   const movements = await prisma.stockMovement.findMany({
-    where: { userId },
+    where: {
+      userId,
+      movementType: { in: [MovementType.IN, MovementType.OUT] },
+    },
     select: {
       id: true,
       movementType: true,
@@ -118,9 +162,9 @@ export async function getStockMovementsByUserId(userId: string): Promise<StockMo
   // convert Decimal to number for UI
   return movements.map((m) => ({
     ...m,
-    quantity: Number(m.quantity),
-    unitCost: m.unitCost !== null ? Number(m.unitCost) : null,
-    totalCost: m.totalCost !== null ? Number(m.totalCost) : null,
+    quantity: decimalToNumber(m.quantity),
+    unitCost: m.unitCost !== null ? decimalToNumber(m.unitCost) : null,
+    totalCost: m.totalCost !== null ? decimalToNumber(m.totalCost) : null,
   }))
 }
 
@@ -143,25 +187,36 @@ export async function updateStockMovement(
     const productId = data.productId ?? old.productId
 
     await assertProductOwnership(userId, productId, tx)
+    assertSupportedMovementType(old.movementType)
+    assertSupportedMovementType(data.movementType)
+    const oldProductSnapshot = await getProductSnapshot(tx, old.productId)
+    const revertedState = revertMovementMAC(oldProductSnapshot, old)
 
-    const undoDelta = calcDelta(old.movementType, decimalToNumber(old.quantity)) * -1
-    const newDelta = calcDelta(data.movementType, decimalToNumber(data.quantity))
+    await updateProductCaches(tx, old.productId, revertedState)
 
-    // คืน stock เดิม
-    await tx.product.update({
-      where: { id: old.productId },
-      data: { currentStock: { increment: undoDelta } },
+    let baseSnapshot: ProductSnapshot
+    if (productId === old.productId) {
+      baseSnapshot = revertedState
+    } else {
+      baseSnapshot = await getProductSnapshot(tx, productId)
+    }
+
+    const computation = applyMovementMAC(baseSnapshot, {
+      movementType: data.movementType,
+      quantity: Number(data.quantity),
+      unitCost: data.unitCost ?? null,
     })
 
-    // ใส่ stock ใหม่
-    await tx.product.update({
-      where: { id: productId },
-      data: { currentStock: { increment: newDelta } },
-    })
+    await updateProductCaches(tx, productId, computation.nextState)
 
     return tx.stockMovement.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        productId,
+        unitCost: computation.unitCost,
+        totalCost: computation.totalCost,
+      },
     })
   })
 }
@@ -182,13 +237,11 @@ export async function deleteStockMovementById(
     if (!old) throw new AppError("NOT_FOUND", "Stock movement not found.")
 
     await assertProductOwnership(userId, old.productId, tx)
+    assertSupportedMovementType(old.movementType)
+    const snapshot = await getProductSnapshot(tx, old.productId)
+    const revertedState = revertMovementMAC(snapshot, old)
 
-    const undoDelta = calcDelta(old.movementType, decimalToNumber(old.quantity)) * -1
-
-    await tx.product.update({
-      where: { id: old.productId },
-      data: { currentStock: { increment: undoDelta } },
-    })
+    await updateProductCaches(tx, old.productId, revertedState)
 
     return tx.stockMovement.delete({
       where: { id },

@@ -8,8 +8,8 @@ export type StockMovementInput = {
   productId: string
   movementType: MovementType
   quantity: number
-  unitCost: number | null
-  totalCost: number | null
+  unitCost?: number | null
+  totalCost?: number | null
   referenceType: ReferenceType
   referenceId: string | null
   reason: string | null

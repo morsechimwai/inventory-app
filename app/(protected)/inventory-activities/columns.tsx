@@ -4,7 +4,6 @@
 import {
   ArrowDownToLine,
   ArrowUpToLine,
-  Forklift,
   LucideIcon,
   MoreVertical,
   SquarePen,
@@ -29,7 +28,13 @@ import { MovementType, ReferenceType } from "@prisma/client"
 import { dateFormatter, quantityFormatter, currencyFormatterTHB } from "@/lib/utils/formatters"
 import { createElement } from "react"
 
-const movementTypeLabels: Record<MovementType, { title: string; icon: LucideIcon }> = {
+type SupportedMovementType = Exclude<MovementType, MovementType.ADJUST>
+
+const isSupportedMovementType = (
+  type: MovementType
+): type is SupportedMovementType => type === MovementType.IN || type === MovementType.OUT
+
+const movementTypeLabels: Record<SupportedMovementType, { title: string; icon: LucideIcon }> = {
   [MovementType.IN]: {
     title: "Stock In",
     icon: ArrowDownToLine,
@@ -37,10 +42,6 @@ const movementTypeLabels: Record<MovementType, { title: string; icon: LucideIcon
   [MovementType.OUT]: {
     title: "Stock Out",
     icon: ArrowUpToLine,
-  },
-  [MovementType.ADJUST]: {
-    title: "Adjustment",
-    icon: Forklift,
   },
 }
 
@@ -75,10 +76,13 @@ export const columns = (
     enableSearch: true,
     cell: ({ row }) => {
       const { movementType } = row.original
+      const meta = isSupportedMovementType(movementType)
+        ? movementTypeLabels[movementType]
+        : { title: movementType, icon: ArrowDownToLine }
       return (
         <div className="inline-flex items-center gap-1">
-          {createElement(movementTypeLabels[movementType].icon, { className: "size-3.5" })}
-          {movementTypeLabels[movementType].title}
+          {createElement(meta.icon, { className: "size-3.5" })}
+          {meta.title}
         </div>
       )
     },
