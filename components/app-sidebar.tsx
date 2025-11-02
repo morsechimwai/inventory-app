@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar"
 
 // Icons
-import { ArrowUpDown, BarChart2, Hash, LucideIcon, Origami, Package, Tags } from "lucide-react"
+import { ArrowUpDown, BarChart2, Hash, LucideIcon, Package, Tags } from "lucide-react"
 
 // Stack Auth (โหลดเฉพาะฝั่ง client)
 import dynamic from "next/dynamic"
@@ -106,7 +106,6 @@ export default function AppSidebar() {
             href="#"
             onClick={handleNavigate}
           >
-            <Origami className="size-7 stroke-3 stroke-sky-400" />
             <span className="text-xl font-black font-sans">StocKit</span>
           </Link>
         </SidebarMenuButton>

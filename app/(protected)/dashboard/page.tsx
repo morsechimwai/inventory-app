@@ -285,53 +285,68 @@ export default async function DashboardPage() {
                   {stockLevels.map((product) => {
                     const { bg, text, label, icon: Icon } = STOCK_LEVEL_STYLES[product.stockLevel]
                     const isOut = product.stockLevel === "OUT_OF_STOCK"
+                    const threshold =
+                      typeof product.lowStockAt === "number" ? product.lowStockAt : null
+                    const ratio =
+                      !isOut && threshold && threshold > 0
+                        ? Math.min(product.currentStock / threshold, 1)
+                        : isOut
+                        ? 0
+                        : 1
+                    const progressPercent = Math.round(ratio * 100)
 
+                    // updated
                     return (
-                      <div key={product.id} className="rounded-lg bg-muted/50 p-4 space-y-2">
-                        <div className="flex items-center gap-3">
-                          <span
-                            className={`flex size-10 items-center justify-center rounded-full text-white ${bg}`}
-                          >
-                            <Icon className="size-5" />
-                          </span>
+                      <div
+                        key={product.id}
+                        className="relative overflow-hidden rounded-lg border bg-muted/40"
+                      >
+                        <span className={`absolute inset-y-0 left-0 w-1`} aria-hidden="true" />
+                        <div className="flex flex-col gap-3 p-4">
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex items-start gap-3">
+                              <span
+                                className={`flex size-10 items-center justify-center rounded-full text-white ${bg}`}
+                              >
+                                <Icon className="size-5" />
+                              </span>
+                              <div className="space-y-1">
+                                <p className="text-sm font-semibold font-sans">{product.name}</p>
+                                <p className="text-xs text-muted-foreground font-sans">
+                                  <span className={`${text}`}>{label}</span>
+                                  {threshold
+                                    ? ` • Min ${quantityFormatter.format(threshold)} ${
+                                        product.unitName
+                                      }`
+                                    : ""}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-2">
+                              <p className={`text-sm font-semibold font-sans ${text}`}>
+                                {isOut ? "0" : quantityFormatter.format(product.currentStock)}{" "}
+                                {product.unitName}
+                              </p>
+                            </div>
+                          </div>
                           <div>
-                            <p className="text-sm font-medium font-sans">{product.name}</p>
-                            <p className="text-xs text-muted-foreground font-sans">
-                              <span className={`${text}`}>{label}</span>
-                            </p>
+                            <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground font-sans">
+                              <span>Stock level</span>
+                              <span>
+                                {threshold ? `${progressPercent}%` : isOut ? "0%" : "100%"}
+                              </span>
+                            </div>
+                            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                              <div
+                                className={`${bg} h-full rounded-full`}
+                                style={{ width: `${progressPercent}%` }}
+                              />
+                            </div>
                           </div>
                         </div>
-
-                        {/* Stock amount + percentage */}
-                        <div className="text-sm font-sans flex justify-between">
-                          <span className={`${text}`}>
-                            {isOut ? "0" : quantityFormatter.format(product.currentStock)}{" "}
-                            {product.unitName}
-                          </span>
-
-                          {product.lowStockAt && !isOut && (
-                            <span className="text-xs text-muted-foreground">
-                              {(Math.min(product.currentStock / product.lowStockAt, 1) * 100) | 0}%
-                              of threshold
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Mini progress bar */}
-                        {!isOut && product.lowStockAt && (
-                          <div className="h-1.5 bg-muted rounded overflow-hidden">
-                            <div
-                              className={`${bg} h-full`}
-                              style={{
-                                width: `${
-                                  Math.min(product.currentStock / product.lowStockAt, 1) * 100
-                                }%`,
-                              }}
-                            />
-                          </div>
-                        )}
                       </div>
                     )
+                    // updated
                   })}
                 </div>
               ) : (
