@@ -115,7 +115,6 @@ model StockMovement {
 enum MovementType {
   IN // สินค้าเข้ามาในคลัง
   OUT // สินค้าออกจากคลัง
-  ADJUST // ปรับยอด (นับแล้วผิด, ของหาย, สินค้าเสีย etc.)
 }
 
 enum ReferenceType {
