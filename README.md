@@ -7,16 +7,24 @@
   </a>
 </p>
 
-A Stack-authenticated inventory management workspace built with Next.js 16. It lets small teams monitor stock, surface low inventory, and manage product records from a single dashboard.
+ A Stack-authenticated inventory management workspace built with Next.js 16. It lets small teams monitor stock, surface low inventory, and manage product records from a single dashboard.
 
 > **Project status:** In development — dashboard analytics and inventory CRUD flows are live; integrations such as alerts and role management are still in progress.
 
 ## Feature Highlights
 - Secure workspace powered by Stack authentication with protected routes and user-scoped Prisma queries.
 - Inventory manager with server actions for create/update/delete, `react-hook-form` + `zod` validation, toast feedback, sheets and dialogs, and empty/loading states.
-- Analytics dashboard that calculates stock KPIs, renders recent product activity with Recharts, and visualizes efficiency using a radial chart.
+- Insights-driven dashboard surfacing KPI tiles, live stock health, restock cues, efficiency scoring, weekly product trends, and recent inventory movements.
 - Responsive layout with an off-canvas sidebar, breadcrumb header, skeleton placeholders, and reusable UI primitives.
 - Prisma-backed PostgreSQL data model for per-user products, with `revalidatePath` ensuring UI freshness after mutations.
+
+## Dashboard Insights
+- Key metrics tile trio covering total products, low-stock count, and total inventory value with week-over-week trend indicators.
+- Stock health list with traffic-light status strip, live quantity gauge, and quick restock action for risky items.
+- Restock suggestions highlighting reorder thresholds plus recommended purchase quantities.
+- Efficiency radial chart summarizing in-stock, low-stock, and out-of-stock percentages alongside the overall efficiency score.
+- Weekly product chart visualising new additions across the last 12 weeks.
+- Recent activity feed detailing the latest stock movements with type, reason, quantity, and relative timestamps.
 
 ## Tech Stack
 - Next.js 16 (App Router, Server Components, Route Handlers)
@@ -45,7 +53,7 @@ public/                   // Static assets
 - Read more in `lib/services/README.md` for rationale and integration notes with the Inventory Activity UI.
 
 ## Dashboard Efficiency Formula
-- We calculate `efficiencyScore` in `lib/utils/dashboard.ts` by first deriving the product distribution:
+- We calculate `efficiencyScore` in [`lib/utils/dashboard.ts`](lib/utils/dashboard.ts) by first deriving the product distribution:
   - `inStockPercentage = round((inStockCount / totalProducts) × 100)`
   - `lowStockPercentage = round((lowStockCount / totalProducts) × 100)`
   - `outOfStockPercentage = round((outOfStockCount / totalProducts) × 100)`
