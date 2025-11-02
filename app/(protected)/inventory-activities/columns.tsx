@@ -28,18 +28,12 @@ import { MovementType, ReferenceType } from "@prisma/client"
 import { dateFormatter, quantityFormatter, currencyFormatterTHB } from "@/lib/utils/formatters"
 import { createElement } from "react"
 
-type SupportedMovementType = Exclude<MovementType, MovementType.ADJUST>
-
-const isSupportedMovementType = (
-  type: MovementType
-): type is SupportedMovementType => type === MovementType.IN || type === MovementType.OUT
-
-const movementTypeLabels: Record<SupportedMovementType, { title: string; icon: LucideIcon }> = {
-  [MovementType.IN]: {
+const movementTypeLabels: Record<MovementType, { title: string; icon: LucideIcon }> = {
+  IN: {
     title: "Stock In",
     icon: ArrowDownToLine,
   },
-  [MovementType.OUT]: {
+  OUT: {
     title: "Stock Out",
     icon: ArrowUpToLine,
   },
@@ -76,7 +70,7 @@ export const columns = (
     enableSearch: true,
     cell: ({ row }) => {
       const { movementType } = row.original
-      const meta = isSupportedMovementType(movementType)
+      const meta = movementType
         ? movementTypeLabels[movementType]
         : { title: movementType, icon: ArrowDownToLine }
       return (

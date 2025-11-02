@@ -24,15 +24,6 @@ import {
   type ProductSnapshot,
 } from "../utils/stock-movement-math"
 
-const assertSupportedMovementType = (movementType: MovementType) => {
-  if (movementType === MovementType.ADJUST) {
-    throw new AppError(
-      "UNSUPPORTED_MOVEMENT",
-      "Adjustment movements are not supported in this release."
-    )
-  }
-}
-
 // ─────────────────────────────────────────────────────────────
 // Product Ownership Check (Overloaded for prisma/tx)
 // ─────────────────────────────────────────────────────────────
@@ -102,7 +93,6 @@ export async function createStockMovement(
 ): Promise<StockMovementEntity> {
   return prisma.$transaction(async (tx) => {
     await assertProductOwnership(userId, data.productId, tx)
-    assertSupportedMovementType(data.movementType)
 
     const snapshot = await getProductSnapshot(tx, data.productId)
     const computation = applyMovementMAC(snapshot, {
@@ -187,8 +177,6 @@ export async function updateStockMovement(
     const productId = data.productId ?? old.productId
 
     await assertProductOwnership(userId, productId, tx)
-    assertSupportedMovementType(old.movementType)
-    assertSupportedMovementType(data.movementType)
     const oldProductSnapshot = await getProductSnapshot(tx, old.productId)
     const revertedState = revertMovementMAC(oldProductSnapshot, old)
 
@@ -237,7 +225,6 @@ export async function deleteStockMovementById(
     if (!old) throw new AppError("NOT_FOUND", "Stock movement not found.")
 
     await assertProductOwnership(userId, old.productId, tx)
-    assertSupportedMovementType(old.movementType)
     const snapshot = await getProductSnapshot(tx, old.productId)
     const revertedState = revertMovementMAC(snapshot, old)
 

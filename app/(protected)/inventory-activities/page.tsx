@@ -77,16 +77,9 @@ type MovementDetail = {
   icon: LucideIcon
 }
 
-type SupportedMovementType = Exclude<MovementType, MovementType.ADJUST>
+const supportedMovementTypes: MovementType[] = [MovementType.IN, MovementType.OUT]
 
-const isSupportedMovementType = (
-  movementType: MovementType
-): movementType is SupportedMovementType =>
-  movementType === MovementType.IN || movementType === MovementType.OUT
-
-const supportedMovementTypes: SupportedMovementType[] = [MovementType.IN, MovementType.OUT]
-
-const movementTypeMeta: Record<SupportedMovementType, MovementDetail> = {
+const movementTypeMeta: Record<MovementType, MovementDetail> = {
   [MovementType.IN]: {
     buttonLabel: "Stock In",
     createTitle: "Stock In",
@@ -129,9 +122,7 @@ export default function InventoryActivityPage() {
   // Derived state
   const isEditing = Boolean(editingStockMovement)
   const watchedMovementType = form.watch("movementType") ?? MovementType.IN
-  const currentMovementType = isSupportedMovementType(watchedMovementType)
-    ? watchedMovementType
-    : MovementType.IN
+  const currentMovementType = watchedMovementType ? watchedMovementType : MovementType.IN
   const movementMeta = movementTypeMeta[currentMovementType]
   const SheetIcon = movementMeta.icon
   const headerTitle = isEditing ? movementMeta.editTitle : movementMeta.createTitle
@@ -162,9 +153,7 @@ export default function InventoryActivityPage() {
       const result = await getAllStockMovements()
 
       if (result.success) {
-        const supported = (result.data?.data ?? []).filter((movement) =>
-          isSupportedMovementType(movement.movementType)
-        )
+        const supported = (result.data?.data ?? []).filter((movement) => movement.movementType)
         setStockMovements(supported)
       } else {
         toast.error(result.errorMessage ?? "Failed to load activity")
@@ -289,10 +278,6 @@ export default function InventoryActivityPage() {
   // Open edit sheet
   const handleOpenEdit = useCallback(
     (movement: StockMovementDTO) => {
-      if (!isSupportedMovementType(movement.movementType)) {
-        toast.error("Adjustment movements are not supported in this release.")
-        return
-      }
       setEditingStockMovement(movement)
       form.reset({
         productId: movement.product.id,
@@ -372,7 +357,7 @@ export default function InventoryActivityPage() {
     let unitCostForCalculation: number | null = null
 
     if (isCostEditable) {
-      if (unitCostValue === undefined || unitCostValue === null || unitCostValue === "") {
+      if (unitCostValue === undefined || unitCostValue === null) {
         if (currentTotal !== undefined) {
           form.setValue("totalCost", undefined, { shouldDirty: false })
         }
@@ -585,9 +570,7 @@ export default function InventoryActivityPage() {
                             placeholder="No average cost yet"
                             disabled
                             readOnly
-                            value={
-                              productAvgCost !== null ? Number(productAvgCost).toFixed(2) : ""
-                            }
+                            value={productAvgCost !== null ? Number(productAvgCost).toFixed(2) : ""}
                           />
                           {productAvgCost === null && (
                             <p className="text-xs text-muted-foreground mt-1">
