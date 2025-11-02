@@ -62,6 +62,7 @@ export function DataTable<TData>({ columns, data, emptyComponent }: DataTablePro
   })
 
   const rows = table.getRowModel().rows
+  const hasData = rows.length > 0
 
   const searchOptions = useSearchOptions(columns)
 
@@ -164,62 +165,68 @@ export function DataTable<TData>({ columns, data, emptyComponent }: DataTablePro
 
   return (
     <div className="w-full font-sans">
-      <div className="w-full flex gap-2 flex-row  ml-auto items-center mb-4 max-w-sm">
-        <Input
-          className="h-8 px-3 py-1.5"
-          placeholder={
-            searchOptions.length === 0
-              ? "Filter..."
-              : `Filter by ${
-                  searchOptions.find((option) => option.value === searchColumn)?.label ?? "field"
-                }..`
-          }
-          value={searchValue}
-          onChange={(event) => {
-            const nextValue = event.target.value
-            setSearchValue(nextValue)
-
-            if (searchOptions.length === 0) {
-              setAppliedSearch({ column: "", value: "" })
-              return
+      {hasData && (
+        <div className="w-full flex gap-2 flex-row  ml-auto items-center mb-4 max-w-sm">
+          <Input
+            className="h-8 px-3 py-1.5"
+            placeholder={
+              searchOptions.length === 0
+                ? "Filter..."
+                : `Filter by ${
+                    searchOptions.find((option) => option.value === searchColumn)?.label ?? "field"
+                  }..`
             }
+            value={searchValue}
+            onChange={(event) => {
+              const nextValue = event.target.value
+              setSearchValue(nextValue)
 
-            const nextColumn = searchColumn || searchOptions[0]?.value || ""
-            if (!nextColumn) {
-              setAppliedSearch({ column: "", value: "" })
-              return
-            }
+              if (searchOptions.length === 0) {
+                setAppliedSearch({ column: "", value: "" })
+                return
+              }
 
-            if (!searchColumn && nextColumn) {
-              setSearchColumn(nextColumn)
-            }
+              const nextColumn = searchColumn || searchOptions[0]?.value || ""
+              if (!nextColumn) {
+                setAppliedSearch({ column: "", value: "" })
+                return
+              }
 
-            setAppliedSearch({ column: nextColumn, value: nextValue })
-            setPage(1)
-          }}
-          disabled={searchOptions.length === 0}
-        />
-        <Select
-          value={searchColumn || undefined}
-          onValueChange={(value) => {
-            setSearchColumn(value)
-            setAppliedSearch({ column: value, value: searchValue })
-            setPage(1)
-          }}
-          disabled={searchOptions.length === 0}
-        >
-          <SelectTrigger className="w-full sm:w-40" size="sm" disabled={searchOptions.length === 0}>
-            <SelectValue placeholder="Select column" />
-          </SelectTrigger>
-          <SelectContent>
-            {searchOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+              if (!searchColumn && nextColumn) {
+                setSearchColumn(nextColumn)
+              }
+
+              setAppliedSearch({ column: nextColumn, value: nextValue })
+              setPage(1)
+            }}
+            disabled={searchOptions.length === 0}
+          />
+          <Select
+            value={searchColumn || undefined}
+            onValueChange={(value) => {
+              setSearchColumn(value)
+              setAppliedSearch({ column: value, value: searchValue })
+              setPage(1)
+            }}
+            disabled={searchOptions.length === 0}
+          >
+            <SelectTrigger
+              className="w-full sm:w-40"
+              size="sm"
+              disabled={searchOptions.length === 0}
+            >
+              <SelectValue placeholder="Select column" />
+            </SelectTrigger>
+            <SelectContent>
+              {searchOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       <div className="rounded-md border">
         <div className="overflow-x-auto">
@@ -261,80 +268,82 @@ export function DataTable<TData>({ columns, data, emptyComponent }: DataTablePro
             </TableBody>
           </Table>
         </div>
-        <Pagination className="border-t px-4 py-4 text-sm text-muted-foreground">
-          <div className="flex w-full flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2">
-                <span>Rows per page</span>
-                <Select
-                  value={pageSize === "all" ? "all" : String(pageSize)}
-                  onValueChange={handlePageSizeChange}
-                >
-                  <SelectTrigger className="h-8 w-[88px]" size="sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {perPageOptions.map((option) => {
-                      const optionValue = option === "all" ? "all" : String(option)
-                      return (
-                        <SelectItem key={optionValue} value={optionValue}>
-                          {option === "all" ? "All" : option}
-                        </SelectItem>
-                      )
-                    })}
-                  </SelectContent>
-                </Select>
+        {hasData && (
+          <Pagination className="border-t px-4 py-4 text-sm text-muted-foreground">
+            <div className="flex w-full flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <span>Rows per page</span>
+                  <Select
+                    value={pageSize === "all" ? "all" : String(pageSize)}
+                    onValueChange={handlePageSizeChange}
+                  >
+                    <SelectTrigger className="h-8 w-[88px]" size="sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {perPageOptions.map((option) => {
+                        const optionValue = option === "all" ? "all" : String(option)
+                        return (
+                          <SelectItem key={optionValue} value={optionValue}>
+                            {option === "all" ? "All" : option}
+                          </SelectItem>
+                        )
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <span>
+                  Showing{" "}
+                  <strong>
+                    {totalItems === 0 ? 0 : startIndex + 1}–{endIndex}
+                  </strong>{" "}
+                  of <strong>{totalItems}</strong>
+                </span>
               </div>
-              <span>
-                Showing{" "}
-                <strong>
-                  {totalItems === 0 ? 0 : startIndex + 1}–{endIndex}
-                </strong>{" "}
-                of <strong>{totalItems}</strong>
-              </span>
-            </div>
-            <div>
-              Page {page} of {totalPages}
-            </div>
-            <div className="flex flex-wrap items-center gap-3 sm:justify-end">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    aria-disabled={page === 1}
-                    onClick={(event) => {
-                      event.preventDefault()
-                      handlePageChange(page - 1)
-                    }}
-                  />
-                </PaginationItem>
-                {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
-                  <PaginationItem key={pageNumber}>
-                    <PaginationLink
-                      isActive={pageNumber === page}
+              <div>
+                Page {page} of {totalPages}
+              </div>
+              <div className="flex flex-wrap items-center gap-3 sm:justify-end">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      aria-disabled={page === 1}
                       onClick={(event) => {
                         event.preventDefault()
-                        handlePageChange(pageNumber)
+                        handlePageChange(page - 1)
                       }}
-                    >
-                      {pageNumber}
-                    </PaginationLink>
+                    />
                   </PaginationItem>
-                ))}
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    aria-disabled={page === totalPages}
-                    onClick={(event) => {
-                      event.preventDefault()
-                      handlePageChange(page + 1)
-                    }}
-                  />
-                </PaginationItem>
-              </PaginationContent>
+                  {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
+                    <PaginationItem key={pageNumber}>
+                      <PaginationLink
+                        isActive={pageNumber === page}
+                        onClick={(event) => {
+                          event.preventDefault()
+                          handlePageChange(pageNumber)
+                        }}
+                      >
+                        {pageNumber}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      aria-disabled={page === totalPages}
+                      onClick={(event) => {
+                        event.preventDefault()
+                        handlePageChange(page + 1)
+                      }}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </div>
             </div>
-          </div>
-        </Pagination>
+          </Pagination>
+        )}
       </div>
     </div>
   )
