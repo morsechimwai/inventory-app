@@ -8,7 +8,7 @@ import type {
   StockLevelState,
   RecentActivityItem,
 } from "@/lib/types/dashboard"
-import { Prisma } from "@prisma/client"
+import { MovementType, Prisma } from "@prisma/client"
 import { decimalToNumber } from "../utils/decimal"
 
 const productSelect = Prisma.validator<Prisma.ProductSelect>()({
@@ -17,6 +17,7 @@ const productSelect = Prisma.validator<Prisma.ProductSelect>()({
   sku: true,
   lowStockAt: true,
   currentStock: true,
+  avgCost: true,
   createdAt: true,
   category: {
     select: {
@@ -28,15 +29,6 @@ const productSelect = Prisma.validator<Prisma.ProductSelect>()({
     select: {
       id: true,
       name: true,
-    },
-  },
-  movements: {
-    orderBy: { createdAt: "desc" },
-    take: 1,
-    select: {
-      unitCost: true,
-      totalCost: true,
-      quantity: true,
     },
   },
 })
@@ -52,24 +44,10 @@ export async function getDashboardProducts(userId: string): Promise<ProductWithD
 
   return products.map((product) => {
     const currentStock = decimalToNumber(product.currentStock)
+    const avgCost = decimalToNumber(product.avgCost)
     const lowStockAt = product.lowStockAt ?? null
-    const latestMovement = product.movements[0]
-
-    let latestUnitCost: number | null = null
-    if (latestMovement) {
-      if (latestMovement.unitCost !== null) {
-        latestUnitCost = decimalToNumber(latestMovement.unitCost)
-      } else if (latestMovement.totalCost !== null) {
-        const quantity = decimalToNumber(latestMovement.quantity)
-        const totalCost = decimalToNumber(latestMovement.totalCost)
-        if (quantity > 0) {
-          latestUnitCost = Number((totalCost / quantity).toFixed(2))
-        }
-      }
-    }
-
-    const inventoryValue =
-      latestUnitCost !== null ? Number((currentStock * latestUnitCost).toFixed(2)) : 0
+    const latestUnitCost = avgCost
+    const inventoryValue = Number((currentStock * avgCost).toFixed(2))
     const isOutOfStock = currentStock <= 0
     const isLowStock =
       !isOutOfStock && lowStockAt !== null && lowStockAt > 0 ? currentStock <= lowStockAt : false
@@ -89,6 +67,7 @@ export async function getDashboardProducts(userId: string): Promise<ProductWithD
       unit: product.unit,
       createdAt: product.createdAt,
       inventoryValue,
+      avgCost,
       latestUnitCost,
       isLowStock,
       isOutOfStock,
@@ -142,7 +121,10 @@ type RecentMovementWithRelations = Prisma.StockMovementGetPayload<{
 
 export async function getRecentStockMovements(userId: string): Promise<RecentActivityItem[]> {
   const movements: RecentMovementWithRelations[] = await prisma.stockMovement.findMany({
-    where: { userId },
+    where: {
+      userId,
+      movementType: { in: [MovementType.IN, MovementType.OUT] },
+    },
     orderBy: { createdAt: "desc" },
     take: 12,
     select: {

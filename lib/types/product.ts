@@ -19,6 +19,7 @@ export type ProductDTO = {
   sku: string | null
   lowStockAt: number | null
   currentStock: number
+  avgCost: number
   category: { id: string; name: string } | null
   unit: { id: string; name: string }
 }

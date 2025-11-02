@@ -26,7 +26,6 @@ import {
   PackageCheck,
   PackageOpen,
   PackagePlus,
-  RefreshCw,
   TrendingUp,
   TrendingUpDown,
 } from "lucide-react"
@@ -73,13 +72,6 @@ const MOVEMENT_STYLES = {
     chip: "bg-red-500/10 text-red-600",
     icon: ArrowUpFromLine,
     sign: "−",
-  },
-  ADJUST: {
-    label: "Adjustment",
-    tone: "text-amber-500",
-    chip: "bg-amber-500/10 text-amber-600",
-    icon: RefreshCw,
-    sign: "",
   },
 } as const
 
@@ -558,19 +550,12 @@ export default async function DashboardPage() {
             {recentActivity.length > 0 ? (
               <div className="space-y-3">
                 {recentActivity.map((activity) => {
-                  const style = MOVEMENT_STYLES[activity.movementType]
+                  const style =
+                    MOVEMENT_STYLES[activity.movementType as keyof typeof MOVEMENT_STYLES] ??
+                    MOVEMENT_STYLES.IN
                   const quantity = quantityFormatter.format(Math.abs(activity.quantity))
                   const Icon = style.icon
-                  const signSymbol =
-                    activity.movementType === "IN"
-                      ? "+"
-                      : activity.movementType === "OUT"
-                      ? "−"
-                      : activity.quantity < 0
-                      ? "−"
-                      : activity.quantity > 0
-                      ? "+"
-                      : ""
+                  const signSymbol = style.sign
 
                   return (
                     <div

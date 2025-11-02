@@ -43,7 +43,7 @@ import SelectCombobox, { type ComboboxOption } from "@/components/ui/select-comb
 
 // Icons
 import type { LucideIcon } from "lucide-react"
-import { ArrowDownToLine, ArrowUpToLine, History, Forklift } from "lucide-react"
+import { ArrowDownToLine, ArrowUpToLine, History } from "lucide-react"
 
 // Toast
 import { toast } from "sonner"
@@ -77,7 +77,16 @@ type MovementDetail = {
   icon: LucideIcon
 }
 
-const movementTypeMeta: Record<MovementType, MovementDetail> = {
+type SupportedMovementType = Exclude<MovementType, MovementType.ADJUST>
+
+const isSupportedMovementType = (
+  movementType: MovementType
+): movementType is SupportedMovementType =>
+  movementType === MovementType.IN || movementType === MovementType.OUT
+
+const supportedMovementTypes: SupportedMovementType[] = [MovementType.IN, MovementType.OUT]
+
+const movementTypeMeta: Record<SupportedMovementType, MovementDetail> = {
   [MovementType.IN]: {
     buttonLabel: "Stock In",
     createTitle: "Stock In",
@@ -92,18 +101,11 @@ const movementTypeMeta: Record<MovementType, MovementDetail> = {
     description: "Track what leaves the shelf — sales, usage, or transfers.",
     icon: ArrowUpToLine,
   },
-  [MovementType.ADJUST]: {
-    buttonLabel: "Adjustment",
-    createTitle: "Adjustment",
-    editTitle: "Edit Adjustment",
-    description: "Correct stock by difference: + adds, - subtracts.",
-    icon: Forklift,
-  },
 }
 
 // Reference type options
 const referenceTypeOptions = Object.values(ReferenceType)
-const movementButtonOrder: MovementType[] = [MovementType.IN, MovementType.OUT, MovementType.ADJUST]
+const movementButtonOrder = supportedMovementTypes
 
 export default function InventoryActivityPage() {
   // Form
@@ -126,7 +128,10 @@ export default function InventoryActivityPage() {
 
   // Derived state
   const isEditing = Boolean(editingStockMovement)
-  const currentMovementType = form.watch("movementType") ?? MovementType.IN
+  const watchedMovementType = form.watch("movementType") ?? MovementType.IN
+  const currentMovementType = isSupportedMovementType(watchedMovementType)
+    ? watchedMovementType
+    : MovementType.IN
   const movementMeta = movementTypeMeta[currentMovementType]
   const SheetIcon = movementMeta.icon
   const headerTitle = isEditing ? movementMeta.editTitle : movementMeta.createTitle
@@ -148,6 +153,8 @@ export default function InventoryActivityPage() {
   )
   const quantityValue = form.watch("quantity")
   const unitCostValue = form.watch("unitCost")
+  const productAvgCost = selectedProduct ? selectedProduct.avgCost : null
+  const isCostEditable = currentMovementType === MovementType.IN
 
   // Load stock movements
   const loadStockMovements = useCallback(async () => {
@@ -155,7 +162,10 @@ export default function InventoryActivityPage() {
       const result = await getAllStockMovements()
 
       if (result.success) {
-        setStockMovements(result.data?.data ?? [])
+        const supported = (result.data?.data ?? []).filter((movement) =>
+          isSupportedMovementType(movement.movementType)
+        )
+        setStockMovements(supported)
       } else {
         toast.error(result.errorMessage ?? "Failed to load activity")
         console.error(result.errorMessage, result.code, result.meta)
@@ -192,8 +202,8 @@ export default function InventoryActivityPage() {
       productId: values.productId,
       movementType: values.movementType,
       quantity: values.quantity,
-      unitCost: values.unitCost ?? null,
-      totalCost: values.totalCost ?? null,
+      unitCost: isCostEditable ? values.unitCost ?? null : null,
+      totalCost: isCostEditable ? values.totalCost ?? null : null,
       referenceType: values.referenceType,
       referenceId: values.referenceId ?? null,
       reason: values.reason ?? null,
@@ -279,6 +289,10 @@ export default function InventoryActivityPage() {
   // Open edit sheet
   const handleOpenEdit = useCallback(
     (movement: StockMovementDTO) => {
+      if (!isSupportedMovementType(movement.movementType)) {
+        toast.error("Adjustment movements are not supported in this release.")
+        return
+      }
       setEditingStockMovement(movement)
       form.reset({
         productId: movement.product.id,
@@ -326,13 +340,20 @@ export default function InventoryActivityPage() {
 
   useEffect(() => {
     if (!isSheetOpen) return
+    if (isCostEditable) return
 
-    const hasQuantity = quantityValue !== undefined && quantityValue !== null && quantityValue !== 0
-    const hasUnitCost = unitCostValue !== undefined && unitCostValue !== null && unitCostValue !== 0
+    const currentUnitCost = form.getValues("unitCost")
+    if (currentUnitCost !== undefined) {
+      form.setValue("unitCost", undefined, { shouldDirty: false })
+    }
+  }, [form, isCostEditable, isSheetOpen])
+
+  useEffect(() => {
+    if (!isSheetOpen) return
 
     const currentTotal = form.getValues("totalCost")
 
-    if (!hasQuantity || !hasUnitCost) {
+    if (quantityValue === undefined || quantityValue === null) {
       if (currentTotal !== undefined) {
         form.setValue("totalCost", undefined, { shouldDirty: false })
       }
@@ -340,21 +361,55 @@ export default function InventoryActivityPage() {
     }
 
     const parsedQuantity = Number(quantityValue)
-    const parsedUnitCost = Number(unitCostValue)
 
-    if (Number.isNaN(parsedQuantity) || Number.isNaN(parsedUnitCost)) {
+    if (Number.isNaN(parsedQuantity)) {
       if (currentTotal !== undefined) {
         form.setValue("totalCost", undefined, { shouldDirty: false })
       }
       return
     }
 
-    const computed = Number((parsedQuantity * parsedUnitCost).toFixed(2))
+    let unitCostForCalculation: number | null = null
+
+    if (isCostEditable) {
+      if (unitCostValue === undefined || unitCostValue === null || unitCostValue === "") {
+        if (currentTotal !== undefined) {
+          form.setValue("totalCost", undefined, { shouldDirty: false })
+        }
+        return
+      }
+
+      const parsedUnitCost = Number(unitCostValue)
+      if (Number.isNaN(parsedUnitCost)) {
+        if (currentTotal !== undefined) {
+          form.setValue("totalCost", undefined, { shouldDirty: false })
+        }
+        return
+      }
+      unitCostForCalculation = parsedUnitCost
+    } else {
+      if (productAvgCost === null) {
+        if (currentTotal !== undefined) {
+          form.setValue("totalCost", undefined, { shouldDirty: false })
+        }
+        return
+      }
+      unitCostForCalculation = productAvgCost
+    }
+
+    if (unitCostForCalculation === null) {
+      if (currentTotal !== undefined) {
+        form.setValue("totalCost", undefined, { shouldDirty: false })
+      }
+      return
+    }
+
+    const computed = Number((parsedQuantity * unitCostForCalculation).toFixed(2))
 
     if (currentTotal !== computed) {
       form.setValue("totalCost", computed, { shouldDirty: false })
     }
-  }, [form, isSheetOpen, quantityValue, unitCostValue])
+  }, [form, isCostEditable, isSheetOpen, productAvgCost, quantityValue, unitCostValue])
 
   const disableCreateButtons = products.length === 0 || saving
 
@@ -493,29 +548,16 @@ export default function InventoryActivityPage() {
                         type="number"
                         inputMode="decimal"
                         step="0.001"
-                        placeholder={
-                          currentMovementType === MovementType.ADJUST ? "+5 or -3" : "e.g. 25"
-                        }
+                        placeholder="e.g. 25"
                         autoComplete="off"
                         disabled={saving}
                         aria-invalid={fieldState.invalid}
                         onKeyDown={(event) => {
-                          const isAdjust = form.getValues("movementType") === MovementType.ADJUST
-
-                          // Always block scientific notation
-                          if (["e", "E"].includes(event.key)) return event.preventDefault()
-
-                          // Allow +/- only in ADJUST mode
-                          if (!isAdjust && ["+", "-"].includes(event.key))
+                          if (["e", "E", "+", "-"].includes(event.key))
                             return event.preventDefault()
                         }}
                         {...field}
                       />
-                      {currentMovementType === MovementType.ADJUST && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Enter difference: +5 to add stock, -2 to remove stock.
-                        </p>
-                      )}
                       <FieldError errors={[fieldState.error]} />
                     </FieldContent>
                   </Field>
@@ -527,13 +569,43 @@ export default function InventoryActivityPage() {
                 control={form.control}
                 name="unitCost"
                 render={({ field, fieldState }) => {
+                  if (!isCostEditable) {
+                    return (
+                      <Field data-invalid={false}>
+                        <FieldLabel htmlFor={`${field.name}-readonly`}>
+                          Unit Cost{" "}
+                          <span className="text-sm font-normal text-muted-foreground">(auto)</span>
+                        </FieldLabel>
+                        <FieldContent>
+                          <Input
+                            id={`${field.name}-readonly`}
+                            type="number"
+                            inputMode="decimal"
+                            step="0.01"
+                            placeholder="No average cost yet"
+                            disabled
+                            readOnly
+                            value={
+                              productAvgCost !== null ? Number(productAvgCost).toFixed(2) : ""
+                            }
+                          />
+                          {productAvgCost === null && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Average cost populates after a stock in movement.
+                            </p>
+                          )}
+                        </FieldContent>
+                      </Field>
+                    )
+                  }
+
                   const { value, onChange, ...fieldProps } = field
                   return (
                     <Field data-invalid={fieldState.invalid}>
                       <FieldLabel htmlFor={field.name}>
                         Unit Cost{" "}
                         <span className="text-sm font-normal text-muted-foreground">
-                          (optional)
+                          (required for stock in)
                         </span>
                       </FieldLabel>
                       <FieldContent>
@@ -684,11 +756,7 @@ export default function InventoryActivityPage() {
                       <FieldContent>
                         <textarea
                           id={field.name}
-                          placeholder={
-                            currentMovementType === MovementType.ADJUST
-                              ? "e.g. Counted on 12 Nov — corrected after stock check."
-                              : "Add context for future you."
-                          }
+                          placeholder="Add context for future you."
                           disabled={saving}
                           aria-invalid={fieldState.invalid}
                           value={value ?? ""}

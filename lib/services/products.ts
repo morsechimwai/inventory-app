@@ -36,6 +36,7 @@ export async function getProductsByUserId(userId: string): Promise<ProductDTO[]>
       sku: true,
       lowStockAt: true,
       currentStock: true,
+      avgCost: true,
       category: { select: { id: true, name: true } },
       unit: { select: { id: true, name: true } },
     },
@@ -45,6 +46,7 @@ export async function getProductsByUserId(userId: string): Promise<ProductDTO[]>
   return products.map((p) => ({
     ...p,
     currentStock: decimalToNumber(p.currentStock),
+    avgCost: decimalToNumber(p.avgCost),
   }))
 }
 
