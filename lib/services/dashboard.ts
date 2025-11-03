@@ -1,6 +1,6 @@
 // lib/services/dashboard.ts
 
-import { prisma } from "@/lib/db/prisma"
+// Types
 import type {
   KeyMetrics,
   ProductWithDate,
@@ -8,7 +8,14 @@ import type {
   StockLevelState,
   RecentActivityItem,
 } from "@/lib/types/dashboard"
+
+// Prisma Client
 import { MovementType, Prisma } from "@prisma/client"
+
+// Database client
+import { prisma } from "@/lib/db/prisma"
+
+// Utils
 import { decimalToNumber } from "../utils/decimal"
 
 const productSelect = Prisma.validator<Prisma.ProductSelect>()({

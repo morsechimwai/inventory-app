@@ -1,7 +1,15 @@
 // lib/services/units.ts
 
-import { prisma } from "@/lib/db/prisma"
+// Types
 import type { UnitEntity, UnitInput, UnitDTO } from "@/lib/types/unit"
+
+// Database client
+import { prisma } from "@/lib/db/prisma"
+
+// Security
+import { sanitizeInput } from "@/lib/security/sanitize"
+
+// App error handling
 import { AppError } from "../errors/app-error"
 
 // Helper to assert unit ownership
@@ -17,8 +25,12 @@ async function assertUnitOwnership(userId: string, unitId: string) {
 // Create a new unit (CRUD - Create)
 export async function createUnit(userId: string, data: UnitInput): Promise<UnitEntity> {
   try {
+    // Sanitize input
+    const cleanName = sanitizeInput(data.name)
+
+    // Create unit
     return prisma.unit.create({
-      data: { ...data, userId },
+      data: { ...data, userId, name: cleanName },
     })
   } catch {
     throw new AppError("DB_CREATE_FAILED", "Failed to create unit.", {
@@ -50,9 +62,17 @@ export async function updateUnit(
   try {
     // Ensure the unit belongs to the user
     await assertUnitOwnership(userId, id)
+
+    // Sanitize input if name is being updated
+    const cleanName = data.name ? sanitizeInput(data.name) : undefined
+
+    // Update unit
     return prisma.unit.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        name: cleanName,
+      },
     })
   } catch {
     throw new AppError("DB_UPDATE_FAILED", "Failed to update unit.", {

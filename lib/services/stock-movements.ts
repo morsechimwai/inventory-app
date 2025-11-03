@@ -13,9 +13,6 @@ import type {
   StockMovementDTO,
 } from "@/lib/types/stock-movement"
 
-// Errors
-import { AppError } from "@/lib/errors/app-error"
-
 // Utils
 import { decimalToNumber } from "../utils/decimal"
 import {
@@ -23,6 +20,9 @@ import {
   revertMovementMAC,
   type ProductSnapshot,
 } from "../utils/stock-movement-math"
+
+// App error handling
+import { AppError } from "@/lib/errors/app-error"
 
 // ─────────────────────────────────────────────────────────────
 // Product Ownership Check (Overloaded for prisma/tx)
@@ -52,6 +52,9 @@ async function assertProductOwnership(
   if (!product) throw new AppError("NOT_FOUND", "Product not found or unauthorized.")
 }
 
+// ─────────────────────────────────────────────────────────────
+// Get Product Snapshot (currentStock, avgCost)
+// ─────────────────────────────────────────────────────────────
 async function getProductSnapshot(
   tx: Prisma.TransactionClient,
   productId: string
@@ -69,6 +72,9 @@ async function getProductSnapshot(
   }
 }
 
+// ─────────────────────────────────────────────────────────────
+// Update Product Caches (currentStock, avgCost)
+// ─────────────────────────────────────────────────────────────
 async function updateProductCaches(
   tx: Prisma.TransactionClient,
   productId: string,
