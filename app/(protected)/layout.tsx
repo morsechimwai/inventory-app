@@ -12,6 +12,10 @@ import { LayoutProviders } from "./providers"
 import { getUserServer } from "@/lib/auth/get-user"
 import { headers } from "next/headers"
 
+// Custom
+import AppSidebar from "@/components/app-sidebar"
+import SiteHeader from "@/components/site-header"
+
 export const metadata: Metadata = {
   title: "Dashboard",
   description: "Manage your inventory with stocKit",
@@ -30,5 +34,13 @@ export default async function RootLayout({ children }: Readonly<DashboardLayoutP
     redirect(`/?next=${path}`)
   }
 
-  return <LayoutProviders>{children}</LayoutProviders>
+  return (
+    <LayoutProviders>
+      <AppSidebar />
+      <main className="w-full">
+        <SiteHeader />
+        {children}
+      </main>
+    </LayoutProviders>
+  )
 }

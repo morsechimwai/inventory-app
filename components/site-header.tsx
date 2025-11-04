@@ -18,7 +18,7 @@ import {
 // Icons
 import { Github } from "lucide-react"
 
-export function SiteHeader() {
+export default function SiteHeader() {
   // Get current pathname
   const pathname = usePathname()
 
