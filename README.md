@@ -192,12 +192,11 @@ The optional `prisma/seed.ts` script references a demo user ID—adjust it if yo
    ```bash
    pnpm dlx prisma migrate dev
    ```
-3. (Optional) Seed demo data after configuring Prisma's seed command to run `prisma/seed.ts`.
-4. Start the development server
+3. Start the development server
    ```bash
    pnpm dev
    ```
-5. Open http://localhost:3000 and sign in with Stack to access the dashboard and inventory screens.
+4. Open http://localhost:3000 and sign in with Stack to access the dashboard and inventory screens.
 
 ## Available Scripts
 | Script        | Description                              |
