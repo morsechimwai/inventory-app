@@ -511,7 +511,7 @@ export default async function DashboardPage() {
       {/* Weekly chart & recent activity */}
       <section className="grid grid-cols-1 gap-8 lg:grid-cols-2 items-stretch">
         {/* Weekly Chart */}
-        <div className="flex h-full flex-col gap-4">
+        <div className="flex flex-col gap-4">
           <Card className="flex-1">
             <CardHeader className="flex flex-col gap-2 border-b">
               <div className="flex items-center gap-2">
@@ -531,8 +531,9 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+
         {/* Recent Activity */}
-        <Card className="flex h-full flex-col">
+        <Card className="flex flex-col">
           <CardHeader className="flex flex-col gap-2 border-b">
             <div className="flex items-center gap-2">
               <span className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
