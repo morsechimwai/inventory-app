@@ -8,7 +8,7 @@ import { Metadata } from "next"
 import { getUserServer } from "@/lib/auth/get-user"
 
 // Providers
-import { LayoutProviders } from "@/app/(protected)/providers"
+import DashboardLayout from "../(protected)/layout"
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -24,5 +24,5 @@ export default async function HandlerLayout({ children }: HandlerLayoutProps) {
 
   if (!user) return <>{children}</>
 
-  return <LayoutProviders>{children}</LayoutProviders>
+  return <DashboardLayout>{children}</DashboardLayout>
 }
