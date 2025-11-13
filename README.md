@@ -7,57 +7,60 @@
   </a>
 </p>
 
- A Stack-authenticated inventory management workspace built with Next.js 16. It lets small teams monitor stock, surface low inventory, and manage product records from a single dashboard.
+ระบบจัดการสินค้าคงคลังแบบครบครันที่สร้างด้วย Next.js 16 พร้อม Stack Auth สำหรับการรักษาความปลอดภัย เหมาะสำหรับธุรกิจขนาดเล็กถึงกลางที่ต้องการติดตามสต็อกสินค้า, ตรวจสอบสินค้าใกล้หมด, และจัดการข้อมูลสินค้าจากหน้าจอเดียว
 
-> **Project status:** In development — dashboard analytics and inventory CRUD flows are live; integrations such as alerts and role management are still in progress.
-
-## Feature Highlights
-- Secure workspace powered by Stack authentication with protected routes and user-scoped Prisma queries.
-- Inventory manager with server actions for create/update/delete, `react-hook-form` + `zod` validation, toast feedback, sheets and dialogs, and empty/loading states.
-- Moving Average Cost engine keeps `Product.currentStock` and `Product.avgCost` in sync so OUT movements price automatically while IN movements recompute weighted-average cost.
-- Insights-driven dashboard surfacing KPI tiles, live stock health, restock cues, efficiency scoring, weekly product trends, and recent inventory movements.
-- Responsive layout with an off-canvas sidebar, breadcrumb header, skeleton placeholders, and reusable UI primitives.
-- Prisma-backed PostgreSQL data model for per-user products, with `revalidatePath` ensuring UI freshness after mutations.
+## Features
+- **ระบบรักษาความปลอดภัย** ด้วย Stack authentication พร้อม protected routes และ user-scoped Prisma queries
+- **จัดการสินค้าคงคลัง** ด้วย server actions สำหรับ CRUD operations, การ validate ด้วย `react-hook-form` + `zod`, toast feedback, dialog และ empty/loading states
+- **เอนจิน Moving Average Cost** ที่จัดการ `Product.currentStock` และ `Product.avgCost` อัตโนมัติ เมื่อสินค้าออก (OUT) จะใช้ราคาเฉลี่ย ส่วนสินค้าเข้า (IN) จะคำนวณต้นทุนเฉลี่ยแบบถ่วงน้ำหนักใหม่
+- **Dashboard ข้อมูลเชิงลึก** แสดง KPI tiles, สถานะสต็อกแบบเรียลไทม์, คำแนะนำการเติมสต็อก, คะแนนประสิทธิภาพ, แผนภูมิสินค้าใหม่รายสัปดาห์, และกิจกรรมล่าสุด
+- **Layout ปรับตัวได้** ด้วย sidebar แบบพับได้, breadcrumb header, skeleton placeholders, และ UI components แบบนำกลับมาใช้ได้
+- **ฐานข้อมูล Prisma-PostgreSQL** แยกข้อมูลตาม user พร้อม `revalidatePath` เพื่อความสดใหม่ของ UI หลังการแก้ไขข้อมูล
 
 ## Dashboard Insights
-- Key metrics tile trio covering total products, low-stock count, and total inventory value with week-over-week trend indicators.
-- Stock health list with traffic-light status strip, live quantity gauge, and quick restock action for risky items.
-- Restock suggestions highlighting reorder thresholds plus recommended purchase quantities.
-- Efficiency radial chart summarizing in-stock, low-stock, and out-of-stock percentages alongside the overall efficiency score.
-- Weekly product chart visualising new additions across the last 12 weeks.
-- Recent activity feed detailing the latest stock movements with type, reason, quantity, and relative timestamps.
+- **กลุ่มเมตริกหลัก 3 ตัว** ครอบคลุมจำนวนสินค้าทั้งหมด, จำนวนสินค้าใกล้หมด, และมูลค่าสินค้าคงคลังรวม พร้อมตัวชี้วัดแนวโน้มรายสัปดาห์
+- **รายการสถานภาพสต็อก** แสดงสถานะแบบ traffic-light, เกจปริมาณแบบเรียลไทม์, และปุ่มเติมสต็อกด่วนสำหรับสินค้าเสี่ยง
+- **คำแนะนำการเติมสต็อก** ไฮไลต์จุดสั่งซื้อใหม่และแนะนำปริมาณที่ควรซื้อ
+- **แผนภูมิประสิทธิภาพแบบ radial** สรุปเปอร์เซ็นต์ของสินค้าในสต็อก, สินค้าใกล้หมด, และสินค้าหมดสต็อก พร้อมคะแนนประสิทธิภาพโดยรวม
+- **แผนภูมิสินค้ารายสัปดาห์** แสดงจำนวนสินค้าใหม่ที่เพิ่มเข้ามาใน 12 สัปดาห์ที่ผ่านมา
+- **ฟีดกิจกรรมล่าสุด** รายละเอียดการเคลื่อนไหวสต็อกล่าสุด พร้อมประเภท, เหตุผล, ปริมาณ, และเวลาแบบสัมพันธ์
 
 ## Tech Stack
 - Next.js 16 (App Router, Server Components, Route Handlers)
 - React 19 + TypeScript
 - Tailwind CSS 4 + tw-animate
 - Prisma ORM + PostgreSQL (`DATABASE_URL`)
-- Stack SDK (`@stackframe/stack`) for auth/session management
+- Stack SDK (`@stackframe/stack`) สำหรับการจัดการ auth/session
 - Recharts, react-hook-form, zod, sonner, class-variance-authority, tailwind-merge, Lucide icons
 
-## Directory Overview
+## Directory Structure
 ```
-app/                      // Landing page, dashboard, inventory, settings, Stack handler
-components/               // Shared UI (sidebar, header, tables, charts, skeletons)
-lib/actions/              // Server actions wrapping service-layer operations
-lib/services/             // Prisma-backed domain services
-lib/types/                // Shared DTOs and helpers
+app/                      // Main pages, dashboard, inventory, settings, Stack handler
+components/               // Central UI (sidebar, header, tables, charts, skeletons)
+lib/actions/              // Server actions that wrap service-layer operations
+lib/services/             // Domain services using Prisma
+lib/types/                // Central DTOs and helpers
+lib/utils/                // Utility functions and helper functions
+lib/auth/                 // Authentication management
+lib/db/                   // Database connection
+lib/errors/               // Error handling and custom errors
+lib/security/             // Security utilities
 stack/                    // Stack client/server configuration
-prisma/                   // Schema, migrations, seed script
+prisma/                   // Schema, migrations, reset script
 public/                   // Static assets
 ```
 
-## Stock Movements Service
-- Core service logic lives in `lib/services/stock-movements.ts`, where each create/update/delete runs inside a Prisma transaction and delegates pricing + stock math to the MAC helpers.
-- Ownership enforcement (`assertProductOwnership`) ensures a user can only mutate their own products, even inside nested transactions.
-- Pure Moving Average Cost math sits in `lib/services/stock-movement-math.ts` with Vitest coverage at `lib/services/__tests__/stock-movement-math.test.ts`, making it straightforward to evolve costing rules without touching Prisma code.
+## Stock Movements Management System
+- **Logic หลัก** อยู่ใน `lib/services/stock-movements.ts` ซึ่งการ create/update/delete แต่ละครั้งทำงานภายใน Prisma transaction และมอบหมายการคำนวณราคาและสต็อกให้ MAC helpers
+- **การบังคับใช้ ownership** ด้วย `assertProductOwnership` ช่วยให้ user แก้ไขได้เฉพาะสินค้าของตัวเองเท่านั้น แม้ในการทำงานแบบ nested transactions
+- **คณิตศาสตร์ Moving Average Cost แบบบริสุทธิ์** อยู่ใน `lib/utils/stock-movement-math.ts` พร้อมการทดสอบด้วย Vitest ทำให้พัฒนากฎการคำนวณต้นทุนได้ง่าย โดยไม่ต้องแก้ไขโค้ด Prisma
 
-## Dashboard Efficiency Formula
-- We calculate `efficiencyScore` in [`lib/utils/dashboard.ts`](lib/utils/dashboard.ts) by first deriving the product distribution:
+## Efficiency Score Calculation
+- เราคำนวณ `efficiencyScore` ใน [`lib/utils/dashboard.ts`](lib/utils/dashboard.ts) โดยเริ่มจากการแจกแจงสินค้า:
   - `inStockPercentage = round((inStockCount / totalProducts) × 100)`
   - `lowStockPercentage = round((lowStockCount / totalProducts) × 100)`
   - `outOfStockPercentage = round((outOfStockCount / totalProducts) × 100)`
-- The final score blends these with weighted penalties and clamps between 0–100:
+- คะแนนสุดท้ายผสมผสานค่าเหล่านี้ด้วยการลงโทษแบบถ่วงน้ำหนักและจำกัดค่าระหว่าง 0–100:
 
   ```
   efficiencyScore = round(
@@ -71,108 +74,107 @@ public/                   // Static assets
   )
   ```
 
-- If there are no products (`totalProducts = 0`), the score is reported as `null`.
+- หากไม่มีสินค้าเลย (`totalProducts = 0`) คะแนนจะแสดงเป็น `null`
 
 ## Database Schema
-Prisma models are scoped by `userId` so each Stack-authenticated workspace owns its own catalogue. Columns marked `*` are required.
+Prisma models ถูกจำกัดขอบเขตด้วย `userId` ดังนั้นแต่ละ workspace ที่ authenticated ด้วย Stack จะมีข้อมูลสินค้าเป็นของตัวเอง คอลัมน์ที่มีเครื่องหมาย `*` คือ required
 
-### Product
-| Column*        | Type                 | Notes                                                       |
+### Product (สินค้า)
+| คอลัมน์*        | ประเภท                | หมายเหตุ                                                      |
 |----------------|----------------------|-------------------------------------------------------------|
-| id*            | `String`             | Primary key generated with `cuid()`                        |
-| userId*        | `String`             | Foreign key to Stack user; drives row-level isolation      |
-| name*          | `String`             | Product display name                                        |
-| sku            | `String?`            | User-scoped unique constraint with `userId`                |
-| lowStockAt     | `Int?`               | Optional threshold that triggers low stock warnings       |
-| categoryId     | `String?`            | Nullable FK to `Category` (`@db.VarChar(255)`)             |
-| unitId*        | `String`             | Required FK to `Unit` (`@db.VarChar(255)`)                 |
-| currentStock*  | `Decimal(12,3)`      | Cached on-hand quantity, defaults to `0`                   |
-| avgCost*       | `Decimal(12,2)`      | Cached moving-average cost, defaults to `0`                |
-| createdAt*     | `DateTime`           | Defaults to `now()`                                         |
-| updatedAt*     | `DateTime`           | Auto-updated timestamp                                      |
+| id*            | `String`             | Primary key ที่สร้างด้วย `cuid()`                             |
+| userId*        | `String`             | Foreign key ไปยัง Stack user เพื่อแยกข้อมูลตาม user          |
+| name*          | `String`             | ชื่อสินค้าที่แสดง                                              |
+| sku            | `String?`            | รหัสสินค้า (ไม่ซ้ำในแต่ละ user)                               |
+| lowStockAt     | `Int?`               | จุดเตือนสต็อกน้อย (ไม่บังคับ)                                 |
+| categoryId     | `String?`            | FK ไปยัง `Category` (ไม่บังคับ) (`@db.VarChar(255)`)          |
+| unitId*        | `String`             | FK ไปยัง `Unit` (บังคับ) (`@db.VarChar(255)`)                 |
+| currentStock*  | `Decimal(12,3)`      | จำนวนสต็อกปัจจุบันที่ cache ไว้ (ค่าเริ่มต้น `0`)              |
+| avgCost*       | `Decimal(12,2)`      | ต้นทุนเฉลี่ยแบบ moving-average ที่ cache ไว้ (ค่าเริ่มต้น `0`) |
+| createdAt*     | `DateTime`           | วันที่สร้าง (ค่าเริ่มต้น `now()`)                              |
+| updatedAt*     | `DateTime`           | วันที่แก้ไขล่าสุด (อัปเดตอัตโนมัติ)                           |
 
 **Indexes**
-- `@@unique([userId, sku])`
-- `@@index([userId, name])`
-- `@@index([createdAt])`
+- `@@unique([userId, sku])` - SKU ไม่ซ้ำในแต่ละ user
+- `@@index([userId, name])` - ค้นหาสินค้าตามชื่อ
+- `@@index([createdAt])` - เรียงตามวันที่สร้าง
 
-**Relations**
-- Optional `category` via `categoryId`
-- Required `unit` via `unitId`
-- One-to-many `movements`
+**ความสัมพันธ์**
+- `category` (ไม่บังคับ) ผ่าน `categoryId`
+- `unit` (บังคับ) ผ่าน `unitId`
+- `movements` แบบ one-to-many
 
-### Category
-| Column*    | Type        | Notes                                                   |
-|------------|-------------|---------------------------------------------------------|
-| id*        | `String`    | Primary key generated with `cuid()`                    |
-| userId*    | `String`    | Stack user owner                                        |
-| name*      | `String`    | User-scoped unique category name                        |
-| createdAt* | `DateTime`  | Defaults to `now()`                                     |
-| updatedAt* | `DateTime`  | Auto-updated timestamp                                  |
-
-**Indexes**
-- `@@unique([userId, name])`
-- `@@index([userId])`
-
-**Relations**
-- One-to-many `products`
-
-### Unit
-| Column*    | Type        | Notes                                                   |
-|------------|-------------|---------------------------------------------------------|
-| id*        | `String`    | Primary key generated with `cuid()`                    |
-| userId*    | `String`    | Stack user owner                                        |
-| name*      | `String`    | Display label such as "กล่อง", "กิโลกรัม"             |
-| createdAt* | `DateTime`  | Defaults to `now()`                                     |
-| updatedAt* | `DateTime`  | Auto-updated timestamp                                  |
+### Category (หมวดหมู่)
+| คอลัมน์*    | ประเภท       | หมายเหตุ                                                 |
+|------------|-------------|--------------------------------------------------------|
+| id*        | `String`    | Primary key ที่สร้างด้วย `cuid()`                        |
+| userId*    | `String`    | เจ้าของ Stack user                                      |
+| name*      | `String`    | ชื่อหมวดหมู่ที่ไม่ซ้ำในแต่ละ user                        |
+| createdAt* | `DateTime`  | วันที่สร้าง (ค่าเริ่มต้น `now()`)                        |
+| updatedAt* | `DateTime`  | วันที่แก้ไขล่าสุด (อัปเดตอัตโนมัติ)                     |
 
 **Indexes**
-- `@@unique([userId, name])`
-- `@@index([userId])`
+- `@@unique([userId, name])` - ชื่อหมวดหมู่ไม่ซ้ำในแต่ละ user
+- `@@index([userId])` - ค้นหาตาม user
 
-**Relations**
-- One-to-many `products`
+**ความสัมพันธ์**
+- `products` แบบ one-to-many
 
-### StockMovement
-| Column*       | Type                 | Notes                                                                 |
+### Unit (หน่วย)
+| คอลัมน์*    | ประเภท       | หมายเหตุ                                                 |
+|------------|-------------|--------------------------------------------------------|
+| id*        | `String`    | Primary key ที่สร้างด้วย `cuid()`                        |
+| userId*    | `String`    | เจ้าของ Stack user                                      |
+| name*      | `String`    | ป้ายกำกับที่แสดง เช่น "ชิ้น", "กล่อง", "กิโลกรัม"        |
+| createdAt* | `DateTime`  | วันที่สร้าง (ค่าเริ่มต้น `now()`)                        |
+| updatedAt* | `DateTime`  | วันที่แก้ไขล่าสุด (อัปเดตอัตโนมัติ)                     |
+
+**Indexes**
+- `@@unique([userId, name])` - ชื่อหน่วยไม่ซ้ำในแต่ละ user
+- `@@index([userId])` - ค้นหาตาม user
+
+**ความสัมพันธ์**
+- `products` แบบ one-to-many
+
+### StockMovement (การเคลื่อนไหวสต็อก)
+| คอลัมน์*       | ประเภท                | หมายเหตุ                                                               |
 |---------------|----------------------|-----------------------------------------------------------------------|
-| id*           | `String`             | Primary key generated with `cuid()`                                  |
-| productId*    | `String`             | FK to `Product`                                                       |
-| userId*       | `String`             | Stack user owner                                                      |
-| movementType* | `MovementType`       | Enum describing IN or OUT movements (Adjustment reserved for future use) |
-| quantity*     | `Decimal(12,3)`      | Quantity moved                                                        |
-| unitCost      | `Decimal(12,2)?`     | Per-unit cost persisted for history; IN requires input, OUT auto-uses the product average |
-| totalCost     | `Decimal(14,2)?`     | Calculated as `quantity × unitCost`                                     |
-| referenceType | `ReferenceType`      | Defaults to `MANUAL`                                                  |
-| referenceId   | `String?`            | Optional document identifier                                          |
-| reason        | `String?`            | Optional adjustment reason                                            |
-| createdAt*    | `DateTime`           | Defaults to `now()`                                                   |
-| updatedAt*    | `DateTime`           | Auto-updated timestamp                                                |
+| id*           | `String`             | Primary key ที่สร้างด้วย `cuid()`                                      |
+| productId*    | `String`             | FK ไปยัง `Product`                                                    |
+| userId*       | `String`             | เจ้าของ Stack user                                                    |
+| movementType* | `MovementType`       | Enum บอกประเภทการเคลื่อนไหว IN หรือ OUT                               |
+| quantity*     | `Decimal(12,3)`      | จำนวนที่เคลื่อนไหว                                                     |
+| unitCost      | `Decimal(12,2)?`     | ราคาต่อหน่วยที่บันทึกไว้เพื่อประวัติ; IN ต้องใส่, OUT ใช้ราคาเฉลี่ยสินค้า |
+| totalCost     | `Decimal(14,2)?`     | คำนวณจาก `quantity × unitCost`                                         |
+| referenceType | `ReferenceType`      | ค่าเริ่มต้น `MANUAL`                                                   |
+| referenceId   | `String?`            | รหัสเอกสารอ้างอิง (ไม่บังคับ)                                          |
+| reason        | `String?`            | เหตุผลการปรับยอด (ไม่บังคับ)                                          |
+| createdAt*    | `DateTime`           | วันที่สร้าง (ค่าเริ่มต้น `now()`)                                      |
+| updatedAt*    | `DateTime`           | วันที่แก้ไขล่าสุด (อัปเดตอัตโนมัติ)                                   |
 
 **Indexes**
-- `@@index([productId])`
-- `@@index([createdAt])`
-- `@@index([movementType, createdAt])`
-- `@@index([referenceType, referenceId])`
-- `@@index([userId, createdAt])`
-- `@@index([productId, movementType])`
-- `@@index([productId, createdAt])`
+- `@@index([productId])` - ค้นหาประวัติการเคลื่อนไหวของสินค้า
+- `@@index([createdAt])` - ค้นหาตามวันที่
+- `@@index([movementType, createdAt])` - กรองรายงานตามประเภทและวันที่
+- `@@index([referenceType, referenceId])` - กรองตามเอกสารอ้างอิง
+- `@@index([userId, createdAt])` - กรองตาม user และวันที่
+- `@@index([productId, movementType])` - กรองสินค้าตามประเภทการเคลื่อนไหว
+- `@@index([productId, createdAt])` - กรองสินค้าตามวันที่
 
-**Relations**
-- Belongs to `product`
+**ความสัมพันธ์**
+- เป็นของ `product`
 
 ### Enums
-- `MovementType`: `IN`, `OUT` *(Adjustment reserved for future release)*
-- `ReferenceType`: `PURCHASE`, `SALE`, `RETURN`, `TRANSFER`, `ADJUSTMENT`, `MANUAL`
+- `MovementType`: `IN` (สินค้าเข้า), `OUT` (สินค้าออก)
+- `ReferenceType`: `PURCHASE` (ซื้อ), `SALE` (ขาย), `RETURN` (คืน), `TRANSFER` (โอน), `ADJUSTMENT` (ปรับยอด), `MANUAL` (บันทึกเอง)
 
 ## Prerequisites
 - Node.js 20+
 - pnpm
 - PostgreSQL database
 - Stack account with project keys (https://stackauth.com)
-
 ## Environment Variables
-Create `.env.local` (or `.env`) with the following values using your own credentials:
+สร้างไฟล์ `.env.local` (หรือ `.env`) พร้อมค่าต่อไปนี้โดยใช้ข้อมูลของคุณเอง:
 
 ```
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DB_NAME"
@@ -181,32 +183,38 @@ NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY="<your-stack-publishable-client-key>"
 STACK_SECRET_SERVER_KEY="<your-stack-server-key>"
 ```
 
-The optional `prisma/seed.ts` script references a demo user ID—adjust it if you seed sample data.
+สคริปต์ `prisma/seed.ts` (ไม่บังคับ) อ้างอิงถึง demo user ID—ปรับแต่งหากคุณต้องการใส่ข้อมูลตัวอย่าง
 
 ## Getting Started
-1. Install dependencies
+1. ติดตั้ง dependencies
    ```bash
    pnpm install
    ```
-2. Apply database migrations and generate Prisma Client
+2. ใช้ database migrations และสร้าง Prisma Client
    ```bash
    pnpm dlx prisma migrate dev
    ```
-3. Start the development server
+3. เริ่มต้น development server
    ```bash
    pnpm dev
    ```
-4. Open http://localhost:3000 and sign in with Stack to access the dashboard and inventory screens.
+4. เปิด http://localhost:3000 และเข้าสู่ระบบด้วย Stack เพื่อเข้าใช้หน้า dashboard และ inventory
 
-## Available Scripts
-| Script        | Description                              |
-|---------------|------------------------------------------|
-| `pnpm dev`    | Run the Next.js development server       |
-| `pnpm build`  | Produce a production build               |
-| `pnpm start`  | Serve the production build from `.next`  |
-| `pnpm lint`   | Lint the codebase with ESLint            |
+## Contributing
 
-## Contributing & license
-Pull requests, issues, and feature ideas are welcome. microFeed ships under the [MIT License](./LICENSE), so you can adapt it for commercial products, internal tools, or SaaS offerings without friction.
+ผมยังต้องฝึกอีกเยอะ และโปรเจคนี้ก็ยังมีช่องว่างให้พัฒนาอีกมากครับ
+หากคุณพบเห็นส่วนไหนที่สามารถปรับปรุงให้ดีขึ้นได้ — ไม่ว่าจะเล็กหรือใหญ่ — ยินดีรับทุกความช่วยเหลือจากทุก ๆ ท่านเลยครับ 🙏
 
-Own your feed. Let your team share updates on your terms.
+ขั้นตอนร่วมสนับสนุน:
+
+1. Fork repo นี้ไปที่ของคุณ
+2. สร้าง branch สำหรับส่วนที่คุณอยากปรับปรุง
+3. ลงมือเขียนโค้ด หรือเพิ่มเทสท์ หากจำเป็น
+4. ส่ง Pull Request พร้อมเล่าว่าคุณปรับปรุงอะไร อย่างไรบ้าง และทำไมถึงสำคัญ
+
+ทุกการมีส่วนร่วม ทั้งโค้ด ไอเดีย หรือ feedback ช่วยให้โปรเจคนี้เติบโตเร็วขึ้นมากครับ
+ขอบคุณที่มาช่วยกันสร้างสิ่งนี้ให้ดีขึ้นไปด้วยกันครับ 🩵
+
+---
+
+**🧑‍💻 Happy Hacking!**
