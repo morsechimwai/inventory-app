@@ -35,19 +35,31 @@
 
 ## Directory Structure
 ```
-app/                      // Main pages, dashboard, inventory, settings, Stack handler
-components/               // Central UI (sidebar, header, tables, charts, skeletons)
-lib/actions/              // Server actions that wrap service-layer operations
-lib/services/             // Domain services using Prisma
-lib/types/                // Central DTOs and helpers
-lib/utils/                // Utility functions and helper functions
-lib/auth/                 // Authentication management
-lib/db/                   // Database connection
-lib/errors/               // Error handling and custom errors
-lib/security/             // Security utilities
-stack/                    // Stack client/server configuration
-prisma/                   // Schema, migrations, reset script
-public/                   // Static assets
+app/                      // หน้าหลัก, dashboard, inventory, settings, Stack handler
+├── (protected)/          // เส้นทางที่ต้องล็อกอิน
+│   ├── categories/       // จัดการหมวดหมู่สินค้า
+│   ├── dashboard/        // หน้า dashboard หลัก
+│   ├── inventory-activities/  // ประวัติการเคลื่อนไหวสต็อก
+│   ├── products/         // จัดการสินค้า
+│   └── units/           // จัดการหน่วยสินค้า
+└── handler/             // Stack Auth handlers
+components/              // UI ส่วนกลาง (sidebar, header, ตาราง, แผนภูมิ)
+├── charts/              // แผนภูมิและกราฟต่างๆ
+├── data-table/          // ตารางข้อมูลแบบ reusable
+├── skeleton/            // Loading skeletons
+└── ui/                  // UI components พื้นฐาน
+lib/
+├── actions/             // Server actions ที่ wrap service operations
+├── auth/                // การจัดการ authentication
+├── db/                  // การเชื่อมต่อฐานข้อมูล
+├── errors/              // Error handling และ custom errors
+├── security/            // Security utilities
+├── services/            // Domain services ที่ใช้ Prisma
+├── types/               // DTOs และ type definitions
+└── utils/               // Utility functions และ helpers
+stack/                   // การกำหนดค่า Stack client/server
+prisma/                  // Schema, migrations, reset script
+public/                  // Static assets
 ```
 
 ## Stock Movements Management System
